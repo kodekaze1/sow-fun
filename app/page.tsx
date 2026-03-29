@@ -38,11 +38,9 @@ export default async function Home() {
       <nav className="bg-white/95 backdrop-blur border-b border-gray-100 sticky top-0 z-[500] shadow-sm">
         <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="bg-gradient-to-r from-[#1a6e43] to-[#2CAB6A] text-white font-black text-[17px] px-4 py-1.5 rounded-full">
-              $UPLIFT
-            </span>
-            <span className="text-gray-300 text-lg">x</span>
-            <span className="bg-[#2CAB6A] text-white font-black text-sm px-2.5 py-1 rounded-md tracking-[2px]">kiva</span>
+            <img src="/uplift-logo.png" alt="$UPLIFT" className="h-10 w-10 rounded-full object-cover" />
+            <span className="text-gray-300 text-lg font-light">×</span>
+            <img src="/kiva-logo.png" alt="Kiva" className="h-7 object-contain" />
             <span className="text-gray-400 text-sm italic hidden sm:block">Every trade lifts a life · upliftify.fun</span>
           </div>
           <div className="flex items-center gap-3">
@@ -70,11 +68,11 @@ export default async function Home() {
           </div>
           <h1 className="text-5xl font-extrabold leading-tight mb-4"
             style={{ fontFamily: "'Playfair Display',Georgia,serif", textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}>
-            Real Trades.<br />
+            Every Trade.<br />
             <span style={{ background: "linear-gradient(135deg,#fbbf24,#fde68a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Real Lives.
+              Every Life.
             </span><br />
-            Real Impact.
+            Real Uplift.
           </h1>
           <p className="text-base opacity-85 leading-relaxed mb-8">
             Every time someone buys or sells $UPLIFT, trading fees flow into a transparent treasury that funds
@@ -271,9 +269,11 @@ export default async function Home() {
       {/* FOOTER */}
       <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 mt-4 text-sm">
         <div className="flex justify-center gap-8 mb-3 flex-wrap">
-          {["$UPLIFT Token", "Kiva.org", "upliftify.fun", "Treasury Wallet", "How It Works"].map((link) => (
-            <a key={link} href="#" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">{link}</a>
-          ))}
+          <a href="/tokenomics" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">$UPLIFT Token</a>
+          <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
+          <a href="https://upliftify.fun" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">upliftify.fun</a>
+          <a href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Treasury Wallet</a>
+          <a href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</a>
         </div>
         <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: 8xKj...4mPq · Built on Solana · Powered by Kiva API</div>
         <div className="mt-2 opacity-30 text-xs">Placeholder photos replaced by Kiva borrower images in production</div>

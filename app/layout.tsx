@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "$UPLIFT × Kiva — Real Trades. Real Lives. Real Impact.",
+  title: "$UPLIFT × Kiva — Every Trade. Every Life. Real Uplift.",
   description: "Every $UPLIFT trade funds microloans for real entrepreneurs across the developing world. upliftify.fun",
 };
 
