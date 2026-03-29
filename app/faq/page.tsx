@@ -1,0 +1,194 @@
+"use client";
+import Link from "next/link";
+import { useState } from "react";
+
+const FAQS = [
+  {
+    category: "The Token",
+    items: [
+      {
+        q: "What is $UPLIFT?",
+        a: "$UPLIFT is a Solana token where every trade does good. A portion of every buy and sell fee flows into a transparent on-chain treasury that funds Kiva microloans for real entrepreneurs in the developing world. It's not a charity token — it's a self-sustaining impact engine.",
+      },
+      {
+        q: "Where can I buy $UPLIFT?",
+        a: "$UPLIFT launches on Solana via pump.fun and/or Meteora DBC. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @UpliftTokenSOL on X.",
+      },
+      {
+        q: "Is there a presale or whitelist?",
+        a: "No presale. No whitelist. Fair launch only — everyone gets in at the same time, same price. This is intentional: a fair launch creates a level playing field and avoids the insider dumps that kill most tokens.",
+      },
+      {
+        q: "What is the total supply?",
+        a: "1,000,000,000 $UPLIFT (1 billion). 80% is available via fair launch, 10% goes to the liquidity pool (locked for 1 year), 5% to the team (vested 18 months), and 5% to a community/airdrop reserve.",
+      },
+    ],
+  },
+  {
+    category: "The Fees & Treasury",
+    items: [
+      {
+        q: "What percentage of trades goes to Kiva loans?",
+        a: "70% of every trading fee goes directly into the Kiva loan treasury. The remaining 30% is split: 20% back into the liquidity pool to keep trading healthy, and 10% for operations and marketing.",
+      },
+      {
+        q: "How do I know the treasury is real?",
+        a: "The treasury is a public Solana wallet address listed on this site. Every SOL deposit and spend is permanently recorded on Solana's blockchain — anyone can verify the balance and transaction history at any time using Solana Explorer. No trust required.",
+      },
+      {
+        q: "How often are loans funded?",
+        a: "When the treasury accumulates enough for a meaningful batch (typically 5–10 loans), we fund a round. Each batch is published on the dashboard with borrower names, countries, loan amounts, and an on-chain TX hash proving the spend.",
+      },
+      {
+        q: "Can I see which specific loans were funded?",
+        a: "Yes — the Funding Batch Ledger on the dashboard lists every loan we've funded, including the borrower's name, location, sector, amount, and the Kiva profile link. Full transparency is a core principle.",
+      },
+    ],
+  },
+  {
+    category: "Kiva & The Borrowers",
+    items: [
+      {
+        q: "What is Kiva?",
+        a: "Kiva is a non-profit founded in 2005 that connects lenders with entrepreneurs in the developing world. They've facilitated over $2 billion in loans across 80+ countries with a 97%+ repayment rate. They are one of the most trusted microfinance platforms in the world.",
+      },
+      {
+        q: "Are these real people?",
+        a: "Yes. Every borrower on Kiva is a real person with a verified profile, photo, business description, and loan purpose. Kiva's field partners vet borrowers before they appear on the platform. In production, borrower photos come directly from Kiva's API.",
+      },
+      {
+        q: "What happens when loans get repaid?",
+        a: "We use the recycling model — repaid principal gets reinvested into new loans rather than withdrawn. One dollar of trading fees can fund multiple borrowers over time as it cycles through repayments. This is how the impact compounds.",
+      },
+      {
+        q: "What sectors do you fund?",
+        a: "We prioritize agriculture & food (42%), retail & services (28%), education (18%), and clean energy (12%). These sectors have the highest repayment rates and the most measurable impact on household income.",
+      },
+    ],
+  },
+  {
+    category: "Trust & Safety",
+    items: [
+      {
+        q: "Is the liquidity locked?",
+        a: "Yes — 10% of the total supply goes into the liquidity pool and is locked for 1 year at launch. This prevents rug pulls and ensures trading remains stable regardless of what any single holder does.",
+      },
+      {
+        q: "Is the contract audited?",
+        a: "Audit details will be published before launch. On Solana, tokens launched via pump.fun are non-upgradeable by default — the contract code is fixed at deployment and cannot be changed by anyone, including the team.",
+      },
+      {
+        q: "How is this different from other charity tokens?",
+        a: "Most charity tokens send fees to a wallet you have to trust. $UPLIFT uses Kiva's public API and publishes every loan funding event with an on-chain proof. The recycling model means funds don't disappear — they keep working. And Kiva is a regulated 501(c)(3) with 20 years of track record.",
+      },
+    ],
+  },
+];
+
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`border border-gray-100 rounded-xl overflow-hidden transition-all ${open ? "bg-[#f4f9f6]" : "bg-white hover:bg-[#fdf6ee]"}`}>
+      <button
+        className="w-full text-left px-6 py-4 flex items-center justify-between gap-4"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="font-bold text-gray-900 text-sm leading-snug">{q}</span>
+        <span className="text-xl text-[#2CAB6A] flex-shrink-0 font-light">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <div className="px-6 pb-5 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
+          {a}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function FAQPage() {
+  return (
+    <div className="min-h-screen bg-[#f4f9f6]">
+      {/* NAV */}
+      <nav className="bg-white/95 backdrop-blur border-b border-gray-100 sticky top-0 z-[500] shadow-sm">
+        <div className="max-w-[1100px] mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <img src="/uplift-logo.png" alt="$UPLIFT" className="h-10 w-10 rounded-full object-cover" />
+            <span className="text-gray-300 text-lg font-light">×</span>
+            <img src="/kiva-logo.png" alt="Kiva" className="h-7 object-contain" />
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/tokenomics" className="text-sm text-gray-500 hover:text-[#1a6e43] font-semibold transition-colors">Tokenomics</Link>
+            <Link href="/how-it-works" className="text-sm text-gray-500 hover:text-[#1a6e43] font-semibold transition-colors">How It Works</Link>
+            <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer"
+              className="bg-[#2CAB6A] hover:bg-[#1a6e43] text-white rounded-full px-5 py-2 text-sm font-bold transition-all">
+              Browse Loans
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <div className="text-white py-20 px-6 text-center"
+        style={{ background: "linear-gradient(140deg,#0a2e1b 0%,#1a6e43 40%,#2CAB6A 100%)" }}>
+        <div className="max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+            Got Questions?
+          </div>
+          <h1 className="text-5xl font-extrabold mb-4"
+            style={{ fontFamily: "'Playfair Display',Georgia,serif" }}>
+            FAQ
+          </h1>
+          <p className="text-lg opacity-80 leading-relaxed">
+            Everything you need to know about $UPLIFT, the treasury, and how your trades fund real lives.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-[800px] mx-auto px-6 py-16 flex flex-col gap-12">
+        {FAQS.map(({ category, items }) => (
+          <div key={category}>
+            <h2 className="text-xs font-black uppercase tracking-widest text-[#2CAB6A] mb-4">{category}</h2>
+            <div className="flex flex-col gap-2">
+              {items.map((item) => (
+                <FAQItem key={item.q} q={item.q} a={item.a} />
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {/* STILL HAVE QUESTIONS */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow p-8 text-center">
+          <div className="text-4xl mb-3">💬</div>
+          <h3 className="text-xl font-extrabold text-gray-900 mb-2">Still have questions?</h3>
+          <p className="text-gray-400 text-sm mb-5">Find us on X or browse the live dashboard to see the treasury and loans in action.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <a href="https://x.com/UpliftTokenSOL" target="_blank" rel="noopener noreferrer"
+              className="bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-gray-800 transition-all">
+              @UpliftTokenSOL on X
+            </a>
+            <Link href="/"
+              className="bg-[#2CAB6A] text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-[#1a6e43] transition-all">
+              View Dashboard
+            </Link>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <Link href="/" className="inline-flex items-center gap-2 text-[#2CAB6A] hover:text-[#1a6e43] text-sm font-bold transition-colors">
+            ← Back to Dashboard
+          </Link>
+        </div>
+      </div>
+
+      <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 text-sm">
+        <div className="flex justify-center gap-8 mb-3 flex-wrap">
+          <Link href="/tokenomics" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">$UPLIFT Token</Link>
+          <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
+          <Link href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Treasury Wallet</Link>
+          <Link href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</Link>
+        </div>
+        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: 8xKj...4mPq · Built on Solana · Powered by Kiva API</div>
+      </footer>
+    </div>
+  );
+}

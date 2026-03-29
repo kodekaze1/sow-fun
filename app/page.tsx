@@ -271,9 +271,10 @@ export default async function Home() {
         <div className="flex justify-center gap-8 mb-3 flex-wrap">
           <a href="/tokenomics" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">$UPLIFT Token</a>
           <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
-          <a href="https://upliftify.fun" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">upliftify.fun</a>
           <a href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Treasury Wallet</a>
           <a href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</a>
+          <a href="/roadmap" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Roadmap</a>
+          <a href="/faq" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">FAQ</a>
         </div>
         <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: 8xKj...4mPq · Built on Solana · Powered by Kiva API</div>
         <div className="mt-2 opacity-30 text-xs">Placeholder photos replaced by Kiva borrower images in production</div>
