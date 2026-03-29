@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "$IMPACT × Kiva — Real Trades. Real Lives. Real Impact.",
-  description: "Every $IMPACT trade funds microloans for real entrepreneurs across the developing world.",
+  title: "$UPLIFT × Kiva — Real Trades. Real Lives. Real Impact.",
+  description: "Every $UPLIFT trade funds microloans for real entrepreneurs across the developing world. upliftify.fun",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

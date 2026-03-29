@@ -39,11 +39,11 @@ export default async function Home() {
         <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="bg-gradient-to-r from-[#1a6e43] to-[#2CAB6A] text-white font-black text-[17px] px-4 py-1.5 rounded-full">
-              $IMPACT
+              $UPLIFT
             </span>
             <span className="text-gray-300 text-lg">x</span>
             <span className="bg-[#2CAB6A] text-white font-black text-sm px-2.5 py-1 rounded-md tracking-[2px]">kiva</span>
-            <span className="text-gray-400 text-sm italic hidden sm:block">Every trade funds a life</span>
+            <span className="text-gray-400 text-sm italic hidden sm:block">Every trade lifts a life · upliftify.fun</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-[#e8f7f0] border border-[#a8dfc0] rounded-full px-4 py-1.5 text-xs font-semibold text-[#1a6e43]">
@@ -66,7 +66,7 @@ export default async function Home() {
         style={{ background: "linear-gradient(140deg,#0a2e1b 0%,#1a6e43 35%,#2CAB6A 70%,#48c98a 100%)" }}>
         <div className="relative max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-5">
-            Powered by $IMPACT trading fees on Solana
+            Powered by $UPLIFT trading fees on Solana
           </div>
           <h1 className="text-5xl font-extrabold leading-tight mb-4"
             style={{ fontFamily: "'Playfair Display',Georgia,serif", textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}>
@@ -77,7 +77,7 @@ export default async function Home() {
             Real Impact.
           </h1>
           <p className="text-base opacity-85 leading-relaxed mb-8">
-            Every time someone buys or sells $IMPACT, trading fees flow into a transparent treasury that funds
+            Every time someone buys or sells $UPLIFT, trading fees flow into a transparent treasury that funds
             microloans for real entrepreneurs across the developing world.
           </p>
           <div className="flex flex-wrap justify-center gap-1.5 mb-3">
@@ -233,10 +233,10 @@ export default async function Home() {
             </div>
             <div className="bg-black m-4 rounded-2xl p-4 border border-[#2a2a2a]">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a6e43] to-[#2CAB6A] flex items-center justify-center text-white font-black text-sm flex-shrink-0">$I</div>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a6e43] to-[#2CAB6A] flex items-center justify-center text-white font-black text-sm flex-shrink-0">$U</div>
                 <div>
-                  <div className="text-sm font-bold text-white">$IMPACT x Kiva</div>
-                  <div className="text-xs text-gray-500">@ImpactTokenSOL</div>
+                  <div className="text-sm font-bold text-white">$UPLIFT x Kiva</div>
+                  <div className="text-xs text-gray-500">@UpliftTokenSOL</div>
                 </div>
               </div>
               <div className="text-sm text-gray-200 leading-relaxed mb-3">
@@ -246,7 +246,7 @@ export default async function Home() {
                 {first?.location?.country ?? "Philippines"}<br />
                 {first?.activity ?? "Food Market"}{" · "}
                 <span className="text-amber-400 font-bold">${first?.loan_amount ?? 25}</span><br />
-                Funded by <span className="text-green-400 font-bold">$IMPACT</span> fees, Batch #012<br />
+                Funded by <span className="text-green-400 font-bold">$UPLIFT</span> fees, Batch #012<br />
                 <span className="text-green-400 font-bold">347 loans</span> across 29 countries<br />
                 <span className="text-gray-500 text-xs">TX: 3xAb...9kRt</span>
               </div>
@@ -271,11 +271,11 @@ export default async function Home() {
       {/* FOOTER */}
       <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 mt-4 text-sm">
         <div className="flex justify-center gap-8 mb-3 flex-wrap">
-          {["$IMPACT Token", "Kiva.org", "Treasury Wallet", "Batch Ledger", "How It Works"].map((link) => (
+          {["$UPLIFT Token", "Kiva.org", "upliftify.fun", "Treasury Wallet", "How It Works"].map((link) => (
             <a key={link} href="#" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">{link}</a>
           ))}
         </div>
-        <div className="font-mono text-xs opacity-70">Treasury: 8xKj...4mPq · Built on Solana · Powered by Kiva API</div>
+        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: 8xKj...4mPq · Built on Solana · Powered by Kiva API</div>
         <div className="mt-2 opacity-30 text-xs">Placeholder photos replaced by Kiva borrower images in production</div>
       </footer>
 
