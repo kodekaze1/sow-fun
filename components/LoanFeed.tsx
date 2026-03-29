@@ -1,0 +1,76 @@
+"use client";
+import { KivaLoan, COUNTRY_FLAGS, SECTOR_TAGS, SECTOR_COLORS, getPortrait } from "@/lib/types";
+
+const STATUS_STYLES: Record<string, string> = {
+  funded:   "bg-green-100 text-green-800",
+  repaying: "bg-blue-100 text-blue-800",
+  recycled: "bg-yellow-100 text-yellow-800",
+  fundraising: "bg-emerald-50 text-emerald-700",
+};
+
+export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
+  return (
+    <div className="max-h-[420px] overflow-y-auto divide-y divide-gray-50">
+      {loans.map((loan, i) => {
+        const flag = COUNTRY_FLAGS[loan.location.country] ?? "🌍";
+        const icon = SECTOR_TAGS[loan.sector] ?? "💼";
+        const color = SECTOR_COLORS[loan.sector] ?? SECTOR_COLORS.default;
+        const photo = getPortrait(loan.id);
+        const pct = loan.loan_amount > 0 ? Math.round((loan.funded_amount / loan.loan_amount) * 100) : 0;
+        const description = loan.description?.texts?.en ?? `This loan will help ${loan.name} ${loan.use}.`;
+        const status = pct >= 100 ? "funded" : pct > 50 ? "repaying" : "fundraising";
+        const statusLabel = pct >= 100 ? "✅ Funded" : `${pct}% funded`;
+        const batchNum = String(12 - (i % 3)).padStart(3, "0");
+
+        return (
+          <div
+            key={loan.id}
+            className="flex items-start gap-3 px-5 py-4 hover:bg-[#fdf6ee] transition-colors cursor-pointer"
+          >
+            <img
+              src={photo}
+              alt={loan.name}
+              className="w-12 h-12 rounded-full object-cover flex-shrink-0 border-2 shadow-sm"
+              style={{ borderColor: color + "80" }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(loan.name)}&background=${color.replace("#", "")}&color=fff&size=48`;
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[15px] font-bold text-gray-900">{loan.name}</span>
+                <span>{flag}</span>
+              </div>
+              <div className="text-xs text-gray-500 mt-0.5">
+                📍 {loan.location.town ? `${loan.location.town}, ` : ""}{loan.location.country}
+              </div>
+              <p className="text-[13px] text-gray-600 mt-1.5 leading-relaxed italic border-l-2 border-[#a8dfc0] pl-2 line-clamp-2">
+                "{description}"
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                <span
+                  className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: color + "20", color }}
+                >
+                  {icon} {loan.activity}
+                </span>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${STATUS_STYLES[status]}`}>
+                  {statusLabel}
+                </span>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                  Batch #{batchNum}
+                </span>
+              </div>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <div className="text-base font-extrabold text-[#1a6e43]">${loan.loan_amount}</div>
+              <div className="text-[11px] text-gray-400 mt-0.5">
+                {i === 0 ? "2 min ago" : i < 3 ? "1 hr ago" : i < 5 ? "3 hrs ago" : "1 day ago"}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
