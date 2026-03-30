@@ -52,7 +52,7 @@ export default function TreasuryPage() {
           </div>
           <h1 className="text-5xl font-extrabold mb-4"
             style={{ fontFamily: "'Playfair Display',Georgia,serif" }}>
-            Treasury Wallet
+            Impact Treasury
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
             Every SOL in this wallet came from $UPLIFT trading fees. Every spend funds a real microloan.
@@ -125,7 +125,7 @@ export default function TreasuryPage() {
         {/* BATCH LEDGER */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-            <h2 className="text-lg font-extrabold">📋 Ripple Ledger</h2>
+            <h2 className="text-lg font-extrabold">📋 Uplift Ledger</h2>
             <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{MOCK_BATCHES.length} waves</span>
           </div>
           {MOCK_BATCHES.map((batch) => (
@@ -160,7 +160,7 @@ export default function TreasuryPage() {
             {[
               { icon: "💱", label: "$UPLIFT Trade" },
               { icon: "→", label: "", plain: true },
-              { icon: "🏦", label: "Treasury Wallet" },
+              { icon: "🏦", label: "Impact Treasury" },
               { icon: "→", label: "", plain: true },
               { icon: "🌍", label: "Kiva Microloan" },
               { icon: "→", label: "", plain: true },

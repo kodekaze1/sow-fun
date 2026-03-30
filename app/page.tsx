@@ -117,7 +117,7 @@ export default async function Home() {
           {/* MAP */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">🌍 Where Your Trades Land</h2>
+              <h2 className="text-sm font-bold">🌍 The Global Pulse</h2>
               <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{loans.length} loans on map</span>
             </div>
             <MapWrapper loans={loans} />
@@ -135,7 +135,7 @@ export default async function Home() {
           {/* RIPPLE LEDGER */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">📋 Ripple Ledger</h2>
+              <h2 className="text-sm font-bold">📋 Uplift Ledger</h2>
               <a href="/treasury" className="text-xs font-bold text-[#2CAB6A] hover:underline">View all</a>
             </div>
             {MOCK_BATCHES.map((batch) => (
@@ -168,7 +168,7 @@ export default async function Home() {
           {/* TREASURY */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">🏦 Treasury</h2>
+              <h2 className="text-sm font-bold">🏦 Impact Treasury</h2>
               <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
             </div>
             <TreasuryCard />
@@ -200,7 +200,7 @@ export default async function Home() {
           {/* SECTORS */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">📊 Who We Fund</h2>
+              <h2 className="text-sm font-bold">📊 Impact Sectors</h2>
               <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">347 loans</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
@@ -271,7 +271,7 @@ export default async function Home() {
         <div className="flex justify-center gap-8 mb-3 flex-wrap">
           <a href="/tokenomics" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">$UPLIFT Token</a>
           <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
-          <a href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Treasury Wallet</a>
+          <a href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Impact Treasury</a>
           <a href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</a>
           <a href="/roadmap" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Roadmap</a>
           <a href="/faq" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">FAQ</a>
