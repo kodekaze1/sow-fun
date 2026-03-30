@@ -125,17 +125,17 @@ export default function TreasuryPage() {
         {/* BATCH LEDGER */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-            <h2 className="text-lg font-extrabold">📋 Funding Batch Ledger</h2>
-            <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{MOCK_BATCHES.length} batches</span>
+            <h2 className="text-lg font-extrabold">📋 Ripple Ledger</h2>
+            <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{MOCK_BATCHES.length} waves</span>
           </div>
           {MOCK_BATCHES.map((batch) => (
             <div key={batch.id} className="px-6 py-5 border-b border-gray-50 last:border-0 hover:bg-[#fdf6ee] transition-colors">
               <div className="flex justify-between items-center mb-1">
-                <span className="font-extrabold text-gray-900">Batch #{batch.id} — {batch.date}</span>
+                <span className="font-extrabold text-gray-900">Wave #{batch.id} — {batch.date}</span>
                 <span className="font-extrabold text-[#2CAB6A]">${batch.amount} deployed</span>
               </div>
               <div className="text-xs text-gray-400 mb-2">
-                {batch.loans} loans · ${batch.rate.toFixed(2)}/SOL rate
+                {batch.loans} lives touched · ${batch.rate.toFixed(2)}/SOL rate
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">TX:</span>

@@ -117,7 +117,7 @@ export default async function Home() {
           {/* MAP */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">🌍 Live Impact Map</h2>
+              <h2 className="text-sm font-bold">🌍 Where Your Trades Land</h2>
               <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{loans.length} loans on map</span>
             </div>
             <MapWrapper loans={loans} />
@@ -126,27 +126,27 @@ export default async function Home() {
           {/* FEED */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">⚡ Live Funding Feed</h2>
+              <h2 className="text-sm font-bold">⚡ People Being Lifted</h2>
               <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
             </div>
             <LoanFeed loans={loans} />
           </div>
 
-          {/* BATCH LEDGER */}
+          {/* RIPPLE LEDGER */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">📋 Funding Batch Ledger</h2>
-              <a href="#" className="text-xs font-bold text-[#2CAB6A] hover:underline">View all</a>
+              <h2 className="text-sm font-bold">📋 Ripple Ledger</h2>
+              <a href="/treasury" className="text-xs font-bold text-[#2CAB6A] hover:underline">View all</a>
             </div>
             {MOCK_BATCHES.map((batch) => (
               <div key={batch.id} className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-[#fdf6ee] transition-colors cursor-pointer">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-extrabold">Batch #{batch.id} — {batch.date}</span>
+                  <span className="text-sm font-extrabold">Wave #{batch.id} — {batch.date}</span>
                   <span className="text-sm font-extrabold text-[#2CAB6A]">${batch.amount} deployed</span>
                 </div>
                 <div className="text-xs text-gray-400 mb-2">
                   TX: <span className="font-mono bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">{batch.txHash}</span>
-                  {" "}{batch.loans} loans / ${batch.rate.toFixed(2)}/SOL
+                  {" "}{batch.loans} lives touched / ${batch.rate.toFixed(2)}/SOL
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {loans.slice(0, 3).map((loan) => (
@@ -177,7 +177,7 @@ export default async function Home() {
           {/* RECYCLING */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">♻️ Recycling Ledger</h2>
+              <h2 className="text-sm font-bold">♻️ The Ripple Effect</h2>
               <span className="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-full">$4,200 recycled</span>
             </div>
             {RECYCLED.map(({ from, to, amt }, i) => (
@@ -190,7 +190,7 @@ export default async function Home() {
                     <span className="text-amber-500 text-base leading-none">to</span>
                     <span className="font-bold text-[#1a6e43]">{to.name} {COUNTRY_FLAGS[to.country] ?? "🌍"}</span>
                   </div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">{from.loan} repaid, {to.loan} funded, Batch #{to.batch}</div>
+                  <div className="text-[11px] text-gray-400 mt-0.5">{from.loan} repaid → {to.loan} funded · Wave #{to.batch}</div>
                 </div>
                 <div className="text-sm font-extrabold text-amber-500 flex-shrink-0">${amt} ♻️</div>
               </div>
@@ -200,7 +200,7 @@ export default async function Home() {
           {/* SECTORS */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">📊 Loan Sectors</h2>
+              <h2 className="text-sm font-bold">📊 Who We Fund</h2>
               <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">347 loans</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
@@ -244,7 +244,7 @@ export default async function Home() {
                 {first?.location?.country ?? "Philippines"}<br />
                 {first?.activity ?? "Food Market"}{" · "}
                 <span className="text-amber-400 font-bold">${first?.loan_amount ?? 25}</span><br />
-                Funded by <span className="text-green-400 font-bold">$UPLIFT</span> fees, Batch #012<br />
+                Funded by <span className="text-green-400 font-bold">$UPLIFT</span> fees, Wave #012<br />
                 <span className="text-green-400 font-bold">347 loans</span> across 29 countries<br />
                 <span className="text-gray-500 text-xs">TX: 3xAb...9kRt</span>
               </div>
@@ -256,7 +256,7 @@ export default async function Home() {
                     {first?.name ?? "Maria Santos"}{" "}
                     {COUNTRY_FLAGS[first?.location?.country ?? "Philippines"] ?? ""}
                   </div>
-                  <div className="text-xs text-gray-400 mt-0.5">{first?.activity ?? "Food Market"} · Batch #012</div>
+                  <div className="text-xs text-gray-400 mt-0.5">{first?.activity ?? "Food Market"} · Wave #012</div>
                   <div className="text-sm font-extrabold text-green-400 mt-1">${first?.loan_amount ?? 25} funded</div>
                 </div>
               </div>
