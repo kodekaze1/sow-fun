@@ -78,16 +78,15 @@ export function getPortrait(loanId: number): string {
   return `https://randomuser.me/api/portraits/men/${PORTRAITS_M[loanId % PORTRAITS_M.length]}.jpg`;
 }
 
+// Real stats — starts at zero, updated manually as waves are executed and verified.
+// Do NOT inflate these with demo numbers. Public trust depends on accuracy.
 export const MOCK_STATS = {
-  feesCollected: 12840,
-  loansFunded: 347,
-  countriesReached: 29,
-  repaymentRate: 96.3,
-  recycledCapital: 4200,
+  feesCollected: 0,
+  loansFunded: 0,
+  countriesReached: 0,
+  repaymentRate: 0,
+  recycledCapital: 0,
 };
 
-export const MOCK_BATCHES = [
-  { id: "012", date: "Mar 28, 2026", amount: 340, loans: 14, txHash: "3xAb…9kRt", rate: 148.20 },
-  { id: "011", date: "Mar 21, 2026", amount: 280, loans: 11, txHash: "7mPq…2xNc", rate: 142.80 },
-  { id: "010", date: "Mar 14, 2026", amount: 410, loans: 18, txHash: "9kRt…5pLm", rate: 138.50 },
-];
+// No waves executed yet — will populate with real tx hashes and Kiva receipts.
+export const MOCK_BATCHES: { id: string; date: string; amount: number; loans: number; txHash: string; rate: number }[] = [];

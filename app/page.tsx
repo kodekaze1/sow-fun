@@ -84,19 +84,19 @@ export default async function Home() {
                 <img src={`https://randomuser.me/api/portraits/${p}.jpg`} alt="" className="w-full h-full object-cover" />
               </div>
             ))}
-            <div className="w-12 h-12 rounded-full border-2 border-white/40 bg-white/15 flex items-center justify-center text-xs font-black">+338</div>
+            <div className="w-12 h-12 rounded-full border-2 border-white/40 bg-white/15 flex items-center justify-center text-xs font-black">soon</div>
           </div>
-          <p className="text-sm opacity-75">347 real people funded so far across 29 countries</p>
+          <p className="text-sm opacity-75">Wave #001 coming soon — be part of the genesis</p>
         </div>
       </div>
 
       {/* STATS */}
       <div className="grid grid-cols-5 bg-white border-b-2 border-[#e8f7f0] shadow-md">
         {[
-          { icon: "💰", value: `$${MOCK_STATS.feesCollected.toLocaleString()}`, label: "Fees Collected", delta: "+$340 today" },
-          { icon: "🤝", value: String(MOCK_STATS.loansFunded), label: "Loans Funded", delta: "+14 this week" },
-          { icon: "🌍", value: String(MOCK_STATS.countriesReached), label: "Countries Reached", delta: "+2 new" },
-          { icon: "✅", value: `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
+          { icon: "💰", value: `$${MOCK_STATS.feesCollected.toLocaleString()}`, label: "Fees Collected", delta: "updates live" },
+          { icon: "🤝", value: MOCK_STATS.loansFunded === 0 ? "—" : String(MOCK_STATS.loansFunded), label: "Loans Funded", delta: "post-wave" },
+          { icon: "🌍", value: MOCK_STATS.countriesReached === 0 ? "—" : String(MOCK_STATS.countriesReached), label: "Countries Reached", delta: "post-wave" },
+          { icon: "✅", value: MOCK_STATS.repaymentRate === 0 ? "—" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
           { icon: "♻️", value: `$${MOCK_STATS.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
           <div key={label} className="text-center py-5 px-3 border-r border-gray-100 last:border-0 hover:bg-[#fdf6ee] transition-colors">
@@ -178,7 +178,7 @@ export default async function Home() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
               <h2 className="text-sm font-bold">♻️ The Ripple Effect</h2>
-              <span className="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-full">$4,200 recycled</span>
+              <span className="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-full">post-wave</span>
             </div>
             {RECYCLED.map(({ from, to, amt }, i) => (
               <div key={i} className="px-5 py-3.5 border-b border-gray-50 last:border-0 flex items-center gap-2">
@@ -201,7 +201,7 @@ export default async function Home() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
               <h2 className="text-sm font-bold">📊 Impact Sectors</h2>
-              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">347 loans</span>
+              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
               {[
@@ -244,9 +244,9 @@ export default async function Home() {
                 {first?.location?.country ?? "Philippines"}<br />
                 {first?.activity ?? "Food Market"}{" · "}
                 <span className="text-amber-400 font-bold">${first?.loan_amount ?? 25}</span><br />
-                Funded by <span className="text-green-400 font-bold">$UPLIFT</span> fees, Wave #012<br />
-                <span className="text-green-400 font-bold">347 loans</span> across 29 countries<br />
-                <span className="text-gray-500 text-xs">TX: 3xAb...9kRt</span>
+                Funded by <span className="text-green-400 font-bold">$UPLIFT</span> fees, Wave #001<br />
+                <span className="text-green-400 font-bold">Genesis Wave</span> · coming soon<br />
+                <span className="text-gray-500 text-xs">TX: pending</span>
               </div>
               <div className="flex gap-2 items-center">
                 <img src={getPortrait(first?.id ?? 1001)} alt=""

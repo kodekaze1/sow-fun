@@ -106,13 +106,13 @@ export default function TreasuryPage() {
           )}
         </div>
 
-        {/* STATS ROW */}
+        {/* STATS ROW — shows real zeros until Wave #001 is funded */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { icon: "💰", value: "$14,280", label: "Total Deployed" },
-            { icon: "🤝", value: "347", label: "Loans Funded" },
-            { icon: "♻️", value: "$4,200", label: "Capital Recycled" },
-            { icon: "✅", value: "97.4%", label: "Repayment Rate" },
+            { icon: "💰", value: "$0", label: "Total Deployed" },
+            { icon: "🤝", value: "0", label: "Loans Funded" },
+            { icon: "♻️", value: "$0", label: "Capital Recycled" },
+            { icon: "✅", value: "—", label: "Repayment Rate" },
           ].map(({ icon, value, label }) => (
             <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow p-5 text-center hover:bg-[#fdf6ee] transition-colors">
               <div className="text-3xl mb-2">{icon}</div>
@@ -120,6 +120,9 @@ export default function TreasuryPage() {
               <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{label}</div>
             </div>
           ))}
+        </div>
+        <div className="text-center text-xs text-gray-400 -mt-2">
+          Stats update automatically when Wave #001 is executed and verified.
         </div>
 
         {/* BATCH LEDGER */}
@@ -177,7 +180,8 @@ export default function TreasuryPage() {
             ))}
           </div>
           <p className="text-sm text-gray-400 text-center mt-4 leading-relaxed">
-            70% of every $UPLIFT trade fee flows into the treasury. When enough accumulates, we fund a batch of Kiva loans.
+            95% of project-controlled fees and treasury inflows are allocated to Kiva funding.
+            5% supports operations, reporting, and infrastructure.
             Repayments are reinvested — not withdrawn.
           </p>
         </div>
