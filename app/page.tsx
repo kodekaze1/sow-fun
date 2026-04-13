@@ -176,10 +176,11 @@ export default async function Home() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
               <h2 className="text-sm font-bold">🌍 The Global Pulse</h2>
-              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{impactLoans.length} loan{impactLoans.length === 1 ? "" : "s"} on map</span>
+              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{allMapLoans.length} markers on map</span>
             </div>
-            <MapWrapper loans={impactLoans} />
+            <MapWrapper loans={allMapLoans} />
           </div>
+
 
           {/* FEED */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">

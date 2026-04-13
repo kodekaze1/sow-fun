@@ -24,7 +24,11 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
         const flag = COUNTRY_FLAGS[loan.location.country] ?? "🌍";
         const icon = SECTOR_TAGS[loan.sector] ?? "💼";
         const color = SECTOR_COLORS[loan.sector] ?? SECTOR_COLORS.default;
-        const photo = getPortrait(loan.id);
+        
+        // Use real Kiva image if possible
+        const kivaPhoto = loan.image?.id ? `https://www-kiva-org.car-photos.static.kiva.org/i/s300/${loan.image.id}.jpg` : null;
+        const photo = kivaPhoto || getPortrait(loan.id);
+        
         const pct = loan.loan_amount > 0 ? Math.round((loan.funded_amount / loan.loan_amount) * 100) : 0;
         const description = loan.description?.texts?.en ?? `This loan will help ${loan.name} ${loan.use}.`;
         const status = pct >= 100 ? "funded" : pct > 50 ? "repaying" : "fundraising";

@@ -31,6 +31,7 @@ export const SECTOR_COLORS: Record<string, string> = {
   Education:     "#3b82f6",
   Health:        "#ef4444",
   Housing:       "#06b6d4",
+  Uplift:        "#fbbf24", // Gold for our funded loans
   default:       "#2CAB6A",
 };
 
