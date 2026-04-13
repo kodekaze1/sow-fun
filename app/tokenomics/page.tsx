@@ -138,7 +138,7 @@ export default function TokenomicsPage() {
 
       <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 text-sm">
         <div className="flex justify-center gap-8 mb-3 flex-wrap">
-          <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
+          <a href="https://www.kiva.org/lender/upliftifyfun" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
           <Link href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Impact Treasury</Link>
           <Link href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</Link>
         </div>

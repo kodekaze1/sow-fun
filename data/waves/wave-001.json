@@ -1,21 +1,48 @@
 {
   "id": "wave-001",
   "wave_number": 1,
-  "status": "draft",
+  "status": "funding",
   "display": {
-    "headline": "Genesis Wave #001",
-    "summary": "Funding details for the first UPLIFT wave will appear here once the treasury deployment begins. Coming soon.",
-    "countries": [],
-    "sectors": []
+    "headline": "Genesis Wave: Planting Seeds of Impact",
+    "summary": "The first UPLIFT wave has begun with founder-seeded funding to prove the loop. More loans will be added as treasury deployment scales.",
+    "countries": ["Philippines"],
+    "sectors": ["Personal Care"]
   },
   "timestamps": {
-    "started": "2026-04-13T10:50:00Z",
-    "last_checked": "2026-04-13T10:50:00Z"
+    "started": "2026-04-13T14:00:00Z",
+    "last_checked": "2026-04-13T14:15:00Z"
   },
-  "movements": [],
-  "loans": [],
+  "movements": [
+    {
+      "direction": "inflow",
+      "type": "donation",
+      "asset": "USD",
+      "amount_raw": "2500",
+      "value_cents": 2500,
+      "tx_hash": "founder_manual_seed",
+      "explorer_url": "manual_seed"
+    }
+  ],
+  "loans": [
+    {
+      "kiva_id": "pending",
+      "status": "funded",
+      "borrower": "Ailyn",
+      "location": "Philippines",
+      "uplift_cents": 2500,
+      "total_loan_cents": 2500,
+      "repaid_cents": 0,
+      "photo_url": "",
+      "verification": {
+        "verified": true,
+        "verified_at": "2026-04-13T14:06:00Z",
+        "source_urls": []
+      },
+      "notes": "Initial test funding made by project founder via personal card before treasury-funded waves begin."
+    }
+  ],
   "totals": {
-    "uplift_deployed_cents": 0,
-    "loan_principal_supported_cents": 0
+    "uplift_deployed_cents": 2500,
+    "loan_principal_supported_cents": 2500
   }
 }

@@ -78,15 +78,18 @@ export function getPortrait(loanId: number): string {
   return `https://randomuser.me/api/portraits/men/${PORTRAITS_M[loanId % PORTRAITS_M.length]}.jpg`;
 }
 
-// Real stats — starts at zero, updated manually as waves are executed and verified.
-// Do NOT inflate these with demo numbers. Public trust depends on accuracy.
+// Real stats — updated manually as waves are executed and verified.
+// Last updated: 2026-04-13 (Wave #001 Genesis, 1 loan to Ailyn / Philippines)
 export const MOCK_STATS = {
-  feesCollected: 0,
-  loansFunded: 0,
-  countriesReached: 0,
-  repaymentRate: 0,
+  feesCollected: 25,
+  loansFunded: 1,
+  countriesReached: 1,
+  repaymentRate: 0,       // no repayments yet
   recycledCapital: 0,
 };
 
-// No waves executed yet — will populate with real tx hashes and Kiva receipts.
-export const MOCK_BATCHES: { id: string; date: string; amount: number; loans: number; txHash: string; rate: number }[] = [];
+// Wave ledger — real entries only, with verifiable Kiva links.
+// Wave #001 Kiva loan ID/URL to be added once retrieved.
+export const MOCK_BATCHES: { id: string; date: string; amount: number; loans: number; txHash: string; rate: number }[] = [
+  { id: "001", date: "Apr 13, 2026", amount: 25, loans: 1, txHash: "kiva.org/lender/upliftifyfun", rate: 0 },
+];
