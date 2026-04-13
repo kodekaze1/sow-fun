@@ -48,10 +48,11 @@ export default async function Home() {
               <div className="w-2 h-2 bg-[#2CAB6A] rounded-full animate-livepulse" />
               Treasury: FN7m...keAz
             </div>
-            <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.kiva.org/lender/upliftifyfun" target="_blank" rel="noopener noreferrer"
               className="bg-[#2CAB6A] hover:bg-[#1a6e43] text-white rounded-full px-5 py-2 text-sm font-bold transition-all hover:shadow-lg">
-              Browse Loans
+              Proof of Impact
             </a>
+
           </div>
         </div>
       </nav>
@@ -270,7 +271,7 @@ export default async function Home() {
       <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 mt-4 text-sm">
         <div className="flex justify-center gap-8 mb-3 flex-wrap">
           <a href="/tokenomics" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">$UPLIFT Token</a>
-          <a href="https://www.kiva.org/lender/upliftifyfun" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
+          <a href="https://www.kiva.org/team/upliftify" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Upliftify Kiva Team</a>
           <a href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Impact Treasury</a>
           <a href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</a>
           <a href="/roadmap" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Roadmap</a>
@@ -279,6 +280,7 @@ export default async function Home() {
         <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: FN7m...keAz · Built on Solana · Powered by Kiva API</div>
         <div className="mt-2 opacity-30 text-xs">Placeholder photos replaced by Kiva borrower images in production</div>
       </footer>
+
 
     </div>
   );
