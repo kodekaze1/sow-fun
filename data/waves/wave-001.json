@@ -25,7 +25,7 @@
   ],
   "loans": [
     {
-      "kiva_id": "pending",
+      "kiva_id": "3157094",
       "status": "funded",
       "borrower": "Ailyn",
       "location": "Philippines",
@@ -36,8 +36,12 @@
       "verification": {
         "verified": true,
         "verified_at": "2026-04-13T14:06:00Z",
-        "source_urls": []
+        "source_urls": [
+          "https://www.kiva.org/lend/3157094",
+          "https://www.kiva.org/lender/upliftifyfun"
+        ]
       },
+
       "notes": "Initial test funding made by project founder via personal card before treasury-funded waves begin."
     }
   ],

@@ -89,7 +89,6 @@ export const MOCK_STATS = {
 };
 
 // Wave ledger — real entries only, with verifiable Kiva links.
-// Wave #001 Kiva loan ID/URL to be added once retrieved.
 export const MOCK_BATCHES: { id: string; date: string; amount: number; loans: number; txHash: string; rate: number }[] = [
-  { id: "001", date: "Apr 13, 2026", amount: 25, loans: 1, txHash: "kiva.org/lender/upliftifyfun", rate: 0 },
+  { id: "001", date: "Apr 13, 2026", amount: 25, loans: 1, txHash: "https://www.kiva.org/lend/3157094", rate: 0 },
 ];

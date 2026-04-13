@@ -3,6 +3,7 @@ import LoanFeed from "@/components/LoanFeed";
 import TreasuryCard from "@/components/TreasuryCard";
 import MapWrapper from "@/components/MapWrapper";
 import { KivaLoan, MOCK_STATS, MOCK_BATCHES, COUNTRY_FLAGS, getPortrait } from "@/lib/types";
+import { getKivaImpactStats } from "@/lib/kiva-stats";
 
 async function getLoans(): Promise<KivaLoan[]> {
   try {
@@ -21,15 +22,24 @@ const HERO_PORTRAITS = [
   "men/54", "women/89", "men/23", "women/37",
 ];
 
-const RECYCLED = [
-  { from: { name: "Rohit Das", country: "Bangladesh", photo: "men/54", loan: "Transport" }, to: { name: "Amina Diallo", country: "Mali", loan: "Tailoring", batch: "011" }, amt: 40 },
-  { from: { name: "Grace Mensah", country: "Ghana", photo: "women/89", loan: "Market Stall" }, to: { name: "Carmen Rivera", country: "Bolivia", loan: "Weaving", batch: "011" }, amt: 35 },
-  { from: { name: "Ali Hassan", country: "Egypt", photo: "men/23", loan: "Agriculture" }, to: { name: "Fatima Nkosi", country: "Uganda", loan: "Education", batch: "010" }, amt: 60 },
-];
 
 export default async function Home() {
-  const loans = await getLoans();
+  const [loans, kivaData] = await Promise.all([
+    getLoans(),
+    getKivaImpactStats().catch(() => null),
+  ]);
   const first = loans[0];
+
+  const lenderStats = kivaData?.lender?.lenderStats;
+
+  // Use real Kiva stats if available, otherwise fallback to MOCK_STATS
+  const stats = {
+    feesCollected:    MOCK_STATS.feesCollected,
+    loansFunded:      lenderStats?.loanCount    ?? MOCK_STATS.loansFunded,
+    countriesReached: lenderStats?.numCountries ?? MOCK_STATS.countriesReached,
+    repaymentRate:    MOCK_STATS.repaymentRate, 
+    recycledCapital:  MOCK_STATS.recycledCapital,
+  };
 
   return (
     <div className="min-h-screen">
@@ -87,18 +97,18 @@ export default async function Home() {
             ))}
             <div className="w-12 h-12 rounded-full border-2 border-white/40 bg-white/15 flex items-center justify-center text-xs font-black">soon</div>
           </div>
-          <p className="text-sm opacity-75">Wave #001 coming soon — be part of the genesis</p>
+          <p className="text-sm opacity-75">Wave #001 is live — Ailyn in the Philippines is already funded</p>
         </div>
       </div>
 
       {/* STATS */}
       <div className="grid grid-cols-5 bg-white border-b-2 border-[#e8f7f0] shadow-md">
         {[
-          { icon: "💰", value: `$${MOCK_STATS.feesCollected.toLocaleString()}`, label: "Fees Collected", delta: "updates live" },
-          { icon: "🤝", value: MOCK_STATS.loansFunded === 0 ? "—" : String(MOCK_STATS.loansFunded), label: "Loans Funded", delta: "post-wave" },
-          { icon: "🌍", value: MOCK_STATS.countriesReached === 0 ? "—" : String(MOCK_STATS.countriesReached), label: "Countries Reached", delta: "post-wave" },
-          { icon: "✅", value: MOCK_STATS.repaymentRate === 0 ? "—" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
-          { icon: "♻️", value: `$${MOCK_STATS.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
+          { icon: "💰", value: `$${stats.feesCollected.toLocaleString()}`, label: "Impact Deployed", delta: "founder seed" },
+          { icon: "🤝", value: stats.loansFunded === 0 ? "—" : String(stats.loansFunded), label: "Loans Funded", delta: "post-wave" },
+          { icon: "🌍", value: stats.countriesReached === 0 ? "—" : String(stats.countriesReached), label: "Countries Reached", delta: "post-wave" },
+          { icon: "✅", value: stats.repaymentRate === 0 ? "—" : `${stats.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
+          { icon: "♻️", value: `$${stats.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
           <div key={label} className="text-center py-5 px-3 border-r border-gray-100 last:border-0 hover:bg-[#fdf6ee] transition-colors">
             <div className="text-3xl mb-1.5">{icon}</div>
@@ -181,21 +191,11 @@ export default async function Home() {
               <h2 className="text-sm font-bold">♻️ The Ripple Effect</h2>
               <span className="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-full">post-wave</span>
             </div>
-            {RECYCLED.map(({ from, to, amt }, i) => (
-              <div key={i} className="px-5 py-3.5 border-b border-gray-50 last:border-0 flex items-center gap-2">
-                <img src={`https://randomuser.me/api/portraits/${from.photo}.jpg`} alt={from.name}
-                  className="w-9 h-9 rounded-full object-cover border-2 border-[#a8dfc0] flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                    <span className="font-bold text-gray-800">{from.name} {COUNTRY_FLAGS[from.country] ?? "🌍"}</span>
-                    <span className="text-amber-500 text-base leading-none">to</span>
-                    <span className="font-bold text-[#1a6e43]">{to.name} {COUNTRY_FLAGS[to.country] ?? "🌍"}</span>
-                  </div>
-                  <div className="text-[11px] text-gray-400 mt-0.5">{from.loan} repaid → {to.loan} funded · Wave #{to.batch}</div>
-                </div>
-                <div className="text-sm font-extrabold text-amber-500 flex-shrink-0">${amt} ♻️</div>
-              </div>
-            ))}
+            <div className="px-5 py-8 text-center text-gray-400 text-sm">
+              <div className="text-3xl mb-2">⏳</div>
+              Repayments from Wave #001 will appear here.<br />
+              <span className="text-xs">Kiva loans typically repay over 6–18 months.</span>
+            </div>
           </div>
 
           {/* SECTORS */}
@@ -205,22 +205,11 @@ export default async function Home() {
               <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
-              {[
-                { icon: "🌾", label: "Agriculture & Food", pct: 42, count: 146, color: "#22c55e" },
-                { icon: "🏪", label: "Retail & Services",  pct: 28, count: 97,  color: "#8b5cf6" },
-                { icon: "📚", label: "Education",          pct: 18, count: 63,  color: "#3b82f6" },
-                { icon: "⚡", label: "Clean Energy",       pct: 12, count: 41,  color: "#f59e0b" },
-              ].map(({ icon, label, pct, count, color }) => (
-                <div key={label}>
-                  <div className="flex justify-between items-center mb-1.5 text-sm">
-                    <span className="font-bold">{icon} {label}</span>
-                    <span className="text-xs text-gray-400">{pct}% · {count} loans</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg,${color}cc,${color})` }} />
-                  </div>
-                </div>
-              ))}
+              <div className="py-4 text-center text-gray-400 text-sm">
+                <div className="text-3xl mb-2">📊</div>
+                Sector breakdown will populate after Wave #001 closes.<br />
+                <span className="text-xs">Wave #001: Personal Care &amp; Services · Philippines</span>
+              </div>
             </div>
           </div>
 
@@ -245,9 +234,9 @@ export default async function Home() {
                 {first?.location?.country ?? "Philippines"}<br />
                 {first?.activity ?? "Food Market"}{" · "}
                 <span className="text-amber-400 font-bold">${first?.loan_amount ?? 25}</span><br />
-                Funded by <span className="text-green-400 font-bold">$UPLIFT</span> fees, Wave #001<br />
-                <span className="text-green-400 font-bold">Genesis Wave</span> · coming soon<br />
-                <span className="text-gray-500 text-xs">TX: pending</span>
+                Founder-seeded test loan, Wave #001<br />
+                <span className="text-green-400 font-bold">Genesis Wave</span> · In Progress<br />
+                <span className="text-gray-500 text-xs">Verify: kiva.org/lender/upliftifyfun</span>
               </div>
               <div className="flex gap-2 items-center">
                 <img src={getPortrait(first?.id ?? 1001)} alt=""
@@ -257,7 +246,7 @@ export default async function Home() {
                     {first?.name ?? "Maria Santos"}{" "}
                     {COUNTRY_FLAGS[first?.location?.country ?? "Philippines"] ?? ""}
                   </div>
-                  <div className="text-xs text-gray-400 mt-0.5">{first?.activity ?? "Food Market"} · Wave #012</div>
+                  <div className="text-xs text-gray-400 mt-0.5">{first?.activity ?? "Personal Care"} · Wave #001</div>
                   <div className="text-sm font-extrabold text-green-400 mt-1">${first?.loan_amount ?? 25} funded</div>
                 </div>
               </div>

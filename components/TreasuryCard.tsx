@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import type { TreasuryData } from "@/lib/types";
+import { MOCK_STATS } from "@/lib/types";
 
 export default function TreasuryCard() {
   const [data, setData] = useState<TreasuryData | null>(null);
@@ -29,10 +30,10 @@ export default function TreasuryCard() {
       {/* Rows */}
       {[
         { label: "📍 Wallet", value: <span className="font-mono text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded cursor-pointer hover:bg-blue-100">{short}</span> },
-        { label: "📤 Last withdrawal", value: <span className="font-mono text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded cursor-pointer hover:bg-blue-100">3xAb…9kRt</span> },
-        { label: "🏦 Kiva balance", value: <span className="font-bold text-[#2CAB6A]">$180 pending</span> },
-        { label: "💰 Total deployed", value: <span className="font-bold">$12,840</span> },
-        { label: "♻️ Recycled capital", value: <span className="font-bold text-amber-500">$4,200</span> },
+        { label: "📤 Last withdrawal", value: <span className="font-bold text-gray-400">pending launch</span> },
+        { label: "🏦 Kiva balance", value: <span className="font-bold text-[#2CAB6A]">$0.00</span> },
+        { label: "💰 Total deployed", value: <span className="font-bold">${MOCK_STATS.feesCollected}</span> },
+        { label: "♻️ Recycled capital", value: <span className="font-bold text-amber-500">$0.00</span> },
       ].map(({ label, value }) => (
         <div key={label} className="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0 text-sm">
           <span className="text-gray-500 font-medium">{label}</span>
@@ -43,16 +44,17 @@ export default function TreasuryCard() {
       {/* Progress */}
       <div className="mt-4">
         <div className="flex justify-between text-xs text-gray-500 font-semibold mb-1.5">
-          <span>Next batch progress</span>
-          <span className="text-[#2CAB6A] font-bold">$340 / $500</span>
+          <span>Wave #001 Status</span>
+          <span className="text-[#2CAB6A] font-bold">In Progress</span>
         </div>
         <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full w-[68%] bg-gradient-to-r from-[#1a6e43] via-[#2CAB6A] to-emerald-300 rounded-full relative">
+          <div className="h-full w-[15%] bg-gradient-to-r from-[#1a6e43] via-[#2CAB6A] to-emerald-300 rounded-full relative">
             <div className="absolute right-0 top-0 w-1 h-full bg-white/50 rounded-r-full animate-shimmer" />
           </div>
         </div>
-        <div className="text-center text-[11px] text-gray-400 mt-1.5">$160 more until Batch #013 fires 🚀</div>
+        <div className="text-center text-[11px] text-gray-400 mt-1.5">Founder-seeded $25 loan active while treasury scales 🚀</div>
       </div>
     </div>
   );
 }
+
