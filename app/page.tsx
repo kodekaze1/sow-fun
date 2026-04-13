@@ -46,7 +46,7 @@ export default async function Home() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-[#e8f7f0] border border-[#a8dfc0] rounded-full px-4 py-1.5 text-xs font-semibold text-[#1a6e43]">
               <div className="w-2 h-2 bg-[#2CAB6A] rounded-full animate-livepulse" />
-              Treasury: 8xKj...4mPq
+              Treasury: FN7m...keAz
             </div>
             <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer"
               className="bg-[#2CAB6A] hover:bg-[#1a6e43] text-white rounded-full px-5 py-2 text-sm font-bold transition-all hover:shadow-lg">
@@ -276,7 +276,7 @@ export default async function Home() {
           <a href="/roadmap" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Roadmap</a>
           <a href="/faq" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">FAQ</a>
         </div>
-        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: 8xKj...4mPq · Built on Solana · Powered by Kiva API</div>
+        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: FN7m...keAz · Built on Solana · Powered by Kiva API</div>
         <div className="mt-2 opacity-30 text-xs">Placeholder photos replaced by Kiva borrower images in production</div>
       </footer>
 

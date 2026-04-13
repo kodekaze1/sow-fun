@@ -1,0 +1,22 @@
+{
+  "id": "wave-001",
+  "wave_number": 1,
+  "status": "draft",
+  "display": {
+    "headline": "Genesis Wave — Coming Soon",
+    "summary": "Wave #001 will be UPLIFT's first community-funded microloan batch. Data will be published here with full on-chain proof once the wave is executed.",
+    "countries": [],
+    "sectors": []
+  },
+  "timestamps": {
+    "started": null,
+    "last_checked": null
+  },
+  "movements": [],
+  "loans": [],
+  "totals": {
+    "uplift_deployed_cents": 0,
+    "loan_principal_supported_cents": 0
+  },
+  "_note": "PLACEHOLDER — not yet executed. Will be updated with real tx hashes, Kiva receipts, and borrower links when Wave #001 runs."
+}

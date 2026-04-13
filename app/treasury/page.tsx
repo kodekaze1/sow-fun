@@ -16,7 +16,7 @@ export default function TreasuryPage() {
     fetch("/api/treasury")
       .then((r) => r.json())
       .then(setTreasury)
-      .catch(() => setTreasury({ balance: 4.21, usd: 630, wallet: "11111111111111111111111111111112" }));
+      .catch(() => setTreasury({ balance: 0, usd: 0, wallet: "FN7mbeChbKQoVM3Wvctw7aLgVW3eSM1ZAo74b4NgkeAz" }));
   }, []);
 
   const goal = 10;
@@ -195,7 +195,7 @@ export default function TreasuryPage() {
           <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Kiva.org</a>
           <Link href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</Link>
         </div>
-        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: 8xKj...4mPq · Built on Solana · Powered by Kiva API</div>
+        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: FN7m...keAz · Built on Solana · Powered by Kiva API</div>
       </footer>
     </div>
   );
