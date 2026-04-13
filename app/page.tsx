@@ -2,8 +2,9 @@ import Ticker from "@/components/Ticker";
 import LoanFeed from "@/components/LoanFeed";
 import TreasuryCard from "@/components/TreasuryCard";
 import MapWrapper from "@/components/MapWrapper";
-import { KivaLoan, MOCK_STATS, MOCK_BATCHES, COUNTRY_FLAGS, getPortrait } from "@/lib/types";
+import { KivaLoan, MOCK_STATS, MOCK_BATCHES, COUNTRY_FLAGS, getPortrait, SECTOR_TAGS, SECTOR_COLORS } from "@/lib/types";
 import { getKivaImpactStats } from "@/lib/kiva-stats";
+import { getAllWaves } from "@/lib/waves";
 
 async function getLoans(): Promise<KivaLoan[]> {
   try {
@@ -24,13 +25,14 @@ const HERO_PORTRAITS = [
 
 
 export default async function Home() {
-  const [loans, kivaData] = await Promise.all([
+  const [loans, kivaData, waves] = await Promise.all([
     getLoans(),
     getKivaImpactStats().catch(() => null),
+    getAllWaves(),
   ]);
-  const first = loans[0];
-
   const lenderStats = kivaData?.lender?.lenderStats;
+  const impactLoans = kivaData?.lender?.loans ?? [];
+  const first = impactLoans[0] ?? loans[0];
 
   // Use real Kiva stats if available, otherwise fallback to MOCK_STATS
   const stats = {
@@ -40,6 +42,51 @@ export default async function Home() {
     repaymentRate:    MOCK_STATS.repaymentRate, 
     recycledCapital:  MOCK_STATS.recycledCapital,
   };
+
+  // Compute sectors from waves
+  const sectorMap: Record<string, { count: number; cents: number }> = {};
+  waves.forEach(wave => {
+    if (wave.status === "draft") return;
+    wave.display.sectors.forEach(sector => {
+      if (!sectorMap[sector]) sectorMap[sector] = { count: 0, cents: 0 };
+      sectorMap[sector].count += 1;
+    });
+    wave.loans.forEach(loan => {
+      const primarySector = wave.display.sectors[0] || "General";
+      if (!sectorMap[primarySector]) sectorMap[primarySector] = { count: 0, cents: 0 };
+      sectorMap[primarySector].cents += loan.uplift_cents;
+    });
+  });
+
+  const totalCents = Object.values(sectorMap).reduce((sum, s) => sum + s.cents, 0);
+  const impactSectors = Object.entries(sectorMap).map(([label, data]) => ({
+    label,
+    count: data.count,
+    pct: totalCents > 0 ? Math.round((data.cents / totalCents) * 100) : 0,
+    icon: SECTOR_TAGS[label] || "💼",
+    color: SECTOR_COLORS[label] || SECTOR_COLORS.default,
+  })).sort((a, b) => b.pct - a.pct);
+
+  // Combine active Kiva loans with our funded Uplift loans for the map
+  const fundedLoans = waves.flatMap(wave => 
+    wave.loans.map(loan => ({
+      id: parseInt(loan.kiva_id) || 1001,
+      name: loan.borrower,
+      activity: "Uplift Funded",
+      sector: "Uplift",
+      use: loan.notes || "",
+      location: { country: loan.location },
+      loan_amount: loan.uplift_cents / 100,
+      funded_amount: loan.uplift_cents / 100,
+      image: { id: 0, template_id: 1 },
+      lender_count: 1,
+      partner_id: 0,
+      posted_date: "",
+      planned_expiration_date: "",
+    }))
+  );
+
+  const allMapLoans = [...fundedLoans, ...loans];
 
   return (
     <div className="min-h-screen">
@@ -68,7 +115,7 @@ export default async function Home() {
       </nav>
 
       {/* TICKER */}
-      <Ticker loans={loans} />
+      <Ticker loans={impactLoans.length > 0 ? impactLoans : loans} />
 
       {/* HERO */}
       <div className="text-white py-16 px-6 text-center relative overflow-hidden"
@@ -129,18 +176,18 @@ export default async function Home() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
               <h2 className="text-sm font-bold">🌍 The Global Pulse</h2>
-              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{loans.length} loans on map</span>
+              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{impactLoans.length} loan{impactLoans.length === 1 ? "" : "s"} on map</span>
             </div>
-            <MapWrapper loans={loans} />
+            <MapWrapper loans={impactLoans} />
           </div>
 
           {/* FEED */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">⚡ People Being Lifted</h2>
-              <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
+              <h2 className="text-sm font-bold">⚡ People We&apos;re Watching</h2>
+              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full text-center">Active on Kiva</span>
             </div>
-            <LoanFeed loans={loans} />
+            <LoanFeed loans={impactLoans} />
           </div>
 
           {/* RIPPLE LEDGER */}
@@ -156,16 +203,15 @@ export default async function Home() {
                   <span className="text-sm font-extrabold text-[#2CAB6A]">${batch.amount} deployed</span>
                 </div>
                 <div className="text-xs text-gray-400 mb-2">
-                  TX: <span className="font-mono bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">{batch.txHash}</span>
-                  {" "}{batch.loans} lives touched / ${batch.rate.toFixed(2)}/SOL
+                  Proof: <a href={batch.txHash} target="_blank" rel="noopener noreferrer" className="font-mono bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-100 transition-colors">
+                    {batch.txHash.includes("kiva.org") ? "Kiva Receipt ↗" : `${batch.txHash.slice(0, 8)}...`}
+                  </a>
+                  {" "}{batch.loans} life touched · {stats.feesCollected === 25 ? "Founder Seed" : `$${batch.rate.toFixed(2)}/SOL`}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {loans.slice(0, 3).map((loan) => (
-                    <span key={loan.id} className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#e8f7f0] text-[#1a6e43]">
-                      {COUNTRY_FLAGS[loan.location.country] ?? "🌍"} {loan.name.split(" ")[0]} ${loan.loan_amount}
-                    </span>
-                  ))}
-                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">+{batch.loans - 3} more</span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#e8f7f0] text-[#1a6e43]">
+                    🇵🇭 Ailyn $25
+                  </span>
                 </div>
               </div>
             ))}
@@ -193,7 +239,7 @@ export default async function Home() {
             </div>
             <div className="px-5 py-8 text-center text-gray-400 text-sm">
               <div className="text-3xl mb-2">⏳</div>
-              Repayments from Wave #001 will appear here.<br />
+              Repayments from active loans will appear here.<br />
               <span className="text-xs">Kiva loans typically repay over 6–18 months.</span>
             </div>
           </div>
@@ -205,11 +251,22 @@ export default async function Home() {
               <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
-              <div className="py-4 text-center text-gray-400 text-sm">
-                <div className="text-3xl mb-2">📊</div>
-                Sector breakdown will populate after Wave #001 closes.<br />
-                <span className="text-xs">Wave #001: Personal Care &amp; Services · Philippines</span>
-              </div>
+              {impactSectors.length > 0 ? impactSectors.map(({ icon, label, pct, count, color }) => (
+                <div key={label}>
+                  <div className="flex justify-between items-center mb-1.5 text-sm">
+                    <span className="font-bold">{icon} {label}</span>
+                    <span className="text-xs text-gray-400">{pct}% · {count} wave{count > 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg,${color}cc,${color})` }} />
+                  </div>
+                </div>
+              )) : (
+                <div className="py-4 text-center text-gray-400 text-sm">
+                  <div className="text-3xl mb-2">📊</div>
+                  Sector breakdown will populate as more loans are funded.
+                </div>
+              )}
             </div>
           </div>
 
@@ -229,25 +286,21 @@ export default async function Home() {
               </div>
               <div className="text-sm text-gray-200 leading-relaxed mb-3">
                 <span className="text-green-400 font-bold">Funded: </span>
-                {first?.name ?? "Maria Santos"} in{" "}
-                {COUNTRY_FLAGS[first?.location?.country ?? "Philippines"] ?? "🌍"}{" "}
-                {first?.location?.country ?? "Philippines"}<br />
-                {first?.activity ?? "Food Market"}{" · "}
-                <span className="text-amber-400 font-bold">${first?.loan_amount ?? 25}</span><br />
+                Ailyn in 🇵🇭 Philippines<br />
+                Personal Care · <span className="text-amber-400 font-bold">$25</span><br />
                 Founder-seeded test loan, Wave #001<br />
-                <span className="text-green-400 font-bold">Genesis Wave</span> · In Progress<br />
-                <span className="text-gray-500 text-xs">Verify: kiva.org/lender/upliftifyfun</span>
+                <span className="text-green-400 font-bold">Genesis Wave</span> · active<br />
+                <span className="text-gray-500 text-xs">TX: founder_seeded</span>
               </div>
               <div className="flex gap-2 items-center">
-                <img src={getPortrait(first?.id ?? 1001)} alt=""
+                <img src={getPortrait(1001)} alt=""
                   className="w-14 h-14 rounded-lg object-cover border border-[#333] flex-shrink-0" />
                 <div className="flex-1 bg-[#1a1a1a] rounded-lg p-2.5 border border-[#2a2a2a]">
                   <div className="text-sm font-bold text-white">
-                    {first?.name ?? "Maria Santos"}{" "}
-                    {COUNTRY_FLAGS[first?.location?.country ?? "Philippines"] ?? ""}
+                    Ailyn 🇵🇭
                   </div>
-                  <div className="text-xs text-gray-400 mt-0.5">{first?.activity ?? "Personal Care"} · Wave #001</div>
-                  <div className="text-sm font-extrabold text-green-400 mt-1">${first?.loan_amount ?? 25} funded</div>
+                  <div className="text-xs text-gray-400 mt-0.5">Personal Care · Wave #001</div>
+                  <div className="text-sm font-extrabold text-green-400 mt-1">$25 funded</div>
                 </div>
               </div>
             </div>

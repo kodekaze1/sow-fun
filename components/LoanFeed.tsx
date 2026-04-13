@@ -9,6 +9,15 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
+  if (loans.length === 0) {
+    return (
+      <div className="px-5 py-10 text-center text-gray-400 text-sm">
+        <div className="text-3xl mb-2">⏳</div>
+        Upliftify-funded loans will appear here after they sync from Kiva.
+      </div>
+    );
+  }
+
   return (
     <div className="max-h-[420px] overflow-y-auto divide-y divide-gray-50">
       {loans.map((loan, i) => {
@@ -20,7 +29,6 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
         const description = loan.description?.texts?.en ?? `This loan will help ${loan.name} ${loan.use}.`;
         const status = pct >= 100 ? "funded" : pct > 50 ? "repaying" : "fundraising";
         const statusLabel = pct >= 100 ? "✅ Funded" : `${pct}% funded`;
-        const batchNum = String(12 - (i % 3)).padStart(3, "0");
 
         return (
           <div
@@ -57,15 +65,15 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${STATUS_STYLES[status]}`}>
                   {statusLabel}
                 </span>
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                  Batch #{batchNum}
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                  Monitoring
                 </span>
               </div>
             </div>
             <div className="text-right flex-shrink-0">
               <div className="text-base font-extrabold text-[#1a6e43]">${loan.loan_amount}</div>
               <div className="text-[11px] text-gray-400 mt-0.5">
-                {i === 0 ? "2 min ago" : i < 3 ? "1 hr ago" : i < 5 ? "3 hrs ago" : "1 day ago"}
+                Active Round
               </div>
             </div>
           </div>

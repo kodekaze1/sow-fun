@@ -5,6 +5,7 @@ import {
   KIVA_TEAM_SHORTNAME,
   KIVA_TEAM_URL,
 } from "@/lib/constants";
+import type { KivaLoan as AppKivaLoan } from "@/lib/types";
 import { getAllWaves } from "@/lib/waves";
 
 const KIVA_API_BASE = "https://api.kivaws.org/v1";
@@ -17,12 +18,19 @@ type KivaLender = {
   member_since?: string;
 };
 
-type KivaLoan = {
+type RestKivaLoan = {
   id: number;
   name: string;
   status: string;
   funded_amount?: number;
   loan_amount?: number;
+  borrower_count?: number;
+  lender_count?: number;
+  partner_id?: number;
+  posted_date?: string;
+  planned_expiration_date?: string;
+  image?: { id: number; template_id: number };
+  description?: { texts?: { en?: string } };
   sector?: string;
   activity?: string;
   use?: string;
@@ -55,20 +63,43 @@ async function fetchKiva<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+function normalizeLoan(loan: RestKivaLoan): AppKivaLoan {
+  return {
+    id: loan.id,
+    name: loan.name,
+    activity: loan.activity ?? "Kiva Loan",
+    sector: loan.sector ?? "Retail",
+    use: loan.use ?? "to support their business",
+    location: {
+      country: loan.location?.country ?? "Unknown",
+      town: loan.location?.town,
+    },
+    borrower_count: loan.borrower_count ?? 1,
+    loan_amount: loan.loan_amount ?? loan.funded_amount ?? 0,
+    funded_amount: loan.funded_amount ?? 0,
+    image: loan.image ?? { id: loan.id, template_id: 1 },
+    lender_count: loan.lender_count ?? 0,
+    partner_id: loan.partner_id ?? 0,
+    posted_date: loan.posted_date ?? "",
+    planned_expiration_date: loan.planned_expiration_date ?? "",
+    description: loan.description,
+  };
+}
+
 export async function getKivaImpactStats() {
   const [lenderData, lenderLoansData, teamData, teamLendersData, teamLoansData, waves] =
     await Promise.all([
       fetchKiva<{ lenders: KivaLender[] }>(`/lenders/${KIVA_LENDER_ID}.json`),
-      fetchKiva<{ loans: KivaLoan[]; paging: { total: number } }>(`/lenders/${KIVA_LENDER_ID}/loans.json`),
+      fetchKiva<{ loans: RestKivaLoan[]; paging: { total: number } }>(`/lenders/${KIVA_LENDER_ID}/loans.json`),
       fetchKiva<{ teams: KivaTeam[] }>(`/teams/${KIVA_TEAM_ID}.json`),
       fetchKiva<{ lenders: KivaLender[]; paging: { total: number } }>(`/teams/${KIVA_TEAM_ID}/lenders.json`),
-      fetchKiva<{ loans: KivaLoan[]; paging: { total: number } }>(`/teams/${KIVA_TEAM_ID}/loans.json`),
+      fetchKiva<{ loans: RestKivaLoan[]; paging: { total: number } }>(`/teams/${KIVA_TEAM_ID}/loans.json`),
       getAllWaves(),
     ]);
 
   const lender = lenderData.lenders[0] ?? null;
   const team = teamData.teams[0] ?? null;
-  const lenderLoans = lenderLoansData.loans ?? [];
+  const lenderLoans = (lenderLoansData.loans ?? []).map(normalizeLoan);
   const countries = new Set(lenderLoans.map((loan) => loan.location?.country).filter(Boolean));
   const sectors = new Set(lenderLoans.map((loan) => loan.sector).filter(Boolean));
   const productionWaves = waves.filter((wave) => wave.status !== "draft");
@@ -103,7 +134,7 @@ export async function getKivaImpactStats() {
       url: KIVA_TEAM_URL,
       memberCount: teamLendersData.paging?.total ?? teamLendersData.lenders?.length ?? 0,
       loanCount: team?.loan_count ?? teamLoansData.paging?.total ?? teamLoansData.loans?.length ?? 0,
-      loans: teamLoansData.loans ?? [],
+      loans: (teamLoansData.loans ?? []).map(normalizeLoan),
     },
     canonical: {
       source: "uplift_wave_records",

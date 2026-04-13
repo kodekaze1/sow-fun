@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { MOCK_BATCHES } from "@/lib/types";
+import { MOCK_BATCHES, MOCK_STATS } from "@/lib/types";
 
 interface TreasuryData {
   balance: number;
@@ -106,13 +106,13 @@ export default function TreasuryPage() {
           )}
         </div>
 
-        {/* STATS ROW — shows real zeros until Wave #001 is funded */}
+        {/* STATS ROW — real-time genesis data */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { icon: "💰", value: "$0", label: "Total Deployed" },
-            { icon: "🤝", value: "0", label: "Loans Funded" },
-            { icon: "♻️", value: "$0", label: "Capital Recycled" },
-            { icon: "✅", value: "—", label: "Repayment Rate" },
+            { icon: "💰", value: `$${MOCK_STATS.feesCollected}`, label: "Total Deployed" },
+            { icon: "🤝", value: String(MOCK_STATS.loansFunded), label: "Loans Funded" },
+            { icon: "♻️", value: `$${MOCK_STATS.recycledCapital}`, label: "Capital Recycled" },
+            { icon: "✅", value: MOCK_STATS.repaymentRate === 0 ? "—" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate" },
           ].map(({ icon, value, label }) => (
             <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow p-5 text-center hover:bg-[#fdf6ee] transition-colors">
               <div className="text-3xl mb-2">{icon}</div>
@@ -121,6 +121,7 @@ export default function TreasuryPage() {
             </div>
           ))}
         </div>
+
         <div className="text-center text-xs text-gray-400 -mt-2">
           Stats update automatically when Wave #001 is executed and verified.
         </div>
