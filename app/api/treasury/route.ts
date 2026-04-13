@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { TREASURY_WALLET } from "@/lib/constants";
 
-const WALLET = process.env.NEXT_PUBLIC_TREASURY_WALLET || "FN7mbeChbKQoVM3Wvctw7aLgVW3eSM1ZAo74b4NgkeAz";
+const WALLET = process.env.NEXT_PUBLIC_TREASURY_WALLET || TREASURY_WALLET;
 const RPC    = process.env.NEXT_PUBLIC_SOLANA_RPC    || "https://api.mainnet-beta.solana.com";
 
 async function getSolPrice(): Promise<number> {

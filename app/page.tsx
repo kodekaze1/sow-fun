@@ -234,7 +234,7 @@ export default async function Home() {
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a6e43] to-[#2CAB6A] flex items-center justify-center text-white font-black text-sm flex-shrink-0">$U</div>
                 <div>
                   <div className="text-sm font-bold text-white">$UPLIFT x Kiva</div>
-                  <div className="text-xs text-gray-500">@UpliftTokenSOL</div>
+                  <div className="text-xs text-gray-500">@UpliftifyFun</div>
                 </div>
               </div>
               <div className="text-sm text-gray-200 leading-relaxed mb-3">

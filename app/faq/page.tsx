@@ -12,7 +12,7 @@ const FAQS = [
       },
       {
         q: "Where can I buy $UPLIFT?",
-        a: "$UPLIFT launches on Solana via pump.fun and/or Meteora DBC. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @UpliftTokenSOL on X.",
+        a: "$UPLIFT launches on Solana via pump.fun and/or Meteora DBC. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @UpliftifyFun on X.",
       },
       {
         q: "Is there a presale or whitelist?",
@@ -162,9 +162,9 @@ export default function FAQPage() {
           <h3 className="text-xl font-extrabold text-gray-900 mb-2">Still have questions?</h3>
           <p className="text-gray-400 text-sm mb-5">Find us on X or browse the live dashboard to see the treasury and loans in action.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://x.com/UpliftTokenSOL" target="_blank" rel="noopener noreferrer"
+            <a href="https://x.com/UpliftifyFun" target="_blank" rel="noopener noreferrer"
               className="bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-gray-800 transition-all">
-              @UpliftTokenSOL on X
+              @UpliftifyFun on X
             </a>
             <Link href="/"
               className="bg-[#2CAB6A] text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-[#1a6e43] transition-all">

@@ -53,7 +53,7 @@ export async function getAllWaves(): Promise<UpliftWave[]> {
     return [];
   }
 
-  const files = fs.readdirSync(WAVES_DIR).filter(f => f.endsWith('.json'));
+  const files = fs.readdirSync(WAVES_DIR).filter(f => f.endsWith('.json') && !f.endsWith('.fixture.json'));
   const waves = files.map(file => {
     const filePath = path.join(WAVES_DIR, file);
     const content = fs.readFileSync(filePath, 'utf8');
