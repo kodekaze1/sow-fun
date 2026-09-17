@@ -80,7 +80,7 @@ export default function HowItWorksPage() {
                 <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-[#EDF4F1] border-2 border-[#D9E6DF] text-[#276A43]">
                   <Icon name={step.icon} className="w-8 h-8" />
                 </div>
-                <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 flex-1">
+                <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-6 flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-xs font-black uppercase tracking-widest" style={{ color: step.color }}>Step {step.num}</span>
                   </div>
@@ -93,7 +93,7 @@ export default function HowItWorksPage() {
         </div>
 
         {/* TRUST SECTION */}
-        <div className="mt-16 bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-8">
+        <div className="mt-16 bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Why You Can Trust This</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[

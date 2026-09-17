@@ -57,3 +57,29 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D9E6DF; border-radius: 2px; }
+
+::selection { background: #2AA967; color: #ffffff; }
+
+html { scroll-behavior: smooth; }
+
+/* Hero photo: slow drift */
+@keyframes kenburns { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+.kenburns { animation: kenburns 26s ease-in-out infinite alternate; will-change: transform; }
+
+/* Ticker: soft edges + pause on hover */
+.ticker-fade { mask-image: linear-gradient(90deg, transparent 0, black 40px, black calc(100% - 40px), transparent 100%); }
+.ticker-hover:hover .animate-ticker { animation-play-state: paused; }
+
+/* Scroll reveal (only once JS confirms it will run) */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.6, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kenburns { animation: none; }
+  .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}

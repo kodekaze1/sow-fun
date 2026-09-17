@@ -47,7 +47,7 @@ export default function TreasuryPage() {
       <div className="max-w-[900px] mx-auto px-6 py-16 flex flex-col gap-8">
 
         {/* LIVE BALANCE */}
-        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-8">
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-extrabold text-[#223829]">Live Balance</h2>
             <div className="flex items-center gap-2 bg-[#EDF4F1] border border-[#D9E6DF] rounded-full px-4 py-1.5 text-xs font-semibold text-[#223829]">
@@ -98,7 +98,7 @@ export default function TreasuryPage() {
             { icon: "refresh", value: `$${MOCK_STATS.recycledCapital}`, label: "Capital Recycled" },
             { icon: "check", value: MOCK_STATS.repaymentRate === 0 ? "-" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate" },
           ].map(({ icon, value, label }) => (
-            <div key={label} className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-5 text-center hover:bg-[#F8F2E6] transition-colors">
+            <div key={label} className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-5 text-center hover:bg-[#F8F2E6] transition-colors">
               <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
                 <Icon name={icon} className="w-5 h-5" />
               </div>
@@ -113,7 +113,7 @@ export default function TreasuryPage() {
         </div>
 
         {/* BATCH LEDGER */}
-        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
             <h2 className="flex items-center gap-2.5 text-lg font-extrabold"><span className="w-8 h-8 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="ledger" className="w-5 h-5" /></span>Uplift Ledger</h2>
             <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{MOCK_BATCHES.length} waves</span>
@@ -144,7 +144,7 @@ export default function TreasuryPage() {
         </div>
 
         {/* HOW FUNDS FLOW */}
-        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-8">
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-xl font-extrabold text-[#223829] mb-4">How Funds Flow</h2>
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center">
             {[

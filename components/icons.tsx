@@ -88,7 +88,7 @@ const PATHS: Record<string, React.ReactNode> = {
   ),
 };
 
-export default function Icon({ name, className }: { name: string; className?: string }) {
+export default function Icon({ name, className, accent }: { name: string; className?: string; accent?: boolean }) {
   const path = PATHS[name];
   if (!path) return null;
   return (
@@ -102,6 +102,7 @@ export default function Icon({ name, className }: { name: string; className?: st
       className={className}
       aria-hidden="true"
     >
+      {accent && <circle cx="15.5" cy="15" r="7" fill="#2AA967" opacity="0.22" stroke="none" />}
       {path}
     </svg>
   );

@@ -3,10 +3,12 @@ import LoanFeed from "@/components/LoanFeed";
 import TreasuryCard from "@/components/TreasuryCard";
 import MapWrapper from "@/components/MapWrapper";
 import Icon from "@/components/icons";
+import CountUp from "@/components/CountUp";
+import ScrollReveal from "@/components/ScrollReveal";
 import { KivaLoan, MOCK_STATS, MOCK_BATCHES, SECTOR_TAGS, SECTOR_COLORS } from "@/lib/types";
 import { getKivaImpactStats } from "@/lib/kiva-stats";
 import { getAllWaves } from "@/lib/waves";
-import { KIVA_FETCH_HEADERS } from "@/lib/constants";
+import { KIVA_FETCH_HEADERS, KIVA_TEAM_URL } from "@/lib/constants";
 
 async function getLoans(): Promise<KivaLoan[]> {
   try {
@@ -88,6 +90,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen">
+      <ScrollReveal />
 
       {/* TICKER */}
       <Ticker loans={impactLoans.length > 0 ? impactLoans : loans} />
@@ -95,8 +98,9 @@ export default async function Home() {
       {/* HERO */}
       <div className="relative overflow-hidden bg-[#223829]">
         <img src="/images/vendor-smile.jpg" alt="A smiling vendor at her market stall in the Philippines"
-          className="absolute inset-0 w-full h-full object-cover object-[50%_25%]" />
+          className="absolute inset-0 w-full h-full object-cover object-[50%_25%] kenburns" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#16261c]/95 via-[#16261c]/70 to-[#16261c]/20" />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(120% 95% at 50% 40%, transparent 55%, rgba(10,20,14,0.5) 100%)" }} />
         <div className="relative max-w-[1280px] mx-auto px-6 py-24 md:py-32">
           <div className="max-w-xl text-[#EDF4F1]">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
@@ -127,6 +131,11 @@ export default async function Home() {
                 How it works
               </a>
             </div>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] opacity-85 mb-4">
+              <span className="flex items-center gap-1.5"><Icon name="check" className="w-4 h-4 text-[#7FC79E]" />Loans verified on Kiva</span>
+              <span className="flex items-center gap-1.5"><Icon name="vault" className="w-4 h-4 text-[#7FC79E]" />Public treasury on Solana</span>
+              <span className="flex items-center gap-1.5"><Icon name="refresh" className="w-4 h-4 text-[#7FC79E]" />Repayments recycled</span>
+            </div>
             <p className="text-sm opacity-70">Wave #001 is live - Ailyn in the Philippines is already funded</p>
           </div>
         </div>
@@ -143,13 +152,19 @@ export default async function Home() {
         ].map(({ icon, value, label, delta }) => (
           <div key={label} className="text-center py-6 px-3 border-r border-[#D9E6DF] last:border-0">
             <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-white flex items-center justify-center text-[#276A43] shadow-sm">
-              <Icon name={icon} className="w-5 h-5" />
+              <Icon name={icon} className="w-5 h-5" accent />
             </div>
-            <div className="text-2xl font-black text-[#223829] leading-none mb-1">{value}</div>
+            <div className="text-2xl font-black text-[#223829] leading-none mb-1"><CountUp value={value} /></div>
             <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">{label}</div>
             <div className="mt-1.5 text-[10px] font-bold text-[#276A43] bg-white rounded-full px-2 py-0.5 inline-block">{delta}</div>
           </div>
         ))}
+      </div>
+
+      {/* SECTION INTRO */}
+      <div className="max-w-[1440px] mx-auto px-6 pt-14 pb-2 text-center" data-reveal>
+        <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2.5">Live transparency</div>
+        <h2 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-[#223829]">Watch the treasury work.</h2>
       </div>
 
       {/* MAIN GRID */}
@@ -159,7 +174,7 @@ export default async function Home() {
         <div className="flex flex-col gap-6">
 
           {/* MAP */}
-          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="pin" className="w-4 h-4" /></span>The Global Pulse</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{allMapLoans.length} markers on map</span>
@@ -169,16 +184,30 @@ export default async function Home() {
 
 
           {/* FEED */}
-          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="pulse" className="w-4 h-4" /></span>People We&apos;re Watching</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full text-center">Active on Kiva</span>
+            </div>
+            <div className="px-5 pt-3 pb-1 flex gap-2 overflow-x-auto">
+              {[
+                ["Women", "women"],
+                ["Agriculture", "agriculture"],
+                ["Eco-friendly", "eco-friendly"],
+                ["Refugees", "refugees-and-i-d-ps"],
+                ["Education", "education"],
+              ].map(([label, slug]) => (
+                <a key={slug} href={`https://www.kiva.org/lend-by-category/${slug}`} target="_blank" rel="noopener noreferrer"
+                  className="flex-shrink-0 text-xs font-bold px-3.5 py-1.5 rounded-full bg-white border border-[#D9E6DF] text-[#223829] hover:border-[#276A43] hover:text-[#276A43] transition-colors shadow-sm">
+                  {label}
+                </a>
+              ))}
             </div>
             <LoanFeed loans={impactLoans} />
           </div>
 
           {/* RIPPLE LEDGER */}
-          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="ledger" className="w-4 h-4" /></span>Uplift Ledger</h2>
               <a href="/treasury" className="text-xs font-bold text-[#276A43] hover:underline">View all</a>
@@ -210,7 +239,7 @@ export default async function Home() {
         <div className="flex flex-col gap-6">
 
           {/* TREASURY */}
-          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="vault" className="w-4 h-4" /></span>Impact Treasury</h2>
               <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
@@ -219,7 +248,7 @@ export default async function Home() {
           </div>
 
           {/* RECYCLING */}
-          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="refresh" className="w-4 h-4" /></span>The Ripple Effect</h2>
               <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">post-wave</span>
@@ -234,7 +263,7 @@ export default async function Home() {
           </div>
 
           {/* SECTORS */}
-          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
+          <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="chart" className="w-4 h-4" /></span>Impact Sectors</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">post-wave</span>
@@ -261,12 +290,31 @@ export default async function Home() {
             </div>
           </div>
 
+          {/* LEND WITH US */}
+          <div data-reveal className="bg-[#223829] rounded-2xl overflow-hidden text-[#EDF4F1] p-6 relative">
+            <Icon name="heart" className="absolute -right-5 -bottom-5 w-32 h-32 opacity-10" />
+            <div className="text-xs font-black uppercase tracking-widest text-[#7FC79E] mb-2">Kiva Lending Team</div>
+            <h2 className="font-serif text-xl font-semibold mb-2">Lend alongside the treasury</h2>
+            <p className="text-sm opacity-75 leading-relaxed mb-4">
+              Join the Upliftify team on Kiva - every loan you make under the team banner counts toward our shared impact.
+            </p>
+            <div className="flex items-center gap-5 text-sm mb-5">
+              <div><span className="font-black">{kivaData?.team?.memberCount ?? 1}</span> <span className="opacity-60">member{(kivaData?.team?.memberCount ?? 1) === 1 ? "" : "s"}</span></div>
+              <div><span className="font-black">{kivaData?.team?.loanCount ?? 0}</span> <span className="opacity-60">team loans</span></div>
+            </div>
+            <a href={KIVA_TEAM_URL} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-5 py-2 text-sm font-bold transition-colors">
+              Join the team on Kiva
+              <Icon name="arrow" className="w-4 h-4" />
+            </a>
+          </div>
+
         </div>
       </div>
 
       {/* STORY: WAVE #001 */}
       <div className="bg-[#EDF4F1] mt-6">
-        <div className="max-w-[1100px] mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
+        <div data-reveal className="max-w-[1100px] mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
           <img src="/images/ailyn.webp"
             alt="Ailyn standing in front of her sari-sari store in Barotac Viejo, Philippines"
             className="rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.08)] w-full object-cover aspect-[4/3]" />
@@ -297,7 +345,7 @@ export default async function Home() {
         <img src="/images/hands-wide.jpg" alt="" aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover opacity-45" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/70 to-[#16261c]/40" />
-        <div className="relative max-w-2xl mx-auto px-6 py-20 text-center text-[#EDF4F1]">
+        <div data-reveal className="relative max-w-2xl mx-auto px-6 py-20 text-center text-[#EDF4F1]">
           <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4"
             style={{ fontFamily: "var(--font-serif)" }}>
             Every trade plants a seed.

@@ -111,7 +111,7 @@ export default function RoadmapPage() {
                     <span className="text-xs font-bold text-gray-500 mt-0.5">{phase.date}</span>
                   </div>
 
-                  <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 flex-1">
+                  <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-6 flex-1">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-extrabold text-gray-900">{phase.title}</h2>
                       <span className="text-[11px] font-bold px-3 py-1 rounded-full"
