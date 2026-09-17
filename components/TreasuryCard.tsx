@@ -38,7 +38,7 @@ export default function TreasuryCard() {
       ].map(({ icon, label, value }) => (
         <div key={label} className="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0 text-sm">
           <span className="flex items-center gap-2 text-gray-500 font-medium">
-            <Icon name={icon} className="w-4 h-4 text-[#276A43]" />
+            <Icon name={icon} className="w-4 h-4 text-[#223829]" />
             {label}
           </span>
           <span>{value}</span>

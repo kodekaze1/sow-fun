@@ -151,8 +151,8 @@ export default async function Home() {
           { icon: "refresh", value: `$${stats.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
           <div key={label} className="text-center py-6 px-3 border-r border-[#D9E6DF] last:border-0">
-            <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-white flex items-center justify-center text-[#276A43] shadow-sm">
-              <Icon name={icon} className="w-5 h-5" accent />
+            <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-white flex items-center justify-center text-[#223829] shadow-sm">
+              <Icon name={icon} className="w-6 h-6" />
             </div>
             <div className="text-2xl font-black text-[#223829] leading-none mb-1"><CountUp value={value} /></div>
             <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">{label}</div>
@@ -176,7 +176,7 @@ export default async function Home() {
           {/* MAP */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="pin" className="w-4 h-4" /></span>The Global Pulse</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="pin" className="w-4 h-4" /></span>The Global Pulse</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{allMapLoans.length} markers on map</span>
             </div>
             <MapWrapper loans={allMapLoans} />
@@ -186,7 +186,7 @@ export default async function Home() {
           {/* FEED */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="pulse" className="w-4 h-4" /></span>People We&apos;re Watching</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="pulse" className="w-4 h-4" /></span>People We&apos;re Watching</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full text-center">Active on Kiva</span>
             </div>
             <div className="px-5 pt-3 pb-1 flex gap-2 overflow-x-auto">
@@ -209,7 +209,7 @@ export default async function Home() {
           {/* RIPPLE LEDGER */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="ledger" className="w-4 h-4" /></span>Uplift Ledger</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-4 h-4" /></span>Uplift Ledger</h2>
               <a href="/treasury" className="text-xs font-bold text-[#276A43] hover:underline">View all</a>
             </div>
             {MOCK_BATCHES.map((batch) => (
@@ -241,7 +241,7 @@ export default async function Home() {
           {/* TREASURY */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="vault" className="w-4 h-4" /></span>Impact Treasury</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="vault" className="w-4 h-4" /></span>Impact Treasury</h2>
               <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
             </div>
             <TreasuryCard />
@@ -250,11 +250,11 @@ export default async function Home() {
           {/* RECYCLING */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="refresh" className="w-4 h-4" /></span>The Ripple Effect</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="refresh" className="w-4 h-4" /></span>The Ripple Effect</h2>
               <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="px-5 py-8 text-center text-gray-400 text-sm">
-              <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
+              <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
                 <Icon name="hourglass" className="w-5 h-5" />
               </div>
               Repayments from active loans will appear here.<br />
@@ -265,7 +265,7 @@ export default async function Home() {
           {/* SECTORS */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="chart" className="w-4 h-4" /></span>Impact Sectors</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="chart" className="w-4 h-4" /></span>Impact Sectors</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
@@ -281,7 +281,7 @@ export default async function Home() {
                 </div>
               )) : (
                 <div className="py-4 text-center text-gray-400 text-sm">
-                  <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
+                  <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
                     <Icon name="chart" className="w-5 h-5" />
                   </div>
                   Sector breakdown will populate as more loans are funded.
@@ -292,8 +292,10 @@ export default async function Home() {
 
           {/* LEND WITH US */}
           <div data-reveal className="bg-[#223829] rounded-2xl overflow-hidden text-[#EDF4F1] p-6 relative">
-            <Icon name="heart" className="absolute -right-5 -bottom-5 w-32 h-32 opacity-10" />
-            <div className="text-xs font-black uppercase tracking-widest text-[#7FC79E] mb-2">Kiva Lending Team</div>
+            <div className="absolute right-4 top-4 w-14 h-14 rounded-2xl bg-white p-1.5 shadow-lg rotate-[4deg]">
+              <img src="/images/illustrations/heart-radiate.png" alt="" aria-hidden="true" className="w-full h-full object-contain" />
+            </div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#7FC79E] mb-2 pr-16">Kiva Lending Team</div>
             <h2 className="font-serif text-xl font-semibold mb-2">Lend alongside the treasury</h2>
             <p className="text-sm opacity-75 leading-relaxed mb-4">
               Join the Upliftify team on Kiva - every loan you make under the team banner counts toward our shared impact.
@@ -346,6 +348,9 @@ export default async function Home() {
           className="absolute inset-0 w-full h-full object-cover opacity-45" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/70 to-[#16261c]/40" />
         <div data-reveal className="relative max-w-2xl mx-auto px-6 py-20 text-center text-[#EDF4F1]">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-white p-2 shadow-[0_6px_20px_rgba(0,0,0,0.25)] rotate-[-3deg]">
+            <img src="/images/illustrations/plant-coin.png" alt="" aria-hidden="true" className="w-full h-full object-contain" />
+          </div>
           <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4"
             style={{ fontFamily: "var(--font-serif)" }}>
             Every trade plants a seed.

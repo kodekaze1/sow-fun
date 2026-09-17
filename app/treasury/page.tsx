@@ -99,7 +99,7 @@ export default function TreasuryPage() {
             { icon: "check", value: MOCK_STATS.repaymentRate === 0 ? "-" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate" },
           ].map(({ icon, value, label }) => (
             <div key={label} className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-5 text-center hover:bg-[#F8F2E6] transition-colors">
-              <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
+              <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
                 <Icon name={icon} className="w-5 h-5" />
               </div>
               <div className="text-2xl font-black text-[#223829] leading-none mb-1">{value}</div>
@@ -115,7 +115,7 @@ export default function TreasuryPage() {
         {/* BATCH LEDGER */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-            <h2 className="flex items-center gap-2.5 text-lg font-extrabold"><span className="w-8 h-8 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="ledger" className="w-5 h-5" /></span>Uplift Ledger</h2>
+            <h2 className="flex items-center gap-2.5 text-lg font-extrabold"><span className="w-8 h-8 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-5 h-5" /></span>Uplift Ledger</h2>
             <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{MOCK_BATCHES.length} waves</span>
           </div>
           {MOCK_BATCHES.map((batch) => (
@@ -160,7 +160,7 @@ export default function TreasuryPage() {
                 <div key={i} className="text-gray-300 hidden sm:block"><Icon name="arrow" className="w-5 h-5" /></div>
               ) : (
                 <div key={i} className="flex-1 p-4 bg-[#EDF4F1] rounded-xl">
-                  <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-white flex items-center justify-center text-[#276A43]">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-white flex items-center justify-center text-[#223829]">
                     <Icon name={icon} className="w-5 h-5" />
                   </div>
                   <div className="text-sm font-bold text-gray-700">{label}</div>

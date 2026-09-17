@@ -104,7 +104,7 @@ export default function TokenomicsPage() {
               { icon: "refresh", title: "Repayments → New Loans", body: "When borrowers repay, capital gets reinvested - not withdrawn. One dollar, many lives." },
             ].map(({ icon, title, body }) => (
               <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-[#276A43]">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-[#223829]">
                   <Icon name={icon} className="w-6 h-6" />
                 </div>
                 <h3 className="text-base font-extrabold text-gray-900 mb-2">{title}</h3>

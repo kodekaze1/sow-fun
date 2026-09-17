@@ -77,7 +77,7 @@ export default function HowItWorksPage() {
           <div className="flex flex-col gap-10">
             {STEPS.map((step) => (
               <div key={step.num} className="flex gap-6 items-start">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-[#EDF4F1] border-2 border-[#D9E6DF] text-[#276A43]">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 relative z-10 bg-[#EDF4F1] border-2 border-[#D9E6DF] text-[#223829]">
                   <Icon name={step.icon} className="w-8 h-8" />
                 </div>
                 <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-6 flex-1">
@@ -102,7 +102,7 @@ export default function HowItWorksPage() {
               { icon: "globe", title: "Kiva Verification", body: "Loans are funded through Kiva.org - a non-profit with 97%+ repayment rates and 15+ years of verified impact across 80 countries." },
             ].map(({ icon, title, body }) => (
               <div key={title} className="text-center p-4">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
                   <Icon name={icon} className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-extrabold text-gray-900 mb-2">{title}</h3>

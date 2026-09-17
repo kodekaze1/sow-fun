@@ -142,7 +142,7 @@ export default function FAQPage() {
 
         {/* STILL HAVE QUESTIONS */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8 text-center">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
             <Icon name="message" className="w-6 h-6" />
           </div>
           <h3 className="text-xl font-extrabold text-gray-900 mb-2">Still have questions?</h3>
