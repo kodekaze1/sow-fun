@@ -14,11 +14,18 @@ API integration is built.
    - Add DRY=1 first to preview pending fees.
    - Receipt: claim tx signatures (solscan links).
 
-2. OFF-RAMP (manual, exchange receipt)
-   Send SOL from the treasury to the exchange (Kraken or Coinbase), sell for USD.
-   - Receipt: the treasury->exchange transfer tx + the exchange trade/order ID.
-   - Alternative bridge: a crypto Visa debit card (e.g. Coinbase Card) lets you
-     pay Kiva directly at checkout from the sold balance - literally crypto->Visa.
+2. OFF-RAMP (manual, receipt at every hop)
+   Path A - no-KYC gift-card bridge (default for early waves):
+   - Swap claimed SOL -> USDC on Jupiter (on-chain tx).
+   - Buy a virtual prepaid Visa with USDC on Bitrefill (no KYC; ~$250-500
+     per card, few % fee). Receipt: the on-chain USDC payment + invoice.
+   - Pay Kiva at checkout with the prepaid Visa (register a ZIP if AVS asks).
+   Path B - KAST card (if volume outgrows gift-card limits):
+   - 2-min KYC once, instant virtual Visa, loads USDC 1:1 over Solana.
+   - Publish the card's Solana deposit address as the "Impact Card" so every
+     top-up is publicly visible; keep the card balance lean (top up per wave).
+   Path C - exchange off-ramp (Kraken/Coinbase sell, bank, card/PayPal on Kiva).
+   Never use anonymous offshore card issuers - unreliable and reputationally toxic.
    - Keep the 45/10 split here: 45 points of the fee go to loans, 10 to ops.
      (Creator's 45 never touches the vault - it is claimed by creators on-chain.)
 
