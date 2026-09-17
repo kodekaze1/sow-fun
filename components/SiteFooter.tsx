@@ -5,6 +5,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
   {
     title: "Protocol",
     links: [
+      { href: "/launch", label: "Launch a coin" },
       { href: "/tokenomics", label: "Tokenomics" },
       { href: "/treasury", label: "Impact Treasury" },
       { href: "/roadmap", label: "Roadmap" },

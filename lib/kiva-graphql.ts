@@ -1,4 +1,5 @@
 import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID } from "@/lib/constants";
+import type { FundraisingLoan } from "@/lib/launchpad";
 
 const GRAPHQL_URL = "https://api.kivaws.org/graphql";
 
@@ -26,6 +27,47 @@ type LenderLoansData = {
     } | null;
   };
 };
+
+type FundraisingSearchData = {
+  lend: {
+    loans: {
+      totalCount: number;
+      values: {
+        id: number;
+        name: string;
+        loanAmount: string;
+        use?: string | null;
+        image?: { url?: string } | null;
+        activity?: { name?: string } | null;
+        sector?: { name?: string } | null;
+        geocode?: { country?: { name?: string } } | null;
+        borrowerCount?: number | null;
+        loanFundraisingInfo?: { fundedAmount?: string } | null;
+      }[];
+    };
+  };
+};
+
+// Live fundraising borrowers for the launchpad picker.
+export async function searchFundraisingLoans(query?: string, limit = 12): Promise<FundraisingLoan[]> {
+  const q = query ? `,queryString:${JSON.stringify(query)}` : "";
+  const data = await kivaGQL<FundraisingSearchData>(
+    `{lend{loans(filters:{status:fundraising}${q},limit:${limit},sortBy:popularity){totalCount values{id name loanAmount use image{url(customSize:"w480h360")} activity{name} sector{name} geocode{country{name}} borrowerCount loanFundraisingInfo{fundedAmount}}}}}`,
+    300
+  );
+  return (data.lend.loans.values ?? []).map((l) => ({
+    id: l.id,
+    name: l.name,
+    country: l.geocode?.country?.name ?? "Unknown",
+    activity: l.activity?.name ?? "Small Business",
+    sector: l.sector?.name ?? "Retail",
+    use: l.use ?? "to grow their business",
+    image: l.image?.url ?? null,
+    loanAmount: parseFloat(l.loanAmount) || 0,
+    fundedAmount: parseFloat(l.loanFundraisingInfo?.fundedAmount ?? "0") || 0,
+    borrowerCount: l.borrowerCount ?? 1,
+  }));
+}
 
 // Real borrower photo URLs for the treasury lender's funded loans,
 // keyed by loan id. The legacy REST API only exposes a dead CDN pattern.

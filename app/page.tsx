@@ -122,13 +122,13 @@ export default async function Home() {
               microloans for real entrepreneurs across the developing world.
             </p>
             <div className="flex flex-wrap gap-3 mb-6">
-              <a href="https://www.kiva.org/lend/3157094" target="_blank" rel="noopener noreferrer"
+              <a href="/launch"
                 className="bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
-                See the first funded loan
+                Launch a coin for a borrower
               </a>
-              <a href="/how-it-works"
+              <a href="https://www.kiva.org/lend/3157094" target="_blank" rel="noopener noreferrer"
                 className="border border-[#EDF4F1]/40 hover:border-[#EDF4F1] rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
-                How it works
+                See the first funded loan
               </a>
             </div>
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] opacity-85 mb-4">
