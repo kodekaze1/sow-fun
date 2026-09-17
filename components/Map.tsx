@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import type { Map as LeafletMap } from "leaflet";
-import { KivaLoan, SECTOR_COLORS, COUNTRY_COORDS, COUNTRY_FLAGS, getPortrait } from "@/lib/types";
+import { KivaLoan, SECTOR_COLORS, COUNTRY_COORDS, COUNTRY_FLAGS } from "@/lib/types";
 
 export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
   const mapRef = useRef<LeafletMap | null>(null);
@@ -45,18 +45,20 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
         const lng = coords[1] + (Math.random() - 0.5) * 2;
 
         const color = SECTOR_COLORS[loan.sector] ?? SECTOR_COLORS.default;
-        const flag = COUNTRY_FLAGS[loan.location.country] ?? "🌍";
-        const photo = getPortrait(loan.id);
+        const flag = COUNTRY_FLAGS[loan.location.country] ?? "";
         const pct = loan.loan_amount > 0
           ? Math.round((loan.funded_amount / loan.loan_amount) * 100)
           : 0;
+        const photoTag = loan.image_url
+          ? `<img src="${loan.image_url}" onerror="this.style.display='none'" style="width:50px;height:50px;border-radius:12px;object-fit:cover;flex-shrink:0;" alt="${loan.name}"/>`
+          : "";
 
         const popup = `
           <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;min-width:220px;font-family:inherit;">
-            <img src="${photo}" onerror="this.style.display='none'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #D9E6DF;flex-shrink:0;" alt="${loan.name}"/>
+            ${photoTag}
             <div>
               <div style="font-size:14px;font-weight:700;color:#223829;">${loan.name} ${flag}</div>
-              <div style="font-size:11px;color:#6b7280;margin-top:2px;">📍 ${loan.location.town ? loan.location.town + ", " : ""}${loan.location.country}</div>
+              <div style="font-size:11px;color:#6b7280;margin-top:2px;">${loan.location.town ? loan.location.town + ", " : ""}${loan.location.country}</div>
               <div style="font-size:12px;margin-top:6px;color:#223829;">${loan.activity} · <strong style="color:#223829;">$${loan.loan_amount}</strong></div>
               <div style="font-size:11px;color:#6b7280;margin-top:3px;">${loan.use}</div>
               <div style="margin-top:6px;height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden;">
@@ -85,10 +87,10 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
       <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur rounded-xl p-2.5 text-xs flex flex-col gap-1.5 z-[400] border border-gray-200 shadow">
         {[
           { color: "#F8CD69", label: "Uplift Funded" },
-          { color: "#22c55e", label: "Agriculture / Food" },
-          { color: "#8b5cf6", label: "Retail" },
-          { color: "#3b82f6", label: "Education" },
-          { color: "#f59e0b", label: "Clean Energy" },
+          { color: "#2AA967", label: "Agriculture / Food" },
+          { color: "#8578B8", label: "Retail" },
+          { color: "#4A7DB5", label: "Education" },
+          { color: "#D99A2B", label: "Clean Energy" },
           { color: "#276A43", label: "Other" },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5 text-gray-600 font-medium">
@@ -99,7 +101,7 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
       </div>
       {/* Counter badge */}
       <div className="absolute top-3 right-3 bg-[#276A43] text-white text-xs font-bold px-3 py-1 rounded-full z-[400] shadow">
-        🌍 {loans.length} loans on map
+        {loans.length} loans on map
       </div>
     </div>
   );

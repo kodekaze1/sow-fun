@@ -9,6 +9,7 @@ export interface KivaLoan {
   loan_amount: number;
   funded_amount: number;
   image: { id: number; template_id: number };
+  image_url?: string;
   lender_count: number;
   partner_id: number;
   posted_date: string;
@@ -23,16 +24,17 @@ export interface TreasuryData {
   lamports: number;
 }
 
+// Muted, earthy categorical palette that sits inside the Kiva-matched theme
 export const SECTOR_COLORS: Record<string, string> = {
-  Agriculture:   "#22c55e",
-  Food:          "#22c55e",
-  "Clean Energy":"#f59e0b",
-  Retail:        "#8b5cf6",
-  Education:     "#3b82f6",
-  Health:        "#ef4444",
-  Housing:       "#06b6d4",
-  Uplift:        "#fbbf24", // Gold for our funded loans
-  default:       "#2CAB6A",
+  Agriculture:   "#2AA967",
+  Food:          "#2AA967",
+  "Clean Energy":"#D99A2B",
+  Retail:        "#8578B8",
+  Education:     "#4A7DB5",
+  Health:        "#A24536",
+  Housing:       "#3E8E8F",
+  Uplift:        "#F8CD69", // Gold for our funded loans
+  default:       "#276A43",
 };
 
 export const SECTOR_TAGS: Record<string, string> = {
@@ -67,16 +69,9 @@ export const COUNTRY_COORDS: Record<string, [number, number]> = {
   Indonesia: [-0.7893, 113.9213], Vietnam: [14.0583, 108.2772],
 };
 
-// Placeholder portrait photos (randomuser.me stand-ins for Kiva API)
-const PORTRAITS_W = [10,12,20,33,37,44,47,53,57,60,63,65,68,71,75,78,82,89,90,91];
-const PORTRAITS_M = [10,14,18,22,25,32,38,43,45,49,51,54,56,60,63,68,72,76,80,85];
-
-export function getPortrait(loanId: number): string {
-  const isFemale = loanId % 3 !== 0;
-  if (isFemale) {
-    return `https://randomuser.me/api/portraits/women/${PORTRAITS_W[loanId % PORTRAITS_W.length]}.jpg`;
-  }
-  return `https://randomuser.me/api/portraits/men/${PORTRAITS_M[loanId % PORTRAITS_M.length]}.jpg`;
+// Initials avatar for loans whose real Kiva photo is unavailable — never fake faces
+export function getAvatarFallback(name: string, color: string): string {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${color.replace("#", "")}&color=fff&size=96`;
 }
 
 // Real stats — updated manually as waves are executed and verified.

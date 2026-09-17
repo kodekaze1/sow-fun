@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { MOCK_BATCHES, MOCK_STATS } from "@/lib/types";
+import Icon from "@/components/icons";
 
 interface TreasuryData {
   balance: number;
@@ -45,7 +46,7 @@ export default function TreasuryPage() {
       <div className="max-w-[900px] mx-auto px-6 py-16 flex flex-col gap-8">
 
         {/* LIVE BALANCE */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow p-8">
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-extrabold text-[#223829]">Live Balance</h2>
             <div className="flex items-center gap-2 bg-[#EDF4F1] border border-[#D9E6DF] rounded-full px-4 py-1.5 text-xs font-semibold text-[#223829]">
@@ -91,13 +92,15 @@ export default function TreasuryPage() {
         {/* STATS ROW — real-time genesis data */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { icon: "💰", value: `$${MOCK_STATS.feesCollected}`, label: "Total Deployed" },
-            { icon: "🤝", value: String(MOCK_STATS.loansFunded), label: "Loans Funded" },
-            { icon: "♻️", value: `$${MOCK_STATS.recycledCapital}`, label: "Capital Recycled" },
-            { icon: "✅", value: MOCK_STATS.repaymentRate === 0 ? "—" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate" },
+            { icon: "coins", value: `$${MOCK_STATS.feesCollected}`, label: "Total Deployed" },
+            { icon: "heart", value: String(MOCK_STATS.loansFunded), label: "Loans Funded" },
+            { icon: "refresh", value: `$${MOCK_STATS.recycledCapital}`, label: "Capital Recycled" },
+            { icon: "check", value: MOCK_STATS.repaymentRate === 0 ? "—" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate" },
           ].map(({ icon, value, label }) => (
-            <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow p-5 text-center hover:bg-[#F8F2E6] transition-colors">
-              <div className="text-3xl mb-2">{icon}</div>
+            <div key={label} className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-5 text-center hover:bg-[#F8F2E6] transition-colors">
+              <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
+                <Icon name={icon} className="w-5 h-5" />
+              </div>
               <div className="text-2xl font-black text-[#223829] leading-none mb-1">{value}</div>
               <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{label}</div>
             </div>
@@ -109,9 +112,9 @@ export default function TreasuryPage() {
         </div>
 
         {/* BATCH LEDGER */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-            <h2 className="text-lg font-extrabold">📋 Uplift Ledger</h2>
+            <h2 className="flex items-center gap-2 text-lg font-extrabold"><Icon name="ledger" className="w-5 h-5 text-[#276A43]" />Uplift Ledger</h2>
             <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{MOCK_BATCHES.length} waves</span>
           </div>
           {MOCK_BATCHES.map((batch) => (
@@ -140,23 +143,25 @@ export default function TreasuryPage() {
         </div>
 
         {/* HOW FUNDS FLOW */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow p-8">
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-8">
           <h2 className="text-xl font-extrabold text-[#223829] mb-4">How Funds Flow</h2>
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center">
             {[
-              { icon: "💱", label: "$UPLIFT Trade" },
-              { icon: "→", label: "", plain: true },
-              { icon: "🏦", label: "Impact Treasury" },
-              { icon: "→", label: "", plain: true },
-              { icon: "🌍", label: "Kiva Microloan" },
-              { icon: "→", label: "", plain: true },
-              { icon: "♻️", label: "Recycled / New Loan" },
+              { icon: "coins", label: "$UPLIFT Trade" },
+              { icon: "arrow", label: "", plain: true },
+              { icon: "vault", label: "Impact Treasury" },
+              { icon: "arrow", label: "", plain: true },
+              { icon: "globe", label: "Kiva Microloan" },
+              { icon: "arrow", label: "", plain: true },
+              { icon: "refresh", label: "Recycled / New Loan" },
             ].map(({ icon, label, plain }, i) => (
               plain ? (
-                <div key={i} className="text-2xl text-gray-300 hidden sm:block">{icon}</div>
+                <div key={i} className="text-gray-300 hidden sm:block"><Icon name="arrow" className="w-5 h-5" /></div>
               ) : (
                 <div key={i} className="flex-1 p-4 bg-[#EDF4F1] rounded-xl">
-                  <div className="text-3xl mb-2">{icon}</div>
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-white flex items-center justify-center text-[#276A43]">
+                    <Icon name={icon} className="w-5 h-5" />
+                  </div>
                   <div className="text-sm font-bold text-gray-700">{label}</div>
                 </div>
               )

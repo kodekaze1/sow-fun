@@ -7,6 +7,7 @@ import {
   KIVA_TEAM_URL,
 } from "@/lib/constants";
 import type { KivaLoan as AppKivaLoan } from "@/lib/types";
+import { getLenderLoanImages } from "@/lib/kiva-graphql";
 import { getAllWaves } from "@/lib/waves";
 
 const KIVA_API_BASE = "https://api.kivaws.org/v1";
@@ -101,6 +102,16 @@ export async function getKivaImpactStats() {
   const lender = lenderData.lenders[0] ?? null;
   const team = teamData.teams[0] ?? null;
   const lenderLoans = (lenderLoansData.loans ?? []).map(normalizeLoan);
+
+  // Attach real borrower photos from GraphQL (REST's photo CDN pattern is dead)
+  try {
+    const images = await getLenderLoanImages();
+    for (const loan of lenderLoans) {
+      if (images[loan.id]) loan.image_url = images[loan.id];
+    }
+  } catch {
+    // photos are progressive enhancement — initials avatars cover the gap
+  }
   const countries = new Set(lenderLoans.map((loan) => loan.location?.country).filter(Boolean));
   const sectors = new Set(lenderLoans.map((loan) => loan.sector).filter(Boolean));
   const productionWaves = waves.filter((wave) => wave.status !== "draft");

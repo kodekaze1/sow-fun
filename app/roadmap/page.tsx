@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icon from "@/components/icons";
 
 const PHASES = [
   {
@@ -21,7 +22,7 @@ const PHASES = [
     title: "Launch",
     status: "active",
     date: "Q2 2026",
-    color: "#f59e0b",
+    color: "#996210",
     items: [
       { done: false, text: "Fair launch on our own Meteora DBC pool" },
       { done: false, text: "First treasury funding batch (10+ loans)" },
@@ -36,7 +37,7 @@ const PHASES = [
     title: "Growth",
     status: "upcoming",
     date: "Q3 2026",
-    color: "#3b82f6",
+    color: "#5C6B62",
     items: [
       { done: false, text: "1,000 loans funded milestone" },
       { done: false, text: "Recycling mechanic live (repayments → new loans)" },
@@ -51,7 +52,7 @@ const PHASES = [
     title: "Scale",
     status: "upcoming",
     date: "Q4 2026",
-    color: "#8b5cf6",
+    color: "#5C6B62",
     items: [
       { done: false, text: "10,000 borrowers funded lifetime" },
       { done: false, text: "$1M total capital deployed" },
@@ -64,9 +65,9 @@ const PHASES = [
 ];
 
 const STATUS_LABELS: Record<string, { label: string; bg: string; text: string }> = {
-  completed: { label: "Completed", bg: "#EDF4F1", text: "#223829" },
-  active:    { label: "In Progress", bg: "#fef3c7", text: "#92400e" },
-  upcoming:  { label: "Upcoming", bg: "#eff6ff", text: "#1e40af" },
+  completed: { label: "Completed", bg: "#EDF4F1", text: "#276A43" },
+  active:    { label: "In Progress", bg: "#F8F2E6", text: "#996210" },
+  upcoming:  { label: "Upcoming", bg: "#EFF3F0", text: "#5C6B62" },
 };
 
 export default function RoadmapPage() {
@@ -109,7 +110,7 @@ export default function RoadmapPage() {
                     <span className="text-xs font-bold text-gray-500 mt-0.5">{phase.date}</span>
                   </div>
 
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow p-6 flex-1">
+                  <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 flex-1">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-xl font-extrabold text-gray-900">{phase.title}</h2>
                       <span className="text-[11px] font-bold px-3 py-1 rounded-full"
@@ -155,7 +156,9 @@ export default function RoadmapPage() {
 
         {/* NORTH STAR */}
         <div className="mt-12 bg-[#223829] rounded-2xl p-8 text-white text-center">
-          <div className="text-4xl mb-3">🌟</div>
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center text-[#F8CD69]">
+            <Icon name="sparkle" className="w-6 h-6" />
+          </div>
           <h2 className="text-2xl font-extrabold mb-2" style={{ fontFamily: "var(--font-serif)" }}>
             The North Star
           </h2>

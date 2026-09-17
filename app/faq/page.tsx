@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import Icon from "@/components/icons";
 
 const FAQS = [
   {
@@ -139,8 +140,10 @@ export default function FAQPage() {
         ))}
 
         {/* STILL HAVE QUESTIONS */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow p-8 text-center">
-          <div className="text-4xl mb-3">💬</div>
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-8 text-center">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
+            <Icon name="message" className="w-6 h-6" />
+          </div>
           <h3 className="text-xl font-extrabold text-gray-900 mb-2">Still have questions?</h3>
           <p className="text-gray-400 text-sm mb-5">Find us on X or browse the live dashboard to see the treasury and loans in action.</p>
           <div className="flex flex-wrap justify-center gap-3">
