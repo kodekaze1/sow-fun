@@ -12,6 +12,14 @@ interface TreasuryData {
 
 export default function TreasuryPage() {
   const [treasury, setTreasury] = useState<TreasuryData | null>(null);
+  const [card, setCard] = useState<{ address: string; sol: number; usdc: number; recent: { signature: string; blockTime: number | null }[] } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/impact-card")
+      .then((r) => r.json())
+      .then(setCard)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch("/api/treasury")
@@ -87,6 +95,63 @@ export default function TreasuryPage() {
             </>
           ) : (
             <div className="h-32 flex items-center justify-center text-gray-400 text-sm">Loading balance...</div>
+          )}
+        </div>
+
+        {/* IMPACT CARD */}
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white border border-[#D9E6DF] p-1 rotate-[3deg] shadow-sm">
+                <img src="/images/illustrations/heart-radiate.png" alt="" aria-hidden="true" className="w-full h-full object-contain" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-[#223829]">Impact Card</h2>
+            </div>
+            <span className="text-xs font-bold bg-[#EDF4F1] text-[#276A43] px-3 py-1 rounded-full">KAST Visa · Solana</span>
+          </div>
+
+          <p className="text-sm text-gray-500 leading-relaxed mb-5">
+            The fiat bridge: each wave, the vault&apos;s impact share is swapped to USDC and sent here -
+            publicly, on-chain - then the Visa card pays Kiva at checkout. Card top-ups below always match
+            the Kiva receipts in the wave ledger.
+          </p>
+
+          <div className="flex flex-wrap gap-8 mb-5">
+            <div>
+              <div className="text-4xl font-black text-[#223829]">${(card?.usdc ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+              <div className="text-gray-400 text-sm mt-1">USDC on card · topped up per wave</div>
+            </div>
+          </div>
+
+          <div className="bg-[#EDF4F1] rounded-xl p-4 font-mono text-sm">
+            <span className="text-gray-400 text-xs uppercase tracking-wider block mb-1 font-sans font-bold">Card deposit address</span>
+            <span className="text-[#223829] font-bold break-all">{card?.address ?? "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q"}</span>
+            <a
+              href={`https://solscan.io/account/${card?.address ?? "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q"}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mt-3 text-xs font-bold font-sans text-[#276A43] hover:text-[#223829] transition-colors"
+            >
+              Watch it on Solscan →
+            </a>
+          </div>
+
+          {card && card.recent.length > 0 ? (
+            <div className="mt-5">
+              <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2">Recent activity</div>
+              <div className="flex flex-col gap-1.5">
+                {card.recent.map((r) => (
+                  <a key={r.signature} href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noopener noreferrer"
+                    className="font-mono text-xs text-gray-500 hover:text-[#276A43] transition-colors truncate">
+                    {r.signature}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 text-xs text-gray-400">
+              No top-ups yet - the first wave&apos;s transfer will appear here the moment it lands.
+            </div>
           )}
         </div>
 
