@@ -5,7 +5,7 @@ const STATUS_STYLES: Record<string, string> = {
   funded:   "bg-green-100 text-green-800",
   repaying: "bg-blue-100 text-blue-800",
   recycled: "bg-yellow-100 text-yellow-800",
-  fundraising: "bg-emerald-50 text-emerald-700",
+  fundraising: "bg-[#EDF4F1] text-[#276A43]",
 };
 
 export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
@@ -37,7 +37,7 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
         return (
           <div
             key={loan.id}
-            className="flex items-start gap-3 px-5 py-4 hover:bg-[#fdf6ee] transition-colors cursor-pointer"
+            className="flex items-start gap-3 px-5 py-4 hover:bg-[#F8F2E6] transition-colors cursor-pointer"
           >
             <img
               src={photo}
@@ -56,7 +56,7 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
               <div className="text-xs text-gray-500 mt-0.5">
                 📍 {loan.location.town ? `${loan.location.town}, ` : ""}{loan.location.country}
               </div>
-              <p className="text-[13px] text-gray-600 mt-1.5 leading-relaxed italic border-l-2 border-[#a8dfc0] pl-2 line-clamp-2">
+              <p className="text-[13px] text-gray-600 mt-1.5 leading-relaxed italic border-l-2 border-[#D9E6DF] pl-2 line-clamp-2">
                 "{description}"
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2">
@@ -75,7 +75,7 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <div className="text-base font-extrabold text-[#1a6e43]">${loan.loan_amount}</div>
+              <div className="text-base font-extrabold text-[#223829]">${loan.loan_amount}</div>
               <div className="text-[11px] text-gray-400 mt-0.5">
                 Active Round
               </div>

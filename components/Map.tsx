@@ -52,15 +52,15 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
           : 0;
 
         const popup = `
-          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;min-width:220px;font-family:Inter,sans-serif;">
-            <img src="${photo}" onerror="this.style.display='none'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #a8dfc0;flex-shrink:0;" alt="${loan.name}"/>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;min-width:220px;font-family:inherit;">
+            <img src="${photo}" onerror="this.style.display='none'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #D9E6DF;flex-shrink:0;" alt="${loan.name}"/>
             <div>
-              <div style="font-size:14px;font-weight:700;color:#1c1c1e;">${loan.name} ${flag}</div>
+              <div style="font-size:14px;font-weight:700;color:#223829;">${loan.name} ${flag}</div>
               <div style="font-size:11px;color:#6b7280;margin-top:2px;">📍 ${loan.location.town ? loan.location.town + ", " : ""}${loan.location.country}</div>
-              <div style="font-size:12px;margin-top:6px;color:#1c1c1e;">${loan.activity} · <strong style="color:#1a6e43;">$${loan.loan_amount}</strong></div>
+              <div style="font-size:12px;margin-top:6px;color:#223829;">${loan.activity} · <strong style="color:#223829;">$${loan.loan_amount}</strong></div>
               <div style="font-size:11px;color:#6b7280;margin-top:3px;">${loan.use}</div>
               <div style="margin-top:6px;height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden;">
-                <div style="height:100%;width:${pct}%;background:#2CAB6A;border-radius:3px;"></div>
+                <div style="height:100%;width:${pct}%;background:#276A43;border-radius:3px;"></div>
               </div>
               <div style="font-size:10px;color:#6b7280;margin-top:2px;">${pct}% funded of $${loan.loan_amount}</div>
             </div>
@@ -84,12 +84,12 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
       {/* Legend */}
       <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur rounded-xl p-2.5 text-xs flex flex-col gap-1.5 z-[400] border border-gray-200 shadow">
         {[
-          { color: "#fbbf24", label: "Uplift Funded" },
+          { color: "#F8CD69", label: "Uplift Funded" },
           { color: "#22c55e", label: "Agriculture / Food" },
           { color: "#8b5cf6", label: "Retail" },
           { color: "#3b82f6", label: "Education" },
           { color: "#f59e0b", label: "Clean Energy" },
-          { color: "#2CAB6A", label: "Other" },
+          { color: "#276A43", label: "Other" },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5 text-gray-600 font-medium">
             <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
@@ -98,7 +98,7 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
         ))}
       </div>
       {/* Counter badge */}
-      <div className="absolute top-3 right-3 bg-[#2CAB6A] text-white text-xs font-bold px-3 py-1 rounded-full z-[400] shadow">
+      <div className="absolute top-3 right-3 bg-[#276A43] text-white text-xs font-bold px-3 py-1 rounded-full z-[400] shadow">
         🌍 {loans.length} loans on map
       </div>
     </div>

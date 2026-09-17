@@ -2,35 +2,17 @@ import Link from "next/link";
 
 export default function TokenomicsPage() {
   return (
-    <div className="min-h-screen bg-[#f4f9f6]">
-      {/* NAV */}
-      <nav className="bg-white/95 backdrop-blur border-b border-gray-100 sticky top-0 z-[500] shadow-sm">
-        <div className="max-w-[1100px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/uplift-logo.png" alt="$UPLIFT" className="h-10 w-10 rounded-full object-cover" />
-            <span className="text-gray-300 text-lg font-light">×</span>
-            <img src="/kiva-logo.png" alt="Kiva" className="h-7 object-contain" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/how-it-works" className="text-sm text-gray-500 hover:text-[#1a6e43] font-semibold transition-colors">How It Works</Link>
-            <Link href="/treasury" className="text-sm text-gray-500 hover:text-[#1a6e43] font-semibold transition-colors">Treasury</Link>
-            <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer"
-              className="bg-[#2CAB6A] hover:bg-[#1a6e43] text-white rounded-full px-5 py-2 text-sm font-bold transition-all">
-              Browse Loans
-            </a>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white">
 
       {/* HERO */}
       <div className="text-white py-20 px-6 text-center"
-        style={{ background: "linear-gradient(140deg,#0a2e1b 0%,#1a6e43 40%,#2CAB6A 100%)" }}>
+        style={{ background: "#223829" }}>
         <div className="max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
             $UPLIFT on Solana
           </div>
           <h1 className="text-5xl font-extrabold mb-4"
-            style={{ fontFamily: "'Playfair Display',Georgia,serif" }}>
+            style={{ fontFamily: "var(--font-serif)" }}>
             Tokenomics
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
@@ -43,16 +25,16 @@ export default function TokenomicsPage() {
 
         {/* TOKEN OVERVIEW */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow p-8">
-          <h2 className="text-2xl font-extrabold text-[#1a6e43] mb-6">Token Overview</h2>
+          <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Token Overview</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
               { label: "Ticker", value: "$UPLIFT" },
               { label: "Chain", value: "Solana" },
               { label: "Total Supply", value: "1,000,000,000" },
-              { label: "Launch", value: "pump.fun / Meteora" },
+              { label: "Launch", value: "Meteora DBC" },
             ].map(({ label, value }) => (
-              <div key={label} className="p-4 bg-[#f4f9f6] rounded-xl">
-                <div className="text-lg font-black text-[#1a6e43] leading-none mb-1">{value}</div>
+              <div key={label} className="p-4 bg-[#EDF4F1] rounded-xl">
+                <div className="text-lg font-black text-[#223829] leading-none mb-1">{value}</div>
                 <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{label}</div>
               </div>
             ))}
@@ -61,15 +43,15 @@ export default function TokenomicsPage() {
 
         {/* FEE STRUCTURE */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow p-8">
-          <h2 className="text-2xl font-extrabold text-[#1a6e43] mb-2">Fee Structure</h2>
+          <h2 className="text-2xl font-extrabold text-[#223829] mb-2">Fee Structure</h2>
           <p className="text-gray-400 text-sm mb-6">Every buy and sell of $UPLIFT carries a transaction fee, split across three buckets:</p>
           <div className="flex flex-col gap-4">
             {[
-              { pct: "70%", label: "Kiva Microloan Treasury", color: "#2CAB6A", icon: "🌍", desc: "Flows directly into the public treasury wallet to fund real borrowers on Kiva.org." },
+              { pct: "70%", label: "Kiva Microloan Treasury", color: "#276A43", icon: "🌍", desc: "Flows directly into the public treasury wallet to fund real borrowers on Kiva.org." },
               { pct: "20%", label: "Liquidity Pool", color: "#3b82f6", icon: "💧", desc: "Auto-added to the trading pool to reduce slippage and maintain healthy price discovery." },
               { pct: "10%", label: "Operations & Marketing", color: "#f59e0b", icon: "⚙️", desc: "Covers team costs, API fees, dashboard hosting, and community growth initiatives." },
             ].map(({ pct, label, color, icon, desc }) => (
-              <div key={label} className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 hover:bg-[#f4f9f6] transition-colors">
+              <div key={label} className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 hover:bg-[#EDF4F1] transition-colors">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 text-2xl"
                   style={{ background: `${color}18`, border: `2px solid ${color}33` }}>
                   {icon}
@@ -88,10 +70,10 @@ export default function TokenomicsPage() {
 
         {/* DISTRIBUTION */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow p-8">
-          <h2 className="text-2xl font-extrabold text-[#1a6e43] mb-6">Token Distribution</h2>
+          <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Token Distribution</h2>
           <div className="flex flex-col gap-3.5">
             {[
-              { label: "Public Sale / Fair Launch", pct: 80, color: "#2CAB6A" },
+              { label: "Public Sale / Fair Launch", pct: 80, color: "#276A43" },
               { label: "Liquidity Pool (locked 1 year)", pct: 10, color: "#3b82f6" },
               { label: "Team (vested 18 months)", pct: 5, color: "#f59e0b" },
               { label: "Community / Airdrop Reserve", pct: 5, color: "#8b5cf6" },
@@ -111,7 +93,7 @@ export default function TokenomicsPage() {
 
         {/* IMPACT MODEL */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow p-8">
-          <h2 className="text-2xl font-extrabold text-[#1a6e43] mb-2">The Recycling Model</h2>
+          <h2 className="text-2xl font-extrabold text-[#223829] mb-2">The Recycling Model</h2>
           <p className="text-gray-400 text-sm mb-6">Unlike charity tokens where funds disappear, $UPLIFT runs a recycling model:</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             {[
@@ -119,7 +101,7 @@ export default function TokenomicsPage() {
               { icon: "🤝", title: "Treasury → Kiva", body: "Funds are deployed as Kiva microloans to vetted entrepreneurs." },
               { icon: "♻️", title: "Repayments → New Loans", body: "When borrowers repay, capital gets reinvested — not withdrawn. One dollar, many lives." },
             ].map(({ icon, title, body }) => (
-              <div key={title} className="p-5 bg-[#f4f9f6] rounded-xl">
+              <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl">
                 <div className="text-4xl mb-3">{icon}</div>
                 <h3 className="text-base font-extrabold text-gray-900 mb-2">{title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{body}</p>
@@ -130,21 +112,12 @@ export default function TokenomicsPage() {
 
         {/* CTA */}
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 bg-[#2CAB6A] hover:bg-[#1a6e43] text-white rounded-full px-8 py-3.5 text-sm font-bold transition-all shadow-lg">
+          <Link href="/" className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-8 py-3.5 text-sm font-bold transition-all shadow-lg">
             ← Back to Dashboard
           </Link>
         </div>
       </div>
 
-      <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 text-sm">
-        <div className="flex justify-center gap-8 mb-3 flex-wrap">
-          <a href="https://www.kiva.org/team/upliftify" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Upliftify Kiva Team</a>
-
-          <Link href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Impact Treasury</Link>
-          <Link href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</Link>
-        </div>
-        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: FN7m...keAz · Built on Solana · Powered by Kiva API</div>
-      </footer>
     </div>
   );
 }

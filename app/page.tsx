@@ -2,14 +2,17 @@ import Ticker from "@/components/Ticker";
 import LoanFeed from "@/components/LoanFeed";
 import TreasuryCard from "@/components/TreasuryCard";
 import MapWrapper from "@/components/MapWrapper";
-import { KivaLoan, MOCK_STATS, MOCK_BATCHES, COUNTRY_FLAGS, getPortrait, SECTOR_TAGS, SECTOR_COLORS } from "@/lib/types";
+import { KivaLoan, MOCK_STATS, MOCK_BATCHES, SECTOR_TAGS, SECTOR_COLORS } from "@/lib/types";
 import { getKivaImpactStats } from "@/lib/kiva-stats";
 import { getAllWaves } from "@/lib/waves";
+import { KIVA_FETCH_HEADERS } from "@/lib/constants";
 
 async function getLoans(): Promise<KivaLoan[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/kiva`, { next: { revalidate: 300 } });
+    const res = await fetch(
+      "https://api.kivaws.org/v1/loans/search.json?status=fundraising&sort_by=popularity&per_page=20&country_code=PH,KE,UG,TZ,GH,ML,SN,BD,PE,BO,PK,IN",
+      { headers: KIVA_FETCH_HEADERS, next: { revalidate: 300 } }
+    );
     if (!res.ok) throw new Error("fetch failed");
     const data = await res.json();
     return (data.loans ?? []).slice(0, 20);
@@ -17,12 +20,6 @@ async function getLoans(): Promise<KivaLoan[]> {
     return getFallbackLoans();
   }
 }
-
-const HERO_PORTRAITS = [
-  "women/65", "men/32", "women/44", "men/76", "women/12",
-  "men/54", "women/89", "men/23", "women/37",
-];
-
 
 export default async function Home() {
   const [loans, kivaData, waves] = await Promise.all([
@@ -32,7 +29,6 @@ export default async function Home() {
   ]);
   const lenderStats = kivaData?.lender?.lenderStats;
   const impactLoans = kivaData?.lender?.loans ?? [];
-  const first = impactLoans[0] ?? loans[0];
 
   // Use real Kiva stats if available, otherwise fallback to MOCK_STATS
   const stats = {
@@ -79,6 +75,7 @@ export default async function Home() {
       loan_amount: loan.uplift_cents / 100,
       funded_amount: loan.uplift_cents / 100,
       image: { id: 0, template_id: 1 },
+      borrower_count: 1,
       lender_count: 1,
       partner_id: 0,
       posted_date: "",
@@ -91,65 +88,41 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
 
-      {/* NAV */}
-      <nav className="bg-white/95 backdrop-blur border-b border-gray-100 sticky top-0 z-[500] shadow-sm">
-        <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/uplift-logo.png" alt="$UPLIFT" className="h-10 w-10 rounded-full object-cover" />
-            <span className="text-gray-300 text-lg font-light">×</span>
-            <img src="/kiva-logo.png" alt="Kiva" className="h-7 object-contain" />
-            <span className="text-gray-400 text-sm italic hidden sm:block">Every trade lifts a life · upliftify.fun</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#e8f7f0] border border-[#a8dfc0] rounded-full px-4 py-1.5 text-xs font-semibold text-[#1a6e43]">
-              <div className="w-2 h-2 bg-[#2CAB6A] rounded-full animate-livepulse" />
-              Treasury: FN7m...keAz
-            </div>
-            <a href="https://www.kiva.org/lender/upliftifyfun" target="_blank" rel="noopener noreferrer"
-              className="bg-[#2CAB6A] hover:bg-[#1a6e43] text-white rounded-full px-5 py-2 text-sm font-bold transition-all hover:shadow-lg">
-              Proof of Impact
-            </a>
-
-          </div>
-        </div>
-      </nav>
-
       {/* TICKER */}
       <Ticker loans={impactLoans.length > 0 ? impactLoans : loans} />
 
       {/* HERO */}
-      <div className="text-white py-16 px-6 text-center relative overflow-hidden"
-        style={{ background: "linear-gradient(140deg,#0a2e1b 0%,#1a6e43 35%,#2CAB6A 70%,#48c98a 100%)" }}>
+      <div className="bg-[#223829] text-[#EDF4F1] py-20 px-6 text-center relative overflow-hidden">
         <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-5">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
             Powered by $UPLIFT trading fees on Solana
           </div>
-          <h1 className="text-5xl font-extrabold leading-tight mb-4"
-            style={{ fontFamily: "'Playfair Display',Georgia,serif", textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}>
-            Every Trade.<br />
-            <span style={{ background: "linear-gradient(135deg,#fbbf24,#fde68a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Every Life.
-            </span><br />
-            Real Uplift.
+          <h1 className="text-5xl md:text-6xl font-medium leading-[1.15] tracking-tight mb-5"
+            style={{ fontFamily: "var(--font-serif)" }}>
+            Every trade,<br />
+            <span className="italic text-[#F8CD69]">a real loan</span><br />
+            for a real person.
           </h1>
-          <p className="text-base opacity-85 leading-relaxed mb-8">
+          <p className="text-base opacity-85 leading-relaxed mb-8 max-w-lg mx-auto">
             Every time someone buys or sells $UPLIFT, trading fees flow into a transparent treasury that funds
             microloans for real entrepreneurs across the developing world.
           </p>
-          <div className="flex flex-wrap justify-center gap-1.5 mb-3">
-            {HERO_PORTRAITS.map((p, i) => (
-              <div key={i} className="w-12 h-12 rounded-full border-2 border-white/50 overflow-hidden shadow-lg hover:scale-110 transition-transform cursor-pointer">
-                <img src={`https://randomuser.me/api/portraits/${p}.jpg`} alt="" className="w-full h-full object-cover" />
-              </div>
-            ))}
-            <div className="w-12 h-12 rounded-full border-2 border-white/40 bg-white/15 flex items-center justify-center text-xs font-black">soon</div>
+          <div className="flex flex-wrap justify-center gap-3 mb-6">
+            <a href="https://www.kiva.org/lend/3157094" target="_blank" rel="noopener noreferrer"
+              className="bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
+              See the first funded loan
+            </a>
+            <a href="/how-it-works"
+              className="border border-[#EDF4F1]/40 hover:border-[#EDF4F1] rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
+              How it works
+            </a>
           </div>
-          <p className="text-sm opacity-75">Wave #001 is live — Ailyn in the Philippines is already funded</p>
+          <p className="text-sm opacity-70">Wave #001 is live — Ailyn in the Philippines is already funded</p>
         </div>
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-5 bg-white border-b-2 border-[#e8f7f0] shadow-md">
+      <div className="grid grid-cols-5 bg-white border-b-2 border-[#EDF4F1] shadow-md">
         {[
           { icon: "💰", value: `$${stats.feesCollected.toLocaleString()}`, label: "Impact Deployed", delta: "founder seed" },
           { icon: "🤝", value: stats.loansFunded === 0 ? "—" : String(stats.loansFunded), label: "Loans Funded", delta: "post-wave" },
@@ -157,11 +130,11 @@ export default async function Home() {
           { icon: "✅", value: stats.repaymentRate === 0 ? "—" : `${stats.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
           { icon: "♻️", value: `$${stats.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
-          <div key={label} className="text-center py-5 px-3 border-r border-gray-100 last:border-0 hover:bg-[#fdf6ee] transition-colors">
+          <div key={label} className="text-center py-5 px-3 border-r border-gray-100 last:border-0 hover:bg-[#F8F2E6] transition-colors">
             <div className="text-3xl mb-1.5">{icon}</div>
-            <div className="text-2xl font-black text-[#1a6e43] leading-none mb-1">{value}</div>
+            <div className="text-2xl font-black text-[#223829] leading-none mb-1">{value}</div>
             <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{label}</div>
-            <div className="mt-1 text-[10px] font-bold text-[#2CAB6A] bg-[#e8f7f0] rounded-full px-2 py-0.5 inline-block">{delta}</div>
+            <div className="mt-1 text-[10px] font-bold text-[#276A43] bg-[#EDF4F1] rounded-full px-2 py-0.5 inline-block">{delta}</div>
           </div>
         ))}
       </div>
@@ -174,9 +147,9 @@ export default async function Home() {
 
           {/* MAP */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
+            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="text-sm font-bold">🌍 The Global Pulse</h2>
-              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">{allMapLoans.length} markers on map</span>
+              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{allMapLoans.length} markers on map</span>
             </div>
             <MapWrapper loans={allMapLoans} />
           </div>
@@ -184,33 +157,33 @@ export default async function Home() {
 
           {/* FEED */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
+            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="text-sm font-bold">⚡ People We&apos;re Watching</h2>
-              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full text-center">Active on Kiva</span>
+              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full text-center">Active on Kiva</span>
             </div>
             <LoanFeed loans={impactLoans} />
           </div>
 
           {/* RIPPLE LEDGER */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
+            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="text-sm font-bold">📋 Uplift Ledger</h2>
-              <a href="/treasury" className="text-xs font-bold text-[#2CAB6A] hover:underline">View all</a>
+              <a href="/treasury" className="text-xs font-bold text-[#276A43] hover:underline">View all</a>
             </div>
             {MOCK_BATCHES.map((batch) => (
-              <div key={batch.id} className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-[#fdf6ee] transition-colors cursor-pointer">
+              <div key={batch.id} className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-[#F8F2E6] transition-colors cursor-pointer">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-sm font-extrabold">Wave #{batch.id} — {batch.date}</span>
-                  <span className="text-sm font-extrabold text-[#2CAB6A]">${batch.amount} deployed</span>
+                  <span className="text-sm font-extrabold text-[#276A43]">${batch.amount} deployed</span>
                 </div>
                 <div className="text-xs text-gray-400 mb-2">
-                  Proof: <a href={batch.txHash} target="_blank" rel="noopener noreferrer" className="font-mono bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-100 transition-colors">
+                  Proof: <a href={batch.txHash} target="_blank" rel="noopener noreferrer" className="font-mono bg-[#EDF4F1] text-[#276A43] px-1.5 py-0.5 rounded hover:bg-[#D9E6DF] transition-colors">
                     {batch.txHash.includes("kiva.org") ? "Kiva Receipt ↗" : `${batch.txHash.slice(0, 8)}...`}
                   </a>
                   {" "}{batch.loans} life touched · {stats.feesCollected === 25 ? "Founder Seed" : `$${batch.rate.toFixed(2)}/SOL`}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#e8f7f0] text-[#1a6e43]">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDF4F1] text-[#223829]">
                     🇵🇭 Ailyn $25
                   </span>
                 </div>
@@ -225,7 +198,7 @@ export default async function Home() {
 
           {/* TREASURY */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
+            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="text-sm font-bold">🏦 Impact Treasury</h2>
               <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
             </div>
@@ -234,9 +207,9 @@ export default async function Home() {
 
           {/* RECYCLING */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
+            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="text-sm font-bold">♻️ The Ripple Effect</h2>
-              <span className="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-full">post-wave</span>
+              <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="px-5 py-8 text-center text-gray-400 text-sm">
               <div className="text-3xl mb-2">⏳</div>
@@ -247,9 +220,9 @@ export default async function Home() {
 
           {/* SECTORS */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
+            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="text-sm font-bold">📊 Impact Sectors</h2>
-              <span className="text-xs font-bold bg-[#e8f7f0] text-[#1a6e43] px-3 py-1 rounded-full">post-wave</span>
+              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
               {impactSectors.length > 0 ? impactSectors.map(({ icon, label, pct, count, color }) => (
@@ -271,59 +244,8 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* X BOT */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#fdf6ee] to-white">
-              <h2 className="text-sm font-bold">X Proof-of-Lending Bot</h2>
-              <span className="text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1 rounded-full">Auto-posts on X</span>
-            </div>
-            <div className="bg-black m-4 rounded-2xl p-4 border border-[#2a2a2a]">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a6e43] to-[#2CAB6A] flex items-center justify-center text-white font-black text-sm flex-shrink-0">$U</div>
-                <div>
-                  <div className="text-sm font-bold text-white">$UPLIFT x Kiva</div>
-                  <div className="text-xs text-gray-500">@UpliftifyFun</div>
-                </div>
-              </div>
-              <div className="text-sm text-gray-200 leading-relaxed mb-3">
-                <span className="text-green-400 font-bold">Funded: </span>
-                Ailyn in 🇵🇭 Philippines<br />
-                Personal Care · <span className="text-amber-400 font-bold">$25</span><br />
-                Founder-seeded test loan, Wave #001<br />
-                <span className="text-green-400 font-bold">Genesis Wave</span> · active<br />
-                <span className="text-gray-500 text-xs">TX: founder_seeded</span>
-              </div>
-              <div className="flex gap-2 items-center">
-                <img src={getPortrait(1001)} alt=""
-                  className="w-14 h-14 rounded-lg object-cover border border-[#333] flex-shrink-0" />
-                <div className="flex-1 bg-[#1a1a1a] rounded-lg p-2.5 border border-[#2a2a2a]">
-                  <div className="text-sm font-bold text-white">
-                    Ailyn 🇵🇭
-                  </div>
-                  <div className="text-xs text-gray-400 mt-0.5">Personal Care · Wave #001</div>
-                  <div className="text-sm font-extrabold text-green-400 mt-1">$25 funded</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
-
-      {/* FOOTER */}
-      <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 mt-4 text-sm">
-        <div className="flex justify-center gap-8 mb-3 flex-wrap">
-          <a href="/tokenomics" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">$UPLIFT Token</a>
-          <a href="https://www.kiva.org/team/upliftify" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Upliftify Kiva Team</a>
-          <a href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Impact Treasury</a>
-          <a href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</a>
-          <a href="/roadmap" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Roadmap</a>
-          <a href="/faq" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">FAQ</a>
-        </div>
-        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: FN7m...keAz · Built on Solana · Powered by Kiva API</div>
-        <div className="mt-2 opacity-30 text-xs">Placeholder photos replaced by Kiva borrower images in production</div>
-      </footer>
-
 
     </div>
   );

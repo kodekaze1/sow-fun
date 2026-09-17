@@ -1,4 +1,5 @@
 import {
+  KIVA_FETCH_HEADERS,
   KIVA_LENDER_ID,
   KIVA_LENDER_URL,
   KIVA_TEAM_ID,
@@ -52,7 +53,7 @@ type KivaTeam = {
 
 async function fetchKiva<T>(path: string): Promise<T> {
   const res = await fetch(`${KIVA_API_BASE}${path}`, {
-    headers: { Accept: "application/json" },
+    headers: KIVA_FETCH_HEADERS,
     next: { revalidate: 3600 },
   });
 

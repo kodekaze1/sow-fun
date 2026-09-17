@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { KIVA_FETCH_HEADERS } from "@/lib/constants";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -7,7 +8,7 @@ export async function GET(request: Request) {
   try {
     const res = await fetch(
       `https://api.kivaws.org/v1/loans/search.json?status=fundraising&sort_by=popularity&per_page=20&page=${page}&country_code=PH,KE,UG,TZ,GH,ML,SN,BD,PE,BO,PK,IN`,
-      { next: { revalidate: 300 } }
+      { headers: KIVA_FETCH_HEADERS, next: { revalidate: 300 } }
     );
 
     if (!res.ok) throw new Error("Kiva API error");

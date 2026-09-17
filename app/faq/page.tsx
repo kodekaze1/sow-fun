@@ -12,7 +12,7 @@ const FAQS = [
       },
       {
         q: "Where can I buy $UPLIFT?",
-        a: "$UPLIFT launches on Solana via pump.fun and/or Meteora DBC. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @UpliftifyFun on X.",
+        a: "$UPLIFT launches on Solana via a Meteora Dynamic Bonding Curve (DBC) pool that we configure and control. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @UpliftifyFun on X.",
       },
       {
         q: "Is there a presale or whitelist?",
@@ -75,7 +75,7 @@ const FAQS = [
       },
       {
         q: "Is the contract audited?",
-        a: "Audit details will be published before launch. On Solana, tokens launched via pump.fun are non-upgradeable by default — the contract code is fixed at deployment and cannot be changed by anyone, including the team.",
+        a: "Audit details will be published before launch. On Solana, SPL token mints are fixed at deployment, and our Meteora DBC pool configuration (including the fee split) is immutable once created — it cannot be changed by anyone, including the team.",
       },
       {
         q: "How is this different from other charity tokens?",
@@ -88,13 +88,13 @@ const FAQS = [
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`border border-gray-100 rounded-xl overflow-hidden transition-all ${open ? "bg-[#f4f9f6]" : "bg-white hover:bg-[#fdf6ee]"}`}>
+    <div className={`border border-gray-100 rounded-xl overflow-hidden transition-all ${open ? "bg-[#EDF4F1]" : "bg-white hover:bg-[#F8F2E6]"}`}>
       <button
         className="w-full text-left px-6 py-4 flex items-center justify-between gap-4"
         onClick={() => setOpen(!open)}
       >
         <span className="font-bold text-gray-900 text-sm leading-snug">{q}</span>
-        <span className="text-xl text-[#2CAB6A] flex-shrink-0 font-light">{open ? "−" : "+"}</span>
+        <span className="text-xl text-[#276A43] flex-shrink-0 font-light">{open ? "−" : "+"}</span>
       </button>
       {open && (
         <div className="px-6 pb-5 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
@@ -107,35 +107,17 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-[#f4f9f6]">
-      {/* NAV */}
-      <nav className="bg-white/95 backdrop-blur border-b border-gray-100 sticky top-0 z-[500] shadow-sm">
-        <div className="max-w-[1100px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/uplift-logo.png" alt="$UPLIFT" className="h-10 w-10 rounded-full object-cover" />
-            <span className="text-gray-300 text-lg font-light">×</span>
-            <img src="/kiva-logo.png" alt="Kiva" className="h-7 object-contain" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/tokenomics" className="text-sm text-gray-500 hover:text-[#1a6e43] font-semibold transition-colors">Tokenomics</Link>
-            <Link href="/how-it-works" className="text-sm text-gray-500 hover:text-[#1a6e43] font-semibold transition-colors">How It Works</Link>
-            <a href="https://www.kiva.org" target="_blank" rel="noopener noreferrer"
-              className="bg-[#2CAB6A] hover:bg-[#1a6e43] text-white rounded-full px-5 py-2 text-sm font-bold transition-all">
-              Browse Loans
-            </a>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white">
 
       {/* HERO */}
       <div className="text-white py-20 px-6 text-center"
-        style={{ background: "linear-gradient(140deg,#0a2e1b 0%,#1a6e43 40%,#2CAB6A 100%)" }}>
+        style={{ background: "#223829" }}>
         <div className="max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
             Got Questions?
           </div>
           <h1 className="text-5xl font-extrabold mb-4"
-            style={{ fontFamily: "'Playfair Display',Georgia,serif" }}>
+            style={{ fontFamily: "var(--font-serif)" }}>
             FAQ
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
@@ -147,7 +129,7 @@ export default function FAQPage() {
       <div className="max-w-[800px] mx-auto px-6 py-16 flex flex-col gap-12">
         {FAQS.map(({ category, items }) => (
           <div key={category}>
-            <h2 className="text-xs font-black uppercase tracking-widest text-[#2CAB6A] mb-4">{category}</h2>
+            <h2 className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-4">{category}</h2>
             <div className="flex flex-col gap-2">
               {items.map((item) => (
                 <FAQItem key={item.q} q={item.q} a={item.a} />
@@ -167,29 +149,19 @@ export default function FAQPage() {
               @UpliftifyFun on X
             </a>
             <Link href="/"
-              className="bg-[#2CAB6A] text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-[#1a6e43] transition-all">
+              className="bg-[#276A43] text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-[#223829] transition-all">
               View Dashboard
             </Link>
           </div>
         </div>
 
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-[#2CAB6A] hover:text-[#1a6e43] text-sm font-bold transition-colors">
+          <Link href="/" className="inline-flex items-center gap-2 text-[#276A43] hover:text-[#223829] text-sm font-bold transition-colors">
             ← Back to Dashboard
           </Link>
         </div>
       </div>
 
-      <footer className="bg-[#0a2e1b] text-white/50 text-center py-8 px-6 text-sm">
-        <div className="flex justify-center gap-8 mb-3 flex-wrap">
-          <Link href="/tokenomics" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">$UPLIFT Token</Link>
-          <a href="https://www.kiva.org/team/upliftify" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Upliftify Kiva Team</a>
-
-          <Link href="/treasury" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">Impact Treasury</Link>
-          <Link href="/how-it-works" className="text-emerald-300 font-semibold hover:text-emerald-200 transition-colors">How It Works</Link>
-        </div>
-        <div className="font-mono text-xs opacity-70">upliftify.fun · Treasury: FN7m...keAz · Built on Solana · Powered by Kiva API</div>
-      </footer>
     </div>
   );
 }

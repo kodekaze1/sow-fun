@@ -1,23 +1,42 @@
 @import "tailwindcss";
 @import 'leaflet/dist/leaflet.css';
 
+/* Kiva-matched design tokens (sampled from kiva.org, Sept 2026)
+   forest  #223829 - primary text + dark bands (kiva --text-primary / --bg-primary-inverse)
+   action  #276A43 - buttons, links (kiva --bg-action / --text-action)
+   bright  #2AA967 - accent, progress bars (kiva heading underline)
+   mint    #EDF4F1 - section backgrounds, chips (kiva --bg-secondary)
+   cream   #F8F2E6 - warm hover (kiva --bg-caution-highlight)
+   gold    #F8CD69 - highlights (kiva --bg-caution) */
+@theme {
+  --color-forest: #223829;
+  --color-action: #276A43;
+  --color-bright: #2AA967;
+  --color-mint: #EDF4F1;
+  --color-cream: #F8F2E6;
+  --color-gold: #F8CD69;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+
 :root {
-  --green: #2CAB6A;
-  --green-dark: #1a6e43;
-  --green-light: #e8f7f0;
-  --green-mid: #a8dfc0;
+  --green: #276A43;
+  --green-dark: #223829;
+  --green-light: #EDF4F1;
+  --green-mid: #D9E6DF;
+  --kiva-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 body {
-  background: #f4f9f6;
-  color: #1c1c1e;
-  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  color: #223829;
+  font-family: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Leaflet popup */
 .leaflet-popup-content-wrapper {
   border-radius: 12px !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+  box-shadow: var(--kiva-shadow) !important;
   padding: 0 !important;
   overflow: hidden;
 }
@@ -37,4 +56,4 @@ body {
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #a8dfc0; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #D9E6DF; border-radius: 2px; }
