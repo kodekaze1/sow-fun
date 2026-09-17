@@ -144,6 +144,7 @@ export default function LaunchPage() {
           <p className="opacity-80 max-w-lg mx-auto">
             Pick a real person raising on Kiva. {CREATOR_FEE_PCT}% of trading fees are yours,{" "}
             {IMPACT_FEE_PCT}% fund their loan and future waves, {OPS_FEE_PCT}% keep the lights on. Nobody can change it after launch.
+            And every borrower your token fully funds earns you $UPLIFT rewards.
           </p>
         </div>
       </div>
@@ -281,6 +282,10 @@ export default function LaunchPage() {
                 <div className="flex justify-between"><span className="text-gray-500">Pool</span><span className="font-bold">Meteora DBC · {POOL_FEE_BPS / 100}% fee</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Fee split (immutable)</span>
                   <span className="font-bold">{CREATOR_FEE_PCT}% you · {IMPACT_FEE_PCT}% loans · {OPS_FEE_PCT}% ops</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Excess fees</span>
+                  <span className="font-bold">80% next borrower · 20% $UPLIFT</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Creator rewards</span>
+                  <span className="font-bold">$UPLIFT per life lifted</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Supply</span><span className="font-bold">1,000,000,000</span></div>
               </div>
             </div>

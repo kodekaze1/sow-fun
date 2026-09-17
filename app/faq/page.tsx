@@ -41,6 +41,10 @@ const FAQS = [
         a: "Honestly, over a fiat bridge - Kiva only accepts card or PayPal for loans, not crypto (their crypto donation page funds Kiva's operations, not borrowers). So each wave works like this: the vault's fee share is claimed on-chain (public transaction), converted to USD on an exchange (trade receipt), deposited to our Kiva lender account, and lent to borrowers with the loan links published. Every hop has a receipt in the wave ledger, so you never have to trust the middle - you can audit it.",
       },
       {
+        q: "What happens when a token raises more than its borrower needs?",
+        a: "That is the normal case - a busy token can out-earn a $500 loan in days. The excess follows one public rule: 80% goes to the next borrower (the token's creator adopts a new fundraising borrower, and the token's lives-lifted counter keeps climbing), and 20% buys $UPLIFT - half is burned, half rewards the creator for every borrower their token fully funds. If a beneficiary's loan fills or expires before a wave executes, the whole wave rolls to the next adopted borrower.",
+      },
+      {
         q: "How often are loans funded?",
         a: "When the treasury accumulates enough for a meaningful batch (typically 5-10 loans), we fund a round. Each batch is published on the dashboard with borrower names, countries, loan amounts, and an on-chain TX hash proving the spend.",
       },

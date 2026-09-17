@@ -114,6 +114,33 @@ export default function TokenomicsPage() {
           </div>
         </div>
 
+        {/* WAVE POLICY */}
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
+          <h2 className="text-2xl font-extrabold text-[#223829] mb-2">Excess Fees & Creator Rewards</h2>
+          <p className="text-gray-400 text-sm mb-6">
+            Launchpad tokens usually raise more than their borrower needs. The excess follows one public rule:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+            {[
+              { icon: "heart", title: "80% - The next borrower", body: "The token adopts a new fundraising borrower, picked by its creator. The lives-lifted counter keeps climbing, wave after wave." },
+              { icon: "refresh", title: "10% - $UPLIFT burned", body: "Half of the $UPLIFT bought back with excess fees is burned - every successful launch makes $UPLIFT scarcer." },
+              { icon: "sparkle", title: "10% - Creator rewards", body: "The other half pays the token's creator in $UPLIFT for every borrower their token fully funds. Rewards follow real loans, not volume." },
+            ].map(({ icon, title, body }) => (
+              <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-[#223829]">
+                  <Icon name={icon} className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-extrabold text-gray-900 mb-2">{title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{body}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 text-center mt-5 leading-relaxed">
+            If a beneficiary&apos;s loan fills or expires before a wave executes, the full wave rolls to the adopted next borrower.
+            Creator rewards are paid only when loans verifiably fund on Kiva.
+          </p>
+        </div>
+
         {/* CTA */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-8 py-3.5 text-sm font-bold transition-all shadow-lg">

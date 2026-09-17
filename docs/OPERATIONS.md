@@ -50,6 +50,23 @@ API integration is built.
    The site polls the public Kiva GraphQL for lender/team stats and shows each
    loan with its kiva.org link. Keep the lender profile public or this breaks.
 
+## Wave allocation policy (user-approved 2026-09-17)
+
+Per token, per wave, from the vault's impact share:
+1. Fund whatever remains of the beneficiary's Kiva loan (live remaining
+   amount from the API - other lenders shrink it).
+2. EXCESS: 80% -> the token's next adopted borrower (creator picks; same
+   category by default). 20% -> market-buy $UPLIFT: half burned (publish the
+   burn tx), half to the Creator Rewards pool.
+3. Creator rewards pay out in $UPLIFT per borrower FULLY funded by their
+   token (anti-wash: rewards track verified Kiva loans, never raw volume).
+4. If the beneficiary's loan fills or expires before the wave executes, the
+   entire wave rolls to the adopted next borrower.
+5. Repayments recycle into the same token's impact counter.
+
+KAST bridge: the card's Solana deposit address is published on /treasury as
+the Impact Card once provided. Top up per wave only - never park the vault.
+
 ## Rules
 - Never describe crypto donations to Kiva as funding loans.
 - Never skip a receipt - the entire pitch is that every hop is verifiable.
