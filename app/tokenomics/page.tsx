@@ -18,7 +18,7 @@ export default function TokenomicsPage() {
             Tokenomics
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
-            A deflationary impact token — every trade does good.
+            A deflationary impact token - every trade does good.
           </p>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function TokenomicsPage() {
             {[
               { icon: "coins", title: "Fees → Treasury", body: "Trading fees accumulate in the public Solana treasury wallet." },
               { icon: "heart", title: "Treasury → Kiva", body: "Funds are deployed as Kiva microloans to vetted entrepreneurs." },
-              { icon: "refresh", title: "Repayments → New Loans", body: "When borrowers repay, capital gets reinvested — not withdrawn. One dollar, many lives." },
+              { icon: "refresh", title: "Repayments → New Loans", body: "When borrowers repay, capital gets reinvested - not withdrawn. One dollar, many lives." },
             ].map(({ icon, title, body }) => (
               <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-[#276A43]">

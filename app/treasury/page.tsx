@@ -90,13 +90,13 @@ export default function TreasuryPage() {
           )}
         </div>
 
-        {/* STATS ROW — real-time genesis data */}
+        {/* STATS ROW - real-time genesis data */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             { icon: "coins", value: `$${MOCK_STATS.feesCollected}`, label: "Total Deployed" },
             { icon: "heart", value: String(MOCK_STATS.loansFunded), label: "Loans Funded" },
             { icon: "refresh", value: `$${MOCK_STATS.recycledCapital}`, label: "Capital Recycled" },
-            { icon: "check", value: MOCK_STATS.repaymentRate === 0 ? "—" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate" },
+            { icon: "check", value: MOCK_STATS.repaymentRate === 0 ? "-" : `${MOCK_STATS.repaymentRate}%`, label: "Repayment Rate" },
           ].map(({ icon, value, label }) => (
             <div key={label} className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-5 text-center hover:bg-[#F8F2E6] transition-colors">
               <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">
@@ -121,7 +121,7 @@ export default function TreasuryPage() {
           {MOCK_BATCHES.map((batch) => (
             <div key={batch.id} className="px-6 py-5 border-b border-gray-50 last:border-0 hover:bg-[#F8F2E6] transition-colors">
               <div className="flex justify-between items-center mb-1">
-                <span className="font-extrabold text-gray-900">Wave #{batch.id} — {batch.date}</span>
+                <span className="font-extrabold text-gray-900">Wave #{batch.id} - {batch.date}</span>
                 <span className="font-extrabold text-[#276A43]">${batch.amount} deployed</span>
               </div>
               <div className="text-xs text-gray-400 mb-2">
@@ -171,7 +171,7 @@ export default function TreasuryPage() {
           <p className="text-sm text-gray-400 text-center mt-4 leading-relaxed">
             95% of project-controlled fees and treasury inflows are allocated to Kiva funding.
             5% supports operations, reporting, and infrastructure.
-            Repayments are reinvested — not withdrawn.
+            Repayments are reinvested - not withdrawn.
           </p>
         </div>
 

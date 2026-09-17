@@ -9,7 +9,7 @@ const FAQS = [
     items: [
       {
         q: "What is $UPLIFT?",
-        a: "$UPLIFT is a Solana token where every trade does good. A portion of every buy and sell fee flows into a transparent on-chain treasury that funds Kiva microloans for real entrepreneurs in the developing world. It's not a charity token — it's a self-sustaining impact engine.",
+        a: "$UPLIFT is a Solana token where every trade does good. A portion of every buy and sell fee flows into a transparent on-chain treasury that funds Kiva microloans for real entrepreneurs in the developing world. It's not a charity token - it's a self-sustaining impact engine.",
       },
       {
         q: "Where can I buy $UPLIFT?",
@@ -17,7 +17,7 @@ const FAQS = [
       },
       {
         q: "Is there a presale or whitelist?",
-        a: "No presale. No whitelist. Fair launch only — everyone gets in at the same time, same price. This is intentional: a fair launch creates a level playing field and avoids the insider dumps that kill most tokens.",
+        a: "No presale. No whitelist. Fair launch only - everyone gets in at the same time, same price. This is intentional: a fair launch creates a level playing field and avoids the insider dumps that kill most tokens.",
       },
       {
         q: "What is the total supply?",
@@ -34,15 +34,15 @@ const FAQS = [
       },
       {
         q: "How do I know the treasury is real?",
-        a: "The treasury is a public Solana wallet address listed on this site. Every SOL deposit and spend is permanently recorded on Solana's blockchain — anyone can verify the balance and transaction history at any time using Solana Explorer. No trust required.",
+        a: "The treasury is a public Solana wallet address listed on this site. Every SOL deposit and spend is permanently recorded on Solana's blockchain - anyone can verify the balance and transaction history at any time using Solana Explorer. No trust required.",
       },
       {
         q: "How often are loans funded?",
-        a: "When the treasury accumulates enough for a meaningful batch (typically 5–10 loans), we fund a round. Each batch is published on the dashboard with borrower names, countries, loan amounts, and an on-chain TX hash proving the spend.",
+        a: "When the treasury accumulates enough for a meaningful batch (typically 5-10 loans), we fund a round. Each batch is published on the dashboard with borrower names, countries, loan amounts, and an on-chain TX hash proving the spend.",
       },
       {
         q: "Can I see which specific loans were funded?",
-        a: "Yes — the Funding Batch Ledger on the dashboard lists every loan we've funded, including the borrower's name, location, sector, amount, and the Kiva profile link. Full transparency is a core principle.",
+        a: "Yes - the Funding Batch Ledger on the dashboard lists every loan we've funded, including the borrower's name, location, sector, amount, and the Kiva profile link. Full transparency is a core principle.",
       },
     ],
   },
@@ -59,7 +59,7 @@ const FAQS = [
       },
       {
         q: "What happens when loans get repaid?",
-        a: "We use the recycling model — repaid principal gets reinvested into new loans rather than withdrawn. One dollar of trading fees can fund multiple borrowers over time as it cycles through repayments. This is how the impact compounds.",
+        a: "We use the recycling model - repaid principal gets reinvested into new loans rather than withdrawn. One dollar of trading fees can fund multiple borrowers over time as it cycles through repayments. This is how the impact compounds.",
       },
       {
         q: "What sectors do you fund?",
@@ -72,15 +72,15 @@ const FAQS = [
     items: [
       {
         q: "Is the liquidity locked?",
-        a: "Yes — 10% of the total supply goes into the liquidity pool and is locked for 1 year at launch. This prevents rug pulls and ensures trading remains stable regardless of what any single holder does.",
+        a: "Yes - 10% of the total supply goes into the liquidity pool and is locked for 1 year at launch. This prevents rug pulls and ensures trading remains stable regardless of what any single holder does.",
       },
       {
         q: "Is the contract audited?",
-        a: "Audit details will be published before launch. On Solana, SPL token mints are fixed at deployment, and our Meteora DBC pool configuration (including the fee split) is immutable once created — it cannot be changed by anyone, including the team.",
+        a: "Audit details will be published before launch. On Solana, SPL token mints are fixed at deployment, and our Meteora DBC pool configuration (including the fee split) is immutable once created - it cannot be changed by anyone, including the team.",
       },
       {
         q: "How is this different from other charity tokens?",
-        a: "Most charity tokens send fees to a wallet you have to trust. $UPLIFT uses Kiva's public API and publishes every loan funding event with an on-chain proof. The recycling model means funds don't disappear — they keep working. And Kiva is a regulated 501(c)(3) with 20 years of track record.",
+        a: "Most charity tokens send fees to a wallet you have to trust. $UPLIFT uses Kiva's public API and publishes every loan funding event with an on-chain proof. The recycling model means funds don't disappear - they keep working. And Kiva is a regulated 501(c)(3) with 20 years of track record.",
       },
     ],
   },

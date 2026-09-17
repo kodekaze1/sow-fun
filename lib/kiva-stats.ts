@@ -110,7 +110,7 @@ export async function getKivaImpactStats() {
       if (images[loan.id]) loan.image_url = images[loan.id];
     }
   } catch {
-    // photos are progressive enhancement — initials avatars cover the gap
+    // photos are progressive enhancement - initials avatars cover the gap
   }
   const countries = new Set(lenderLoans.map((loan) => loan.location?.country).filter(Boolean));
   const sectors = new Set(lenderLoans.map((loan) => loan.sector).filter(Boolean));

@@ -14,8 +14,8 @@ export default function TreasuryCard() {
       .catch(() => {});
   }, []);
 
-  const sol = data?.sol ?? "—";
-  const usd = data?.usd ?? "—";
+  const sol = data?.sol ?? "-";
+  const usd = data?.usd ?? "-";
   const wallet = data?.wallet ?? "loading…";
   const short = wallet.length > 12 ? wallet.slice(0, 4) + "…" + wallet.slice(-4) : wallet;
 

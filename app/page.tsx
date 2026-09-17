@@ -127,7 +127,7 @@ export default async function Home() {
                 How it works
               </a>
             </div>
-            <p className="text-sm opacity-70">Wave #001 is live — Ailyn in the Philippines is already funded</p>
+            <p className="text-sm opacity-70">Wave #001 is live - Ailyn in the Philippines is already funded</p>
           </div>
         </div>
       </div>
@@ -136,9 +136,9 @@ export default async function Home() {
       <div className="grid grid-cols-5 bg-[#EDF4F1] border-b border-[#D9E6DF]">
         {[
           { icon: "coins", value: `$${stats.feesCollected.toLocaleString()}`, label: "Impact Deployed", delta: "founder seed" },
-          { icon: "heart", value: stats.loansFunded === 0 ? "—" : String(stats.loansFunded), label: "Loans Funded", delta: "post-wave" },
-          { icon: "globe", value: stats.countriesReached === 0 ? "—" : String(stats.countriesReached), label: "Countries Reached", delta: "post-wave" },
-          { icon: "check", value: stats.repaymentRate === 0 ? "—" : `${stats.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
+          { icon: "heart", value: stats.loansFunded === 0 ? "-" : String(stats.loansFunded), label: "Loans Funded", delta: "post-wave" },
+          { icon: "globe", value: stats.countriesReached === 0 ? "-" : String(stats.countriesReached), label: "Countries Reached", delta: "post-wave" },
+          { icon: "check", value: stats.repaymentRate === 0 ? "-" : `${stats.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
           { icon: "refresh", value: `$${stats.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
           <div key={label} className="text-center py-6 px-3 border-r border-[#D9E6DF] last:border-0">
@@ -186,7 +186,7 @@ export default async function Home() {
             {MOCK_BATCHES.map((batch) => (
               <div key={batch.id} className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-[#F8F2E6] transition-colors cursor-pointer">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-extrabold">Wave #{batch.id} — {batch.date}</span>
+                  <span className="text-sm font-extrabold">Wave #{batch.id} - {batch.date}</span>
                   <span className="text-sm font-extrabold text-[#276A43]">${batch.amount} deployed</span>
                 </div>
                 <div className="text-xs text-gray-400 mb-2">
@@ -229,7 +229,7 @@ export default async function Home() {
                 <Icon name="hourglass" className="w-5 h-5" />
               </div>
               Repayments from active loans will appear here.<br />
-              <span className="text-xs">Kiva loans typically repay over 6–18 months.</span>
+              <span className="text-xs">Kiva loans typically repay over 6-18 months.</span>
             </div>
           </div>
 
@@ -274,11 +274,11 @@ export default async function Home() {
             <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Wave #001 · Genesis Loan</div>
             <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-[#223829] mb-4"
               style={{ fontFamily: "var(--font-serif)" }}>
-              Meet Ailyn — <span className="italic text-[#276A43]">the first life lifted.</span>
+              Meet Ailyn - <span className="italic text-[#276A43]">the first life lifted.</span>
             </h2>
             <p className="text-[#223829]/80 leading-relaxed mb-3">
               Ailyn runs a sari-sari store in Barotac Viejo, Iloilo, Philippines. Her Kiva loan helps her stock
-              toothpaste, shampoo, canned sardines, soy sauce and soap — the everyday goods her neighbors count on.
+              toothpaste, shampoo, canned sardines, soy sauce and soap - the everyday goods her neighbors count on.
             </p>
             <p className="text-sm text-[#223829]/60 leading-relaxed mb-6">
               Funded as the Upliftify genesis loan and verifiable on Kiva. Every future wave adds another story here.
@@ -304,7 +304,7 @@ export default async function Home() {
           </h2>
           <p className="opacity-80 leading-relaxed mb-8 max-w-lg mx-auto">
             Trading fees become microloans. Repayments fund the next borrower.
-            One treasury, many lives — all of it public, all of it verifiable.
+            One treasury, many lives - all of it public, all of it verifiable.
           </p>
           <a href="https://www.kiva.org/lender/upliftifyfun" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-7 py-3 text-sm font-bold transition-colors">

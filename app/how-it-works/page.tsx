@@ -7,42 +7,42 @@ const STEPS = [
     icon: "coins",
     title: "You Trade $UPLIFT",
     color: "#276A43",
-    body: "Every buy or sell of $UPLIFT on Solana generates a trading fee. A portion of every transaction flows automatically into the transparent on-chain treasury wallet — visible to anyone, any time.",
+    body: "Every buy or sell of $UPLIFT on Solana generates a trading fee. A portion of every transaction flows automatically into the transparent on-chain treasury wallet - visible to anyone, any time.",
   },
   {
     num: "02",
     icon: "vault",
     title: "Fees Accumulate in Treasury",
     color: "#276A43",
-    body: "The treasury wallet is a public Solana address. SOL from trading fees pools there until it reaches a threshold — typically enough to fund 5–10 microloans. Every deposit is verifiable on-chain.",
+    body: "The treasury wallet is a public Solana address. SOL from trading fees pools there until it reaches a threshold - typically enough to fund 5-10 microloans. Every deposit is verifiable on-chain.",
   },
   {
     num: "03",
     icon: "heart",
     title: "We Select Real Borrowers",
     color: "#276A43",
-    body: "Our team browses active Kiva campaigns from entrepreneurs in the developing world — farmers, tailors, market vendors, solar energy resellers. We prioritize high-repayment sectors and underserved regions.",
+    body: "Our team browses active Kiva campaigns from entrepreneurs in the developing world - farmers, tailors, market vendors, solar energy resellers. We prioritize high-repayment sectors and underserved regions.",
   },
   {
     num: "04",
     icon: "globe",
     title: "Loans Get Funded",
     color: "#276A43",
-    body: "We fund loans directly on Kiva.org using the treasury balance. Each funding event is posted publicly — borrower name, country, sector, amount, and the Solana TX hash proving the treasury spend.",
+    body: "We fund loans directly on Kiva.org using the treasury balance. Each funding event is posted publicly - borrower name, country, sector, amount, and the Solana TX hash proving the treasury spend.",
   },
   {
     num: "05",
     icon: "ledger",
     title: "Batch Ledger Published",
     color: "#276A43",
-    body: "Every funding round is recorded as a numbered batch on this dashboard. Batch #, date, loans funded, total deployed, SOL/USD rate, and an on-chain transaction hash — full transparency, no trust required.",
+    body: "Every funding round is recorded as a numbered batch on this dashboard. Batch #, date, loans funded, total deployed, SOL/USD rate, and an on-chain transaction hash - full transparency, no trust required.",
   },
   {
     num: "06",
     icon: "refresh",
     title: "Repayments Get Recycled",
     color: "#276A43",
-    body: "Kiva borrowers repay their loans over time. When repayments come in, we reinvest them into new loans rather than withdrawing. Your fees keep giving — one dollar lifts multiple lives over time.",
+    body: "Kiva borrowers repay their loans over time. When repayments come in, we reinvest them into new loans rather than withdrawing. Your fees keep giving - one dollar lifts multiple lives over time.",
   },
 ];
 
@@ -63,7 +63,7 @@ export default function HowItWorksPage() {
             How It Works
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
-            From your first trade to a borrower&apos;s funded dream — here&apos;s the full journey, step by step.
+            From your first trade to a borrower&apos;s funded dream - here&apos;s the full journey, step by step.
           </p>
         </div>
       </div>
@@ -97,9 +97,9 @@ export default function HowItWorksPage() {
           <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Why You Can Trust This</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
-              { icon: "lock", title: "On-Chain Treasury", body: "Every SOL deposit and spend is recorded on Solana's public ledger. Anyone can verify the wallet balance and transaction history — no middlemen." },
+              { icon: "lock", title: "On-Chain Treasury", body: "Every SOL deposit and spend is recorded on Solana's public ledger. Anyone can verify the wallet balance and transaction history - no middlemen." },
               { icon: "ledger", title: "Public Batch Ledger", body: "Each funding round is published on this dashboard with a numbered batch, borrower names, and the Solana TX hash proving the spend." },
-              { icon: "globe", title: "Kiva Verification", body: "Loans are funded through Kiva.org — a non-profit with 97%+ repayment rates and 15+ years of verified impact across 80 countries." },
+              { icon: "globe", title: "Kiva Verification", body: "Loans are funded through Kiva.org - a non-profit with 97%+ repayment rates and 15+ years of verified impact across 80 countries." },
             ].map(({ icon, title, body }) => (
               <div key={title} className="text-center p-4">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#276A43]">

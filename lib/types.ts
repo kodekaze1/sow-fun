@@ -69,12 +69,12 @@ export const COUNTRY_COORDS: Record<string, [number, number]> = {
   Indonesia: [-0.7893, 113.9213], Vietnam: [14.0583, 108.2772],
 };
 
-// Initials avatar for loans whose real Kiva photo is unavailable — never fake faces
+// Initials avatar for loans whose real Kiva photo is unavailable - never fake faces
 export function getAvatarFallback(name: string, color: string): string {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${color.replace("#", "")}&color=fff&size=96`;
 }
 
-// Real stats — updated manually as waves are executed and verified.
+// Real stats - updated manually as waves are executed and verified.
 // Last updated: 2026-04-13 (Wave #001 Genesis, 1 loan to Ailyn / Philippines)
 export const MOCK_STATS = {
   feesCollected: 25,
@@ -84,7 +84,7 @@ export const MOCK_STATS = {
   recycledCapital: 0,
 };
 
-// Wave ledger — real entries only, with verifiable Kiva links.
+// Wave ledger - real entries only, with verifiable Kiva links.
 export const MOCK_BATCHES: { id: string; date: string; amount: number; loans: number; txHash: string; rate: number }[] = [
   { id: "001", date: "Apr 13, 2026", amount: 25, loans: 1, txHash: "https://www.kiva.org/lend/3157094", rate: 0 },
 ];

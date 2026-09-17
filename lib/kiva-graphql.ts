@@ -3,7 +3,7 @@ import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID } from "@/lib/constants";
 const GRAPHQL_URL = "https://api.kivaws.org/graphql";
 
 // Kiva's GraphQL endpoint is public/no-auth but WAF-gated on User-Agent,
-// and GET queries are capped at 2500 chars — always POST.
+// and GET queries are capped at 2500 chars - always POST.
 export async function kivaGQL<T>(query: string, revalidate = 3600): Promise<T> {
   const res = await fetch(GRAPHQL_URL, {
     method: "POST",

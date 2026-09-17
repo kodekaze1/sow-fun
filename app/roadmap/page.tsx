@@ -87,7 +87,7 @@ export default function RoadmapPage() {
             Roadmap
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
-            From concept to $1M in capital deployed — here&apos;s the plan.
+            From concept to $1M in capital deployed - here&apos;s the plan.
           </p>
         </div>
       </div>
