@@ -37,6 +37,10 @@ const FAQS = [
         a: "The treasury is a public Solana wallet address listed on this site. Every SOL deposit and spend is permanently recorded on Solana's blockchain - anyone can verify the balance and transaction history at any time using Solana Explorer. No trust required.",
       },
       {
+        q: "How do crypto fees actually become Kiva loans?",
+        a: "Honestly, over a fiat bridge - Kiva only accepts card or PayPal for loans, not crypto (their crypto donation page funds Kiva's operations, not borrowers). So each wave works like this: the vault's fee share is claimed on-chain (public transaction), converted to USD on an exchange (trade receipt), deposited to our Kiva lender account, and lent to borrowers with the loan links published. Every hop has a receipt in the wave ledger, so you never have to trust the middle - you can audit it.",
+      },
+      {
         q: "How often are loans funded?",
         a: "When the treasury accumulates enough for a meaningful batch (typically 5-10 loans), we fund a round. Each batch is published on the dashboard with borrower names, countries, loan amounts, and an on-chain TX hash proving the spend.",
       },
