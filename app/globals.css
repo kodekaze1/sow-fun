@@ -16,7 +16,7 @@
   --color-cream: #F8F2E6;
   --color-gold: #F8CD69;
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-serif: var(--font-lora), ui-serif, Georgia, serif;
 }
 
 :root {

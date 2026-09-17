@@ -161,7 +161,7 @@ export default async function Home() {
           {/* MAP */}
           <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2 text-sm font-bold"><Icon name="pin" className="w-4 h-4 text-[#276A43]" />The Global Pulse</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="pin" className="w-4 h-4" /></span>The Global Pulse</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{allMapLoans.length} markers on map</span>
             </div>
             <MapWrapper loans={allMapLoans} />
@@ -171,7 +171,7 @@ export default async function Home() {
           {/* FEED */}
           <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2 text-sm font-bold"><Icon name="pulse" className="w-4 h-4 text-[#276A43]" />People We&apos;re Watching</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="pulse" className="w-4 h-4" /></span>People We&apos;re Watching</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full text-center">Active on Kiva</span>
             </div>
             <LoanFeed loans={impactLoans} />
@@ -180,7 +180,7 @@ export default async function Home() {
           {/* RIPPLE LEDGER */}
           <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2 text-sm font-bold"><Icon name="ledger" className="w-4 h-4 text-[#276A43]" />Uplift Ledger</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="ledger" className="w-4 h-4" /></span>Uplift Ledger</h2>
               <a href="/treasury" className="text-xs font-bold text-[#276A43] hover:underline">View all</a>
             </div>
             {MOCK_BATCHES.map((batch) => (
@@ -212,7 +212,7 @@ export default async function Home() {
           {/* TREASURY */}
           <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2 text-sm font-bold"><Icon name="vault" className="w-4 h-4 text-[#276A43]" />Impact Treasury</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="vault" className="w-4 h-4" /></span>Impact Treasury</h2>
               <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
             </div>
             <TreasuryCard />
@@ -221,7 +221,7 @@ export default async function Home() {
           {/* RECYCLING */}
           <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2 text-sm font-bold"><Icon name="refresh" className="w-4 h-4 text-[#276A43]" />The Ripple Effect</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="refresh" className="w-4 h-4" /></span>The Ripple Effect</h2>
               <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="px-5 py-8 text-center text-gray-400 text-sm">
@@ -236,7 +236,7 @@ export default async function Home() {
           {/* SECTORS */}
           <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2 text-sm font-bold"><Icon name="chart" className="w-4 h-4 text-[#276A43]" />Impact Sectors</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="chart" className="w-4 h-4" /></span>Impact Sectors</h2>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">post-wave</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">

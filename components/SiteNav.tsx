@@ -11,10 +11,11 @@ const LINKS = [
 
 export default function SiteNav() {
   return (
-    <nav className="bg-white/95 backdrop-blur border-b border-[#EDF4F1] sticky top-0 z-[500]">
+    <nav className="bg-white/95 backdrop-blur border-b border-[#EDF4F1] sticky top-0 z-[500] shadow-[0_2px_12px_rgba(34,56,41,0.05)]">
       <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3 flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
           <img src="/uplift-logo.png" alt="$UPLIFT" className="h-9 w-9 rounded-full object-cover" />
+          <span className="font-serif text-[19px] font-semibold text-[#223829] tracking-tight hidden sm:block">Upliftify</span>
           <span className="text-[#D9E6DF] text-lg font-light">×</span>
           <img src="/kiva-logo.png" alt="Kiva" className="h-6 object-contain" />
         </Link>

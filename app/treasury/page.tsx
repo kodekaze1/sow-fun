@@ -27,9 +27,10 @@ export default function TreasuryPage() {
     <div className="min-h-screen bg-white">
 
       {/* HERO */}
-      <div className="text-white py-20 px-6 text-center"
-        style={{ background: "#223829" }}>
-        <div className="max-w-2xl mx-auto">
+      <div className="relative overflow-hidden bg-[#223829] text-white py-20 px-6 text-center">
+        <img src="/images/fruit-man.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
+        <div className="relative max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
             On-Chain · Public · Verifiable
           </div>
@@ -114,7 +115,7 @@ export default function TreasuryPage() {
         {/* BATCH LEDGER */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-            <h2 className="flex items-center gap-2 text-lg font-extrabold"><Icon name="ledger" className="w-5 h-5 text-[#276A43]" />Uplift Ledger</h2>
+            <h2 className="flex items-center gap-2.5 text-lg font-extrabold"><span className="w-8 h-8 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#276A43]"><Icon name="ledger" className="w-5 h-5" /></span>Uplift Ledger</h2>
             <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{MOCK_BATCHES.length} waves</span>
           </div>
           {MOCK_BATCHES.map((batch) => (
