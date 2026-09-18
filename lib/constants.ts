@@ -1,4 +1,4 @@
-export const TREASURY_WALLET = "FN7mbeChbKQoVM3Wvctw7aLgVW3eSM1ZAo74b4NgkeAz";
+export const TREASURY_WALLET = "uPLiftcYwzTK8vgWSwobZb6KLus3vL4DnrB4yidY1yZ";
 
 // Kiva's WAF rejects requests without a browser-like User-Agent (403)
 export const KIVA_FETCH_HEADERS = {

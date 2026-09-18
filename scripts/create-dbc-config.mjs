@@ -30,7 +30,7 @@ const RPC = process.env.RPC ?? "https://mainnet.helius-rpc.com/?api-key=76b314db
 const KEYPAIR_PATH = process.env.KEYPAIR;
 const NATIVE_MINT = new PublicKey("So11111111111111111111111111111111111111112");
 // Treasury / impact vault - receives the partner share (55%) of all trading fees
-const TREASURY = new PublicKey("FN7mbeChbKQoVM3Wvctw7aLgVW3eSM1ZAo74b4NgkeAz");
+const TREASURY = new PublicKey("uPLiftcYwzTK8vgWSwobZb6KLus3vL4DnrB4yidY1yZ");
 
 if (!KEYPAIR_PATH) {
   console.error("Set KEYPAIR=<path to solana keypair json> (the payer; fees ~0.03 SOL)");

@@ -25,7 +25,7 @@ export default function TreasuryPage() {
     fetch("/api/treasury")
       .then((r) => r.json())
       .then(setTreasury)
-      .catch(() => setTreasury({ balance: 0, usd: 0, wallet: "FN7mbeChbKQoVM3Wvctw7aLgVW3eSM1ZAo74b4NgkeAz" }));
+      .catch(() => setTreasury({ balance: 0, usd: 0, wallet: "uPLiftcYwzTK8vgWSwobZb6KLus3vL4DnrB4yidY1yZ" }));
   }, []);
 
   const goal = 10;
