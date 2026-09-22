@@ -116,13 +116,21 @@ export default function LaunchPage() {
               className="text-[#276A43] underline">{result.signature.slice(0, 24)}...</a>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                `I just launched $${symbol} on @UpliftifyFun - ${IMPACT_FEE_PCT}% of every trade funds ${borrower.name}'s Kiva microloan. Locked at launch, verifiable forever.`
+              )}&url=${encodeURIComponent(`https://upliftify.fun/t/${result.mint}`)}`}
+              target="_blank" rel="noopener noreferrer"
+              className="bg-[#223829] hover:bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
+              Share on X
+            </a>
             <a href={`https://jup.ag/swap/SOL-${result.mint}`} target="_blank" rel="noopener noreferrer"
               className="bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
               Trade on Jupiter
             </a>
-            <a href={`https://www.kiva.org/lend/${borrower.id}`} target="_blank" rel="noopener noreferrer"
+            <a href={`/t/${result.mint}`}
               className="border border-[#D9E6DF] hover:border-[#276A43] rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
-              View {borrower.name}&apos;s loan
+              Token page
             </a>
           </div>
         </div>

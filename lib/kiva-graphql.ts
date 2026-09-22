@@ -69,6 +69,52 @@ export async function searchFundraisingLoans(query?: string, limit = 12): Promis
   }));
 }
 
+export interface KivaLoanLive {
+  id: number;
+  name: string;
+  status: string;
+  country: string;
+  use: string;
+  loanAmount: number;
+  fundedAmount: number;
+  remaining: number;
+  image: string | null;
+}
+
+// Batched live status for a set of loan ids (single GraphQL request).
+export async function getLoansById(ids: number[]): Promise<Map<number, KivaLoanLive>> {
+  const map = new Map<number, KivaLoanLive>();
+  const unique = [...new Set(ids)].filter((id) => Number.isFinite(id) && id > 0);
+  if (!unique.length) return map;
+  const query = `{lend{${unique
+    .map((id, i) => `l${i}: loan(id:${id}){id name status use loanAmount loanFundraisingInfo{fundedAmount} geocode{country{name}} image{url(customSize:"w480h360")}}`)
+    .join(" ")}}}`;
+  type Raw = {
+    id: number; name: string; status: string; use?: string | null; loanAmount: string;
+    loanFundraisingInfo?: { fundedAmount?: string } | null;
+    geocode?: { country?: { name?: string } } | null;
+    image?: { url?: string } | null;
+  };
+  const data = await kivaGQL<{ lend: Record<string, Raw | null> }>(query, 120);
+  for (const loan of Object.values(data.lend)) {
+    if (!loan) continue;
+    const loanAmount = parseFloat(loan.loanAmount) || 0;
+    const fundedAmount = parseFloat(loan.loanFundraisingInfo?.fundedAmount ?? "0") || 0;
+    map.set(loan.id, {
+      id: loan.id,
+      name: loan.name,
+      status: loan.status,
+      country: loan.geocode?.country?.name ?? "Unknown",
+      use: loan.use ?? "to grow their business",
+      loanAmount,
+      fundedAmount,
+      remaining: Math.max(0, loanAmount - fundedAmount),
+      image: loan.image?.url ?? null,
+    });
+  }
+  return map;
+}
+
 // Real borrower photo URLs for the treasury lender's funded loans,
 // keyed by loan id. The legacy REST API only exposes a dead CDN pattern.
 export async function getLenderLoanImages(): Promise<Record<number, string>> {
