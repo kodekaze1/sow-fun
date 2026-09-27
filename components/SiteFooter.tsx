@@ -38,7 +38,7 @@ export default function SiteFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <img src="/sow-logo.png" alt="$SOW" className="h-9 w-9 rounded-full object-cover" />
+              <img src="/sow-logo.png" alt="Sow" className="h-9 w-9 object-contain rounded-lg" />
               <span className="font-serif text-xl font-semibold text-[#EDF4F1] tracking-tight">sow.fun</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs">
