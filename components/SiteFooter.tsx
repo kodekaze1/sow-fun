@@ -72,7 +72,7 @@ export default function SiteFooter() {
 
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="font-mono text-xs opacity-60">
-            sow.fun · Treasury: uPLift...Y1yZ · Built on Solana
+            sow.fun · Treasury: sowS...HtD2 · Built on Solana
           </div>
           <div className="text-xs opacity-40 text-center sm:text-right">
             sow.fun is an independent community project, not affiliated with or endorsed by Kiva.
