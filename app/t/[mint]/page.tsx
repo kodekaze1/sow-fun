@@ -34,7 +34,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
   const pct = loan && loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
   const img = launch.image ?? loan?.image ?? "/sow-logo.png";
 
-  const shareText = `$${launch.symbol} on @sowdotfun - ${IMPACT_FEE_PCT}% of every trade funds ${loan?.name ?? launch.borrowerName ?? "a Kiva borrower"}'s microloan. Locked at launch, verifiable forever.`;
+  const shareText = `$${launch.symbol} on @sowfunhq - ${IMPACT_FEE_PCT}% of every trade funds ${loan?.name ?? launch.borrowerName ?? "a Kiva borrower"}'s microloan. Locked at launch, verifiable forever.`;
   const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(`${SITE_URL}/t/${launch.mint}`)}`;
 
   return (

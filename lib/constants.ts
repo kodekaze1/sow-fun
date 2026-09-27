@@ -6,7 +6,7 @@ export const KIVA_FETCH_HEADERS = {
   "User-Agent":
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
 };
-export const X_LINK = "https://x.com/sowdotfun";
+export const X_LINK = "https://x.com/sowfunhq";
 // KAST card Solana deposit address - the fiat bridge to Kiva.
 // Every wave's impact share is topped up here (publicly visible), then the
 // Visa card pays Kiva at checkout; amounts match the harvest ledger receipts.

@@ -17,7 +17,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     links: [
       { href: "/how-it-works", label: "How It Works" },
       { href: "/faq", label: "FAQ" },
-      { href: X_LINK, label: "@sowdotfun on X", external: true },
+      { href: X_LINK, label: "@sowfunhq on X", external: true },
     ],
   },
   {

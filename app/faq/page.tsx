@@ -13,7 +13,7 @@ const FAQS = [
       },
       {
         q: "Where can I buy $SOW?",
-        a: "$SOW launches on Solana via a Meteora Dynamic Bonding Curve (DBC) pool that we configure and control. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @sowdotfun on X.",
+        a: "$SOW launches on Solana via a Meteora Dynamic Bonding Curve (DBC) pool that we configure and control. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @sowfunhq on X.",
       },
       {
         q: "Is there a presale or whitelist?",
@@ -156,9 +156,9 @@ export default function FAQPage() {
           <h3 className="text-xl font-extrabold text-gray-900 mb-2">Still have questions?</h3>
           <p className="text-gray-400 text-sm mb-5">Find us on X or browse the live dashboard to see the treasury and loans in action.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://x.com/sowdotfun" target="_blank" rel="noopener noreferrer"
+            <a href="https://x.com/sowfunhq" target="_blank" rel="noopener noreferrer"
               className="bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-gray-800 transition-all">
-              @sowdotfun on X
+              @sowfunhq on X
             </a>
             <Link href="/"
               className="bg-[#276A43] text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-[#223829] transition-all">

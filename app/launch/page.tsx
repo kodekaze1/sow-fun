@@ -118,7 +118,7 @@ export default function LaunchPage() {
           <div className="flex flex-wrap justify-center gap-3">
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                `I just launched $${symbol} on @sowdotfun - ${IMPACT_FEE_PCT}% of every trade funds ${borrower.name}'s Kiva microloan. Locked at launch, verifiable forever.`
+                `I just launched $${symbol} on @sowfunhq - ${IMPACT_FEE_PCT}% of every trade funds ${borrower.name}'s Kiva microloan. Locked at launch, verifiable forever.`
               )}&url=${encodeURIComponent(`https://sow.fun/t/${result.mint}`)}`}
               target="_blank" rel="noopener noreferrer"
               className="bg-[#223829] hover:bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
