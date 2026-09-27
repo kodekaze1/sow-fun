@@ -16,7 +16,7 @@ export const CREATOR_FEE_PCT = 45;
 export const IMPACT_FEE_PCT = 45;
 export const OPS_FEE_PCT = 10;
 
-export const SITE_URL = "https://upliftify.fun";
+export const SITE_URL = "https://sow.fun";
 
 export interface FundraisingLoan {
   id: number;

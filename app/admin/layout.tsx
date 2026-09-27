@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Claims Console | Upliftify",
+  title: "Claims Console | sow.fun",
   robots: { index: false, follow: false },
 };
 

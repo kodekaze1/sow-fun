@@ -1,5 +1,5 @@
 // Fee-claim runner: sweeps the partner (impact vault) share of trading fees
-// from every pool launched from the Upliftify config into the treasury wallet.
+// from every pool launched from the sow.fun config into the treasury wallet.
 //
 // Usage:
 //   KEYPAIR=C:\path\to\treasury-keypair.json CONFIG=<config pubkey> node scripts/claim-fees.mjs
@@ -55,4 +55,4 @@ for (const f of fees) {
 }
 
 console.log(`\ntotal claimed: ${(totalClaimedLamports.toNumber() / 1e9).toFixed(6)} SOL`);
-console.log(DRY ? "(dry run - nothing claimed)" : "Record these signatures in the next wave's movements[].");
+console.log(DRY ? "(dry run - nothing claimed)" : "Record these signatures in the next harvest's movements[].");

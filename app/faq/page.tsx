@@ -8,12 +8,12 @@ const FAQS = [
     category: "The Token",
     items: [
       {
-        q: "What is $UPLIFT?",
-        a: "$UPLIFT is a Solana token where every trade does good. A portion of every buy and sell fee flows into a transparent on-chain treasury that funds Kiva microloans for real entrepreneurs in the developing world. It's not a charity token - it's a self-sustaining impact engine.",
+        q: "What is $SOW?",
+        a: "$SOW is a Solana token where every trade does good. A portion of every buy and sell fee flows into a transparent on-chain treasury that funds Kiva microloans for real entrepreneurs in the developing world. It's not a charity token - it's a self-sustaining impact engine.",
       },
       {
-        q: "Where can I buy $UPLIFT?",
-        a: "$UPLIFT launches on Solana via a Meteora Dynamic Bonding Curve (DBC) pool that we configure and control. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @UpliftifyFun on X.",
+        q: "Where can I buy $SOW?",
+        a: "$SOW launches on Solana via a Meteora Dynamic Bonding Curve (DBC) pool that we configure and control. Once live, you can trade it through any Solana DEX aggregator (Jupiter, Raydium). The contract address will be published on this site and @sowdotfun on X.",
       },
       {
         q: "Is there a presale or whitelist?",
@@ -21,7 +21,7 @@ const FAQS = [
       },
       {
         q: "What is the total supply?",
-        a: "1,000,000,000 $UPLIFT (1 billion). 80% is available via fair launch, 10% goes to the liquidity pool (locked for 1 year), 5% to the team (vested 18 months), and 5% to a community/airdrop reserve.",
+        a: "1,000,000,000 $SOW (1 billion). 80% is available via fair launch, 10% goes to the liquidity pool (locked for 1 year), 5% to the team (vested 18 months), and 5% to a community/airdrop reserve.",
       },
     ],
   },
@@ -38,11 +38,11 @@ const FAQS = [
       },
       {
         q: "How do crypto fees actually become Kiva loans?",
-        a: "Honestly, over a fiat bridge - Kiva only accepts card or PayPal for loans, not crypto (their crypto donation page funds Kiva's operations, not borrowers). So each wave works like this: the vault's fee share is claimed on-chain (public transaction), converted to USD on an exchange (trade receipt), deposited to our Kiva lender account, and lent to borrowers with the loan links published. Every hop has a receipt in the wave ledger, so you never have to trust the middle - you can audit it.",
+        a: "Honestly, over a fiat bridge - Kiva only accepts card or PayPal for loans, not crypto (their crypto donation page funds Kiva's operations, not borrowers). So each harvest works like this: the vault's fee share is claimed on-chain (public transaction), converted to USD on an exchange (trade receipt), deposited to our Kiva lender account, and lent to borrowers with the loan links published. Every hop has a receipt in the harvest ledger, so you never have to trust the middle - you can audit it.",
       },
       {
         q: "What happens when a token raises more than its borrower needs?",
-        a: "That is the normal case - a busy token can out-earn a $500 loan in days. The excess follows one public rule: 80% goes to the next borrower (the token's creator adopts a new fundraising borrower, and the token's lives-lifted counter keeps climbing), and 20% buys $UPLIFT - half is burned, half rewards the creator for every borrower their token fully funds. If a beneficiary's loan fills or expires before a wave executes, the whole wave rolls to the next adopted borrower.",
+        a: "That is the normal case - a busy token can out-earn a $500 loan in days. The excess follows one public rule: 80% goes to the next borrower (the token's creator adopts a new fundraising borrower, and the token's lives-lifted counter keeps climbing), and 20% buys $SOW - half is burned, half rewards the creator for every borrower their token fully funds. If a beneficiary's loan fills or expires before a harvest executes, the whole harvest rolls to the next adopted borrower.",
       },
       {
         q: "How often are loans funded?",
@@ -88,7 +88,7 @@ const FAQS = [
       },
       {
         q: "How is this different from other charity tokens?",
-        a: "Most charity tokens send fees to a wallet you have to trust. $UPLIFT uses Kiva's public API and publishes every loan funding event with an on-chain proof. The recycling model means funds don't disappear - they keep working. And Kiva is a regulated 501(c)(3) with 20 years of track record.",
+        a: "Most charity tokens send fees to a wallet you have to trust. $SOW uses Kiva's public API and publishes every loan funding event with an on-chain proof. The recycling model means funds don't disappear - they keep working. And Kiva is a regulated 501(c)(3) with 20 years of track record.",
       },
     ],
   },
@@ -131,7 +131,7 @@ export default function FAQPage() {
             FAQ
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
-            Everything you need to know about $UPLIFT, the treasury, and how your trades fund real lives.
+            Everything you need to know about $SOW, the treasury, and how your trades fund real lives.
           </p>
         </div>
       </div>
@@ -156,9 +156,9 @@ export default function FAQPage() {
           <h3 className="text-xl font-extrabold text-gray-900 mb-2">Still have questions?</h3>
           <p className="text-gray-400 text-sm mb-5">Find us on X or browse the live dashboard to see the treasury and loans in action.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <a href="https://x.com/UpliftifyFun" target="_blank" rel="noopener noreferrer"
+            <a href="https://x.com/sowdotfun" target="_blank" rel="noopener noreferrer"
               className="bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-gray-800 transition-all">
-              @UpliftifyFun on X
+              @sowdotfun on X
             </a>
             <Link href="/"
               className="bg-[#276A43] text-white rounded-full px-6 py-2.5 text-sm font-bold hover:bg-[#223829] transition-all">

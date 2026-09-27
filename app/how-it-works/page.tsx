@@ -5,9 +5,9 @@ const STEPS = [
   {
     num: "01",
     icon: "coins",
-    title: "You Trade $UPLIFT",
+    title: "You Trade $SOW",
     color: "#276A43",
-    body: "Every buy or sell of $UPLIFT on Solana generates a trading fee. A portion of every transaction flows automatically into the transparent on-chain treasury wallet - visible to anyone, any time.",
+    body: "Every buy or sell of $SOW on Solana generates a trading fee. A portion of every transaction flows automatically into the transparent on-chain treasury wallet - visible to anyone, any time.",
   },
   {
     num: "02",

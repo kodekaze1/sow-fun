@@ -221,7 +221,7 @@ export default function AdminPage() {
         </div>
 
         <p className="text-xs text-gray-400 mt-10 leading-relaxed">
-          Wave loop: run the claim script locally → swap to USDC → top up the Impact Card → pay Kiva
+          Harvest loop: run the claim script locally → swap to USDC → top up the Impact Card → pay Kiva
           (team attribution on) → record the wave JSON. Full runbook: docs/OPERATIONS.md.
         </p>
       </div>

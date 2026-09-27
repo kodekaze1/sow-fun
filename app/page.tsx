@@ -71,7 +71,7 @@ export default async function Home() {
     wave.loans.map(loan => ({
       id: parseInt(loan.kiva_id) || 1001,
       name: loan.borrower,
-      activity: "Uplift Funded",
+      activity: "sow.fun Funded",
       sector: "Uplift",
       use: loan.notes || "",
       location: { country: loan.location },
@@ -104,22 +104,22 @@ export default async function Home() {
         <div className="relative max-w-[1280px] mx-auto px-6 py-24 md:py-32">
           <div className="max-w-xl text-[#EDF4F1]">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
-              Powered by $UPLIFT trading fees on Solana
+              The launchpad where fees fund real loans
             </div>
             <h1 className="text-5xl md:text-6xl font-medium leading-[1.12] tracking-tight mb-6"
               style={{ fontFamily: "var(--font-serif)" }}>
-              Every trade,{" "}
+              Sow a coin,{" "}
               <span className="italic relative inline-block whitespace-nowrap">
-                a real loan
+                grow a life
                 <svg className="absolute -bottom-1.5 left-0 w-full" viewBox="0 0 200 12" preserveAspectRatio="none" fill="none" aria-hidden="true">
                   <path d="M3 9c40-6 120-8 194-3" stroke="#2AA967" strokeWidth="5" strokeLinecap="round" />
                 </svg>
-              </span>{" "}
-              for a real person.
+              </span>
+              .
             </h1>
             <p className="text-base opacity-85 leading-relaxed mb-8 max-w-md">
-              Every time someone buys or sells $UPLIFT, trading fees flow into a transparent treasury that funds
-              microloans for real entrepreneurs across the developing world.
+              Launch a token for a real borrower on Kiva. 45% of every trade funds their microloan -
+              locked at launch, receipts for every hop. You reap what you sow.
             </p>
             <div className="flex flex-wrap gap-3 mb-6">
               <a href="/launch"
@@ -136,7 +136,7 @@ export default async function Home() {
               <span className="flex items-center gap-1.5"><Icon name="vault" className="w-4 h-4 text-[#7FC79E]" />Public treasury on Solana</span>
               <span className="flex items-center gap-1.5"><Icon name="refresh" className="w-4 h-4 text-[#7FC79E]" />Repayments recycled</span>
             </div>
-            <p className="text-sm opacity-70">Wave #001 is live - Ailyn in the Philippines is already funded</p>
+            <p className="text-sm opacity-70">Harvest #001 is live - Ailyn in the Philippines is already funded</p>
           </div>
         </div>
       </div>
@@ -145,8 +145,8 @@ export default async function Home() {
       <div className="grid grid-cols-5 bg-[#EDF4F1] border-b border-[#D9E6DF]">
         {[
           { icon: "coins", value: `$${stats.feesCollected.toLocaleString()}`, label: "Impact Deployed", delta: "founder seed" },
-          { icon: "heart", value: stats.loansFunded === 0 ? "-" : String(stats.loansFunded), label: "Loans Funded", delta: "post-wave" },
-          { icon: "globe", value: stats.countriesReached === 0 ? "-" : String(stats.countriesReached), label: "Countries Reached", delta: "post-wave" },
+          { icon: "heart", value: stats.loansFunded === 0 ? "-" : String(stats.loansFunded), label: "Loans Funded", delta: "post-harvest" },
+          { icon: "globe", value: stats.countriesReached === 0 ? "-" : String(stats.countriesReached), label: "Countries Reached", delta: "post-harvest" },
           { icon: "check", value: stats.repaymentRate === 0 ? "-" : `${stats.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
           { icon: "refresh", value: `$${stats.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
@@ -209,13 +209,13 @@ export default async function Home() {
           {/* RIPPLE LEDGER */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-4 h-4" /></span>Uplift Ledger</h2>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-4 h-4" /></span>Harvest Ledger</h2>
               <a href="/treasury" className="text-xs font-bold text-[#276A43] hover:underline">View all</a>
             </div>
             {MOCK_BATCHES.map((batch) => (
               <div key={batch.id} className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-[#F8F2E6] transition-colors cursor-pointer">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-extrabold">Wave #{batch.id} - {batch.date}</span>
+                  <span className="text-sm font-extrabold">Harvest #{batch.id} - {batch.date}</span>
                   <span className="text-sm font-extrabold text-[#276A43]">${batch.amount} deployed</span>
                 </div>
                 <div className="text-xs text-gray-400 mb-2">
@@ -251,7 +251,7 @@ export default async function Home() {
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="refresh" className="w-4 h-4" /></span>The Ripple Effect</h2>
-              <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">post-wave</span>
+              <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">post-harvest</span>
             </div>
             <div className="px-5 py-8 text-center text-gray-400 text-sm">
               <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
@@ -266,14 +266,14 @@ export default async function Home() {
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="chart" className="w-4 h-4" /></span>Impact Sectors</h2>
-              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">post-wave</span>
+              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">post-harvest</span>
             </div>
             <div className="p-5 flex flex-col gap-3.5">
               {impactSectors.length > 0 ? impactSectors.map(({ label, pct, count }) => (
                 <div key={label}>
                   <div className="flex justify-between items-center mb-1.5 text-sm">
                     <span className="font-bold">{label}</span>
-                    <span className="text-xs text-gray-400">{pct}% · {count} wave{count > 1 ? 's' : ''}</span>
+                    <span className="text-xs text-gray-400">{pct}% · {count} harvest{count > 1 ? 's' : ''}</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-[#2AA967]" style={{ width: `${pct}%` }} />
@@ -298,7 +298,7 @@ export default async function Home() {
             <div className="text-xs font-black uppercase tracking-widest text-[#7FC79E] mb-2 pr-16">Kiva Lending Team</div>
             <h2 className="font-serif text-xl font-semibold mb-2">Lend alongside the treasury</h2>
             <p className="text-sm opacity-75 leading-relaxed mb-4">
-              Join the Upliftify team on Kiva - every loan you make under the team banner counts toward our shared impact.
+              Join the sow.fun team on Kiva - every loan you make under the team banner counts toward our shared impact.
             </p>
             <div className="flex items-center gap-5 text-sm mb-5">
               <div><span className="font-black">{kivaData?.team?.memberCount ?? 1}</span> <span className="opacity-60">member{(kivaData?.team?.memberCount ?? 1) === 1 ? "" : "s"}</span></div>
@@ -321,7 +321,7 @@ export default async function Home() {
             alt="Ailyn standing in front of her sari-sari store in Barotac Viejo, Philippines"
             className="rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.08)] w-full object-cover aspect-[4/3]" />
           <div>
-            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Wave #001 · Genesis Loan</div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Harvest #001 · Genesis Loan</div>
             <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-[#223829] mb-4"
               style={{ fontFamily: "var(--font-serif)" }}>
               Meet Ailyn - <span className="italic text-[#276A43]">the first life lifted.</span>
@@ -331,7 +331,7 @@ export default async function Home() {
               toothpaste, shampoo, canned sardines, soy sauce and soap - the everyday goods her neighbors count on.
             </p>
             <p className="text-sm text-[#223829]/60 leading-relaxed mb-6">
-              Funded as the Upliftify genesis loan and verifiable on Kiva. Every future wave adds another story here.
+              Funded as the sow.fun genesis loan and verifiable on Kiva. Every future harvest adds another story here.
             </p>
             <a href="https://www.kiva.org/lend/3157094" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">

@@ -7,8 +7,8 @@ import { COUNTRY_FLAGS } from "@/lib/types";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Live Launches | Upliftify",
-  description: "Every token launched on Upliftify, the borrower it funds, and the impact it has generated so far.",
+  title: "Live Launches | sow.fun",
+  description: "Every token launched on sow.fun, the borrower it funds, and the impact it has generated so far.",
 };
 
 export default async function LaunchesPage() {

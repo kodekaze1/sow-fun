@@ -48,7 +48,7 @@ export default function TreasuryCard() {
       {/* Progress */}
       <div className="mt-4">
         <div className="flex justify-between text-xs text-gray-500 font-semibold mb-1.5">
-          <span>Wave #001 Status</span>
+          <span>Harvest #001 Status</span>
           <span className="text-[#276A43] font-bold">In Progress</span>
         </div>
         <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">

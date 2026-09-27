@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Upliftify - every trade, a real loan, for a real person";
+export const alt = "sow.fun - every trade, a real loan, for a real person";
 
 export default function OGImage() {
   return new ImageResponse(
@@ -30,7 +30,7 @@ export default function OGImage() {
             }}
           />
           <div style={{ display: "flex", fontSize: 34, color: "#EDF4F1", fontWeight: 600 }}>
-            Upliftify
+            sow.fun
           </div>
           <div style={{ display: "flex", fontSize: 26, color: "#7FC79E", marginLeft: 8 }}>
             × kiva
@@ -38,26 +38,26 @@ export default function OGImage() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: 76, color: "#EDF4F1", lineHeight: 1.15 }}>
-            Every trade,
+          <div style={{ display: "flex", fontSize: 82, color: "#EDF4F1", lineHeight: 1.15 }}>
+            Sow a coin,
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", fontSize: 76, color: "#F8CD69", fontStyle: "italic", lineHeight: 1.15 }}>
-              a real loan
+            <div style={{ display: "flex", fontSize: 82, color: "#F8CD69", fontStyle: "italic", lineHeight: 1.15 }}>
+              grow a life.
             </div>
             <div
               style={{
-                width: 380,
+                width: 420,
                 height: 10,
                 borderRadius: 999,
                 backgroundColor: "#2AA967",
-                marginTop: 6,
+                marginTop: 8,
                 display: "flex",
               }}
             />
           </div>
-          <div style={{ display: "flex", fontSize: 76, color: "#EDF4F1", lineHeight: 1.15, marginTop: 10 }}>
-            for a real person.
+          <div style={{ display: "flex", fontSize: 34, color: "#A9CDB8", marginTop: 34 }}>
+            45% of every trade funds a real Kiva borrower - locked at launch.
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export default function OGImage() {
             Launch a coin for a Kiva borrower
           </div>
           <div style={{ display: "flex", fontSize: 28, color: "#EDF4F1" }}>
-            upliftify.fun
+            sow.fun
           </div>
         </div>
       </div>

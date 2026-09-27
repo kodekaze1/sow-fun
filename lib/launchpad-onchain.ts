@@ -1,5 +1,5 @@
 // Server-side reads of the launchpad's on-chain state: pools launched from
-// the Upliftify config, their token identities, and accrued fees.
+// the sow.fun config, their token identities, and accrued fees.
 
 import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";

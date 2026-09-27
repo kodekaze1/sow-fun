@@ -128,7 +128,7 @@ export async function getKivaImpactStats() {
   return {
     lender: {
       id: lender?.lender_id ?? KIVA_LENDER_ID,
-      name: lender?.name ?? "Upliftify",
+      name: lender?.name ?? "sow.fun",
       url: KIVA_LENDER_URL,
       memberSince: lender?.member_since ?? null,
       lenderStats: {
@@ -142,7 +142,7 @@ export async function getKivaImpactStats() {
     team: {
       id: team?.id ?? KIVA_TEAM_ID,
       shortname: team?.shortname ?? KIVA_TEAM_SHORTNAME,
-      name: team?.name ?? "Upliftify",
+      name: team?.name ?? "sow.fun",
       url: KIVA_TEAM_URL,
       memberCount: teamLendersData.paging?.total ?? teamLendersData.lenders?.length ?? 0,
       loanCount: team?.loan_count ?? teamLoansData.paging?.total ?? teamLoansData.loans?.length ?? 0,
@@ -165,7 +165,7 @@ export function getEmptyKivaImpactStats() {
   return {
     lender: {
       id: KIVA_LENDER_ID,
-      name: "Upliftify",
+      name: "sow.fun",
       url: KIVA_LENDER_URL,
       lenderStats: {
         loanCount: 0,
@@ -178,7 +178,7 @@ export function getEmptyKivaImpactStats() {
     team: {
       id: KIVA_TEAM_ID,
       shortname: KIVA_TEAM_SHORTNAME,
-      name: "Upliftify",
+      name: "sow.fun",
       url: KIVA_TEAM_URL,
       memberCount: 0,
       loanCount: 0,

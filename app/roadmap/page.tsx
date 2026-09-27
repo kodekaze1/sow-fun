@@ -14,7 +14,7 @@ const PHASES = [
       { done: true, text: "Public impact dashboard (map, feed, treasury)" },
       { done: true, text: "On-chain treasury wallet (Solana)" },
       { done: true, text: "Batch ledger with TX proof" },
-      { done: true, text: "Website live at upliftify.fun" },
+      { done: true, text: "Website live at sow.fun" },
     ],
   },
   {

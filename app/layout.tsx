@@ -8,9 +8,10 @@ const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
 const lora = Lora({ subsets: ["latin"], style: ["normal", "italic"], variable: "--font-lora" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://upliftify.fun"),
-  title: "$UPLIFT × Kiva - Every Trade. Every Life. Real Uplift.",
-  description: "Every $UPLIFT trade funds microloans for real entrepreneurs across the developing world. upliftify.fun",
+  metadataBase: new URL("https://sow.fun"),
+  title: "sow.fun - Launch a coin. Fund a life.",
+  description:
+    "The Solana launchpad where every token pledges 45% of trading fees to a real Kiva borrower - locked at launch, verifiable forever. Sow good, reap good.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

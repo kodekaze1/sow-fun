@@ -47,7 +47,7 @@ export default function TreasuryPage() {
             Impact Treasury
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
-            Every SOL in this wallet came from $UPLIFT trading fees. Every spend funds a real microloan.
+            Every SOL in this wallet came from $SOW trading fees. Every spend funds a real microloan.
           </p>
         </div>
       </div>
@@ -111,15 +111,15 @@ export default function TreasuryPage() {
           </div>
 
           <p className="text-sm text-gray-500 leading-relaxed mb-5">
-            The fiat bridge: each wave, the vault&apos;s impact share is swapped to USDC and sent here -
+            The fiat bridge: each harvest, the vault&apos;s impact share is swapped to USDC and sent here -
             publicly, on-chain - then the Visa card pays Kiva at checkout. Card top-ups below always match
-            the Kiva receipts in the wave ledger.
+            the Kiva receipts in the harvest ledger.
           </p>
 
           <div className="flex flex-wrap gap-8 mb-5">
             <div>
               <div className="text-4xl font-black text-[#223829]">${(card?.usdc ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-              <div className="text-gray-400 text-sm mt-1">USDC on card · topped up per wave</div>
+              <div className="text-gray-400 text-sm mt-1">USDC on card · topped up per harvest</div>
             </div>
           </div>
 
@@ -150,7 +150,7 @@ export default function TreasuryPage() {
             </div>
           ) : (
             <div className="mt-4 text-xs text-gray-400">
-              No top-ups yet - the first wave&apos;s transfer will appear here the moment it lands.
+              No top-ups yet - the first harvest&apos;s transfer will appear here the moment it lands.
             </div>
           )}
         </div>
@@ -174,19 +174,19 @@ export default function TreasuryPage() {
         </div>
 
         <div className="text-center text-xs text-gray-400 -mt-2">
-          Stats update automatically when Wave #001 is executed and verified.
+          Stats update automatically when Harvest #001 is executed and verified.
         </div>
 
         {/* BATCH LEDGER */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-            <h2 className="flex items-center gap-2.5 text-lg font-extrabold"><span className="w-8 h-8 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-5 h-5" /></span>Uplift Ledger</h2>
-            <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{MOCK_BATCHES.length} waves</span>
+            <h2 className="flex items-center gap-2.5 text-lg font-extrabold"><span className="w-8 h-8 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-5 h-5" /></span>Harvest Ledger</h2>
+            <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{MOCK_BATCHES.length} harvests</span>
           </div>
           {MOCK_BATCHES.map((batch) => (
             <div key={batch.id} className="px-6 py-5 border-b border-gray-50 last:border-0 hover:bg-[#F8F2E6] transition-colors">
               <div className="flex justify-between items-center mb-1">
-                <span className="font-extrabold text-gray-900">Wave #{batch.id} - {batch.date}</span>
+                <span className="font-extrabold text-gray-900">Harvest #{batch.id} - {batch.date}</span>
                 <span className="font-extrabold text-[#276A43]">${batch.amount} deployed</span>
               </div>
               <div className="text-xs text-gray-400 mb-2">
@@ -213,7 +213,7 @@ export default function TreasuryPage() {
           <h2 className="text-xl font-extrabold text-[#223829] mb-4">How Funds Flow</h2>
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center">
             {[
-              { icon: "coins", label: "$UPLIFT Trade" },
+              { icon: "coins", label: "$SOW Trade" },
               { icon: "arrow", label: "", plain: true },
               { icon: "vault", label: "Impact Treasury" },
               { icon: "arrow", label: "", plain: true },

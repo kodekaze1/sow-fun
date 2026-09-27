@@ -12,10 +12,10 @@ export const revalidate = 60;
 export async function generateMetadata({ params }: { params: Promise<{ mint: string }> }): Promise<Metadata> {
   const { mint } = await params;
   const launch = await getLaunchByMint(mint).catch(() => null);
-  if (!launch) return { title: "Token not found | Upliftify" };
+  if (!launch) return { title: "Token not found | sow.fun" };
   const who = launch.borrowerName ? ` for ${launch.borrowerName}` : "";
   return {
-    title: `${launch.name} ($${launch.symbol}) | Upliftify`,
+    title: `${launch.name} ($${launch.symbol}) | sow.fun`,
     description: `${IMPACT_FEE_PCT}% of every $${launch.symbol} trade funds${who ? ` ${launch.borrowerName}'s` : " a"} Kiva loan - locked at launch, verifiable forever.`,
     openGraph: launch.image ? { images: [{ url: launch.image }] } : undefined,
   };
@@ -32,9 +32,9 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
   ]);
   const loan = launch.loanId ? loans.get(launch.loanId) : undefined;
   const pct = loan && loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
-  const img = launch.image ?? loan?.image ?? "/uplift-logo.png";
+  const img = launch.image ?? loan?.image ?? "/sow-logo.png";
 
-  const shareText = `$${launch.symbol} on @UpliftifyFun - ${IMPACT_FEE_PCT}% of every trade funds ${loan?.name ?? launch.borrowerName ?? "a Kiva borrower"}'s microloan. Locked at launch, verifiable forever.`;
+  const shareText = `$${launch.symbol} on @sowdotfun - ${IMPACT_FEE_PCT}% of every trade funds ${loan?.name ?? launch.borrowerName ?? "a Kiva borrower"}'s microloan. Locked at launch, verifiable forever.`;
   const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(`${SITE_URL}/t/${launch.mint}`)}`;
 
   return (
@@ -122,7 +122,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                 <span className="font-black text-[#276A43]">≈ ${(launch.impactShareSol * solPrice).toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Awaiting next wave</span>
+                <span className="text-gray-500">Awaiting next harvest</span>
                 <span className="font-black">{launch.pendingVaultSol.toFixed(4)} SOL</span>
               </div>
               <div className="flex justify-between">
@@ -134,7 +134,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
               <Icon name="lock" className="w-4 h-4 flex-shrink-0 text-[#223829] mt-0.5" />
               <span>
                 The split is enforced by the pool config on-chain. Excess beyond the loan: 80% adopts the
-                next borrower, 20% buys $UPLIFT (half burned, half rewards the creator).
+                next borrower, 20% buys $SOW (half burned, half rewards the creator).
               </span>
             </div>
           </div>

@@ -17,7 +17,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     links: [
       { href: "/how-it-works", label: "How It Works" },
       { href: "/faq", label: "FAQ" },
-      { href: X_LINK, label: "@UpliftifyFun on X", external: true },
+      { href: X_LINK, label: "@sowdotfun on X", external: true },
     ],
   },
   {
@@ -38,8 +38,8 @@ export default function SiteFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <img src="/uplift-logo.png" alt="$UPLIFT" className="h-9 w-9 rounded-full object-cover" />
-              <span className="font-serif text-xl font-semibold text-[#EDF4F1] tracking-tight">Upliftify</span>
+              <img src="/sow-logo.png" alt="$SOW" className="h-9 w-9 rounded-full object-cover" />
+              <span className="font-serif text-xl font-semibold text-[#EDF4F1] tracking-tight">sow.fun</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs">
               Trading fees become microloans for real entrepreneurs. Repayments fund the next borrower.
@@ -72,10 +72,10 @@ export default function SiteFooter() {
 
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="font-mono text-xs opacity-60">
-            upliftify.fun · Treasury: uPLift...Y1yZ · Built on Solana
+            sow.fun · Treasury: uPLift...Y1yZ · Built on Solana
           </div>
           <div className="text-xs opacity-40 text-center sm:text-right">
-            Upliftify is an independent community project, not affiliated with or endorsed by Kiva.
+            sow.fun is an independent community project, not affiliated with or endorsed by Kiva.
           </div>
         </div>
       </div>

@@ -86,7 +86,7 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
       {/* Legend */}
       <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur rounded-xl p-2.5 text-xs flex flex-col gap-1.5 z-[400] border border-gray-200 shadow">
         {[
-          { color: "#F8CD69", label: "Uplift Funded" },
+          { color: "#F8CD69", label: "sow.fun Funded" },
           { color: "#2AA967", label: "Agriculture / Food" },
           { color: "#8578B8", label: "Retail" },
           { color: "#4A7DB5", label: "Education" },

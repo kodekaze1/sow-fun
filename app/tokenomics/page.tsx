@@ -11,7 +11,7 @@ export default function TokenomicsPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
         <div className="relative max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
-            $UPLIFT on Solana
+            $SOW on Solana
           </div>
           <h1 className="text-5xl font-extrabold mb-4"
             style={{ fontFamily: "var(--font-serif)" }}>
@@ -30,7 +30,7 @@ export default function TokenomicsPage() {
           <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Token Overview</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { label: "Ticker", value: "$UPLIFT" },
+              { label: "Ticker", value: "$SOW" },
               { label: "Chain", value: "Solana" },
               { label: "Total Supply", value: "1,000,000,000" },
               { label: "Launch", value: "Meteora DBC" },
@@ -46,7 +46,7 @@ export default function TokenomicsPage() {
         {/* FEE STRUCTURE */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">Fee Structure</h2>
-          <p className="text-gray-400 text-sm mb-6">Every buy and sell of $UPLIFT carries a transaction fee, split across three buckets:</p>
+          <p className="text-gray-400 text-sm mb-6">Every buy and sell of $SOW carries a transaction fee, split across three buckets:</p>
           <div className="flex flex-col gap-4">
             {[
               { pct: "70%", label: "Kiva Microloan Treasury", color: "#276A43", icon: "globe", desc: "Flows directly into the public treasury wallet to fund real borrowers on Kiva.org." },
@@ -96,7 +96,7 @@ export default function TokenomicsPage() {
         {/* IMPACT MODEL */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">The Recycling Model</h2>
-          <p className="text-gray-400 text-sm mb-6">Unlike charity tokens where funds disappear, $UPLIFT runs a recycling model:</p>
+          <p className="text-gray-400 text-sm mb-6">Unlike charity tokens where funds disappear, $SOW runs a recycling model:</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             {[
               { icon: "coins", title: "Fees → Treasury", body: "Trading fees accumulate in the public Solana treasury wallet." },
@@ -122,9 +122,9 @@ export default function TokenomicsPage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             {[
-              { icon: "heart", title: "80% - The next borrower", body: "The token adopts a new fundraising borrower, picked by its creator. The lives-lifted counter keeps climbing, wave after wave." },
-              { icon: "refresh", title: "10% - $UPLIFT burned", body: "Half of the $UPLIFT bought back with excess fees is burned - every successful launch makes $UPLIFT scarcer." },
-              { icon: "sparkle", title: "10% - Creator rewards", body: "The other half pays the token's creator in $UPLIFT for every borrower their token fully funds. Rewards follow real loans, not volume." },
+              { icon: "heart", title: "80% - The next borrower", body: "The token adopts a new fundraising borrower, picked by its creator. The lives-lifted counter keeps climbing, harvest after harvest." },
+              { icon: "refresh", title: "10% - $SOW burned", body: "Half of the $SOW bought back with excess fees is burned - every successful launch makes $SOW scarcer." },
+              { icon: "sparkle", title: "10% - Creator rewards", body: "The other half pays the token's creator in $SOW for every borrower their token fully funds. Rewards follow real loans, not volume." },
             ].map(({ icon, title, body }) => (
               <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-[#223829]">
@@ -136,7 +136,7 @@ export default function TokenomicsPage() {
             ))}
           </div>
           <p className="text-xs text-gray-400 text-center mt-5 leading-relaxed">
-            If a beneficiary&apos;s loan fills or expires before a wave executes, the full wave rolls to the adopted next borrower.
+            If a beneficiary&apos;s loan fills or expires before a harvest executes, the full harvest rolls to the adopted next borrower.
             Creator rewards are paid only when loans verifiably fund on Kiva.
           </p>
         </div>

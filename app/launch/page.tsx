@@ -118,8 +118,8 @@ export default function LaunchPage() {
           <div className="flex flex-wrap justify-center gap-3">
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                `I just launched $${symbol} on @UpliftifyFun - ${IMPACT_FEE_PCT}% of every trade funds ${borrower.name}'s Kiva microloan. Locked at launch, verifiable forever.`
-              )}&url=${encodeURIComponent(`https://upliftify.fun/t/${result.mint}`)}`}
+                `I just launched $${symbol} on @sowdotfun - ${IMPACT_FEE_PCT}% of every trade funds ${borrower.name}'s Kiva microloan. Locked at launch, verifiable forever.`
+              )}&url=${encodeURIComponent(`https://sow.fun/t/${result.mint}`)}`}
               target="_blank" rel="noopener noreferrer"
               className="bg-[#223829] hover:bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
               Share on X
@@ -151,8 +151,8 @@ export default function LaunchPage() {
           </h1>
           <p className="opacity-80 max-w-lg mx-auto">
             Pick a real person raising on Kiva. {CREATOR_FEE_PCT}% of trading fees are yours,{" "}
-            {IMPACT_FEE_PCT}% fund their loan and future waves, {OPS_FEE_PCT}% keep the lights on. Nobody can change it after launch.
-            And every borrower your token fully funds earns you $UPLIFT rewards.
+            {IMPACT_FEE_PCT}% fund their loan and future harvests, {OPS_FEE_PCT}% keep the lights on. Nobody can change it after launch.
+            And every borrower your token fully funds earns you $SOW rewards.
           </p>
         </div>
       </div>
@@ -277,7 +277,7 @@ export default function LaunchPage() {
           <div className="pb-16 max-w-lg mx-auto">
             <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 mb-6">
               <div className="flex items-center gap-4 mb-5">
-                <img src={imageUrl || borrower.image || "/uplift-logo.png"} alt=""
+                <img src={imageUrl || borrower.image || "/sow-logo.png"} alt=""
                   className="w-16 h-16 rounded-2xl object-cover" />
                 <div>
                   <div className="font-serif text-2xl font-semibold">{name}</div>
@@ -291,9 +291,9 @@ export default function LaunchPage() {
                 <div className="flex justify-between"><span className="text-gray-500">Fee split (immutable)</span>
                   <span className="font-bold">{CREATOR_FEE_PCT}% you · {IMPACT_FEE_PCT}% loans · {OPS_FEE_PCT}% ops</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Excess fees</span>
-                  <span className="font-bold">80% next borrower · 20% $UPLIFT</span></div>
+                  <span className="font-bold">80% next borrower · 20% $SOW</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Creator rewards</span>
-                  <span className="font-bold">$UPLIFT per life lifted</span></div>
+                  <span className="font-bold">$SOW per life lifted</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Supply</span><span className="font-bold">1,000,000,000</span></div>
               </div>
             </div>
@@ -302,7 +302,7 @@ export default function LaunchPage() {
               <Icon name="lock" className="w-5 h-5 flex-shrink-0 text-[#223829]" />
               <span>
                 The fee split is enforced by the pool config on-chain and cannot be changed by anyone - including us -
-                after launch. The impact share is claimed by the public Upliftify vault and deployed as Kiva loans with receipts.
+                after launch. The impact share is claimed by the public sow.fun vault and deployed as Kiva loans with receipts.
               </span>
             </div>
 

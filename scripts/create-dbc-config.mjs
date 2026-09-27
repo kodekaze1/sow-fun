@@ -1,5 +1,5 @@
-// One-time admin script: creates the immutable Upliftify DBC pool config.
-// Every launch on upliftify.fun/launch creates its pool from this config.
+// One-time admin script: creates the immutable sow.fun DBC pool config.
+// Every launch on sow.fun/launch creates its pool from this config.
 //
 // Usage (run locally, never in CI):
 //   KEYPAIR=C:\path\to\treasury-keypair.json node scripts/create-dbc-config.mjs
@@ -69,7 +69,7 @@ const curveConfig = buildCurveWithMarketCap({
     dynamicFeeEnabled: false,
     collectFeeMode: CollectFeeMode.QuoteToken,
     // Creator keeps 45% of trading fees; the remaining 55% accrues to the
-    // feeClaimer (Upliftify vault) and is deployed 45 loans / 10 ops.
+    // feeClaimer (sow.fun vault) and is deployed 45 loans / 10 ops.
     creatorTradingFeePercentage: 45,
     poolCreationFee: 0,
     enableFirstSwapWithMinFee: false,
