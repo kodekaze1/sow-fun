@@ -5,7 +5,7 @@
 export const DBC_CONFIG_KEY = process.env.NEXT_PUBLIC_DBC_CONFIG_KEY ?? "";
 
 export const SOLANA_RPC =
-  process.env.NEXT_PUBLIC_SOLANA_RPC ??
+  process.env.NEXT_PUBLIC_SOLANA_RPC ||
   "https://mainnet.helius-rpc.com/?api-key=76b314db-4dae-4060-b520-966021589251";
 
 // Trading-fee economics (2% flat pool fee)
