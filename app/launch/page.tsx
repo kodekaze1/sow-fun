@@ -264,7 +264,7 @@ export default function LaunchPage() {
                           <span className="font-bold text-[#223829]">
                             {loan.name} {COUNTRY_FLAGS[loan.country] ?? ""}
                           </span>
-                          <span className="text-sm font-extrabold text-[#223829]">${loan.loanAmount}</span>
+                          <span className="text-sm font-extrabold text-[#223829]">${loan.loanAmount.toLocaleString()}</span>
                         </div>
                         <div className="text-xs text-gray-500 mb-2">{loan.activity} · {loan.country}</div>
                         <p className="text-[13px] text-gray-600 leading-snug line-clamp-2 mb-3">
@@ -274,7 +274,7 @@ export default function LaunchPage() {
                           <div className="h-full bg-[#2AA967] rounded-full" style={{ width: `${pct}%` }} />
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-gray-400 mt-1">
-                          <span>{pct}% funded · ${loan.remaining.toFixed(0)} to go{days !== null ? ` · ${days}d left` : ""}</span>
+                          <span>{pct}% funded · ${loan.remaining.toLocaleString()} to go{days !== null ? ` · ${days}d left` : ""}</span>
                           {fillRisk(loan) && (
                             <span className="font-bold text-[#996210] bg-[#F8F2E6] px-2 py-0.5 rounded-full">Filling fast</span>
                           )}

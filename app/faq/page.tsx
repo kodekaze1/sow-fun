@@ -30,7 +30,7 @@ const FAQS = [
     items: [
       {
         q: "What percentage of trades goes to Kiva loans?",
-        a: "70% of every trading fee goes directly into the Kiva loan treasury. The remaining 30% is split: 20% back into the liquidity pool to keep trading healthy, and 10% for operations and marketing.",
+        a: "Every coin on sow.fun trades with a 2% pool fee, split three ways and locked at launch: 45% to the coin's pledged Kiva loan, 45% to the coin's creator (claimed directly from the pool), and 10% to operations. Nobody - including us - can change a coin's split after launch; it is enforced by the pool config on-chain.",
       },
       {
         q: "How do I know the treasury is real?",
@@ -50,11 +50,11 @@ const FAQS = [
       },
       {
         q: "How often are loans funded?",
-        a: "When the treasury accumulates enough for a meaningful batch (typically 5-10 loans), we fund a round. Each batch is published on the dashboard with borrower names, countries, loan amounts, and an on-chain TX hash proving the spend.",
+        a: "We run a harvest whenever a coin's vault share justifies one - and immediately when a coin's borrower is close to fully funded, so its own fees land before the crowd closes the loan. Each harvest is published in the ledger with per-coin claim snapshots, borrower names, amounts, and the transaction hashes proving each hop.",
       },
       {
         q: "Can I see which specific loans were funded?",
-        a: "Yes - the Funding Batch Ledger on the dashboard lists every loan we've funded, including the borrower's name, location, sector, amount, and the Kiva profile link. Full transparency is a core principle.",
+        a: "Yes - the Harvest Ledger on the dashboard lists every loan we've funded, including the borrower's name, location, sector, amount, and the Kiva loan link. Full transparency is a core principle.",
       },
     ],
   },

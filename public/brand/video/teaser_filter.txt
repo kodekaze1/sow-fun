@@ -2,7 +2,8 @@
 [1:v]trim=0:7.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v1];
 [2:v]fps=24,settb=AVTB[v2];
 [v0][v1]xfade=transition=fade:duration=0.5:offset=5.0[x1];
-[x1]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Launch a coin.':expansion=none:fontsize=58:fontcolor=0x223829:box=1:boxcolor=0xF8F2E6@0.85:boxborderw=20:x=(w-text_w)/2:y=h-200:enable='between(t,0.8,4.6)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='45% of every trade funds a real Kiva loan.':expansion=none:fontsize=52:fontcolor=0x223829:box=1:boxcolor=0xF8F2E6@0.85:boxborderw=20:x=(w-text_w)/2:y=h-200:enable='between(t,5.8,11.2)'[xt];
+[x1]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Most coins farm you.':expansion=none:fontsize=68:fontcolor=0x223829:borderw=12:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-220:enable='between(t,0.8,4.6)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='This one grows a life.':expansion=none:fontsize=68:fontcolor=0x223829:borderw=12:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-280:enable='between(t,5.8,11.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='45% of every trade, locked for a real loan.':expansion=none:fontsize=46:fontcolor=0x276A43:borderw=10:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-190:enable='between(t,6.4,11.2)'[xt];
 [xt][v2]xfade=transition=fade:duration=0.7:offset=11.8[vout];
-[3:a]atrim=0:15.3,afade=t=out:st=12.8:d=2.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]
+[3:a]atrim=0:15.8,afade=t=out:st=13.3:d=2.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]

@@ -446,8 +446,8 @@ export default async function Home() {
           className="absolute inset-0 w-full h-full object-cover opacity-45" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/70 to-[#16261c]/40" />
         <div data-reveal className="relative max-w-2xl mx-auto px-6 py-20 text-center text-[#EDF4F1]">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-white p-2 shadow-[0_6px_20px_rgba(0,0,0,0.25)] rotate-[-3deg]">
-            <img src="/images/illustrations/plant-coin.png" alt="" aria-hidden="true" className="w-full h-full object-contain" />
+          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-[#F8F2E6]/90 p-2.5 shadow-[0_6px_20px_rgba(0,0,0,0.25)] rotate-[-3deg] border border-[#F8CD69]/30">
+            <img src="/images/illustrations/plant-coin.png" alt="" aria-hidden="true" className="w-full h-full object-contain mix-blend-multiply" />
           </div>
           <h2 className="text-3xl md:text-4xl font-medium tracking-tight mb-4"
             style={{ fontFamily: "var(--font-serif)" }}>

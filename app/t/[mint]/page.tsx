@@ -84,7 +84,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
       <div className="max-w-3xl mx-auto px-6 py-12">
         {isDemo && (
           <div className="mb-8 bg-[#F8F2E6] border border-[#F8CD69]/50 rounded-2xl p-4 text-sm text-[#996210] text-center">
-            <span className="font-bold">Preview.</span> This is what a launched coin&apos;s page looks like -
+            <span className="font-bold">Preview.</span>{" "}This is what a launched coin&apos;s page looks like -
             live fees, its borrower, and the curve. <a href="/launch" className="underline font-bold">Sow a real one →</a>
           </div>
         )}
@@ -149,7 +149,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                   {loan.image && <img src={loan.image} alt={loan.name} className="w-14 h-14 rounded-xl object-cover" />}
                   <div>
                     <div className="font-bold text-[#223829]">{loan.name} {COUNTRY_FLAGS[loan.country] ?? ""}</div>
-                    <div className="text-xs text-gray-500">{loan.country} · Kiva loan #{loan.id} · {loan.status}</div>
+                    <div className="text-xs text-gray-500">{loan.country}{loan.id > 0 ? ` · Kiva loan #${loan.id}` : ""} · {loan.status}</div>
                   </div>
                 </div>
                 <p className="text-[13px] text-[#223829]/75 leading-relaxed italic mb-4">
@@ -167,9 +167,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                     className="inline-flex items-center gap-1.5 text-sm font-bold text-[#276A43] hover:underline">
                     View the loan on Kiva <Icon name="arrow" className="w-3.5 h-3.5" />
                   </a>
-                ) : (
-                  <span className="text-sm font-bold text-gray-400">Kiva loan link appears here</span>
-                )}
+                ) : null}
                 {loan.status !== "fundraising" && (
                   <div className={`mt-4 rounded-xl p-3.5 text-[12px] leading-relaxed ${
                     loan.status === "funded"

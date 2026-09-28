@@ -4,45 +4,45 @@ import Icon from "@/components/icons";
 const STEPS = [
   {
     num: "01",
-    icon: "coins",
-    title: "You Trade $SOW",
+    icon: "heart",
+    title: "Pick a Real Borrower",
     color: "#276A43",
-    body: "Every buy or sell of $SOW on Solana generates a trading fee. A portion of every transaction flows automatically into the transparent on-chain treasury wallet - visible to anyone, any time.",
+    body: "Every launch starts with a person, not a ticker. Browse live fundraising borrowers straight from Kiva - farmers, tailors, market vendors, solar resellers - filter by region and sector, and pick who your coin works for.",
   },
   {
     num: "02",
-    icon: "vault",
-    title: "Fees Accumulate in Treasury",
+    icon: "lock",
+    title: "Launch With the Split Locked",
     color: "#276A43",
-    body: "The treasury wallet is a public Solana address. SOL from trading fees pools there until it reaches a threshold - typically enough to fund 5-10 microloans. Every deposit is verifiable on-chain.",
+    body: "Your coin launches on its own Meteora bonding curve with a 2% trading fee, split 45% to you, 45% to your borrower's loan, 10% to operations. The split is enforced by the pool config on-chain - nobody, including us, can change it after launch.",
   },
   {
     num: "03",
-    icon: "heart",
-    title: "We Select Real Borrowers",
+    icon: "coins",
+    title: "Fees Flow From the First Trade",
     color: "#276A43",
-    body: "Our team browses active Kiva campaigns from entrepreneurs in the developing world - farmers, tailors, market vendors, solar energy resellers. We prioritize high-repayment sectors and underserved regions.",
+    body: "No graduation needed. From the very first swap, the loan's share of every trade accrues in the pool. Most Kiva loans are a few hundred dollars - a coin can fully fund its borrower while still early on its curve.",
   },
   {
     num: "04",
-    icon: "globe",
-    title: "Loans Get Funded",
+    icon: "vault",
+    title: "The Harvest",
     color: "#276A43",
-    body: "We fund loans directly on Kiva.org using the treasury balance. Each funding event is posted publicly - borrower name, country, sector, amount, and the Solana TX hash proving the treasury spend.",
+    body: "The public sow.fun vault claims the impact share on-chain, converts it, and pays the loan on Kiva.org. Every hop ships with a receipt: the claim transaction, the conversion, and the Kiva loan link - audit it, don't trust it.",
   },
   {
     num: "05",
     icon: "ledger",
-    title: "Batch Ledger Published",
+    title: "The Harvest Ledger",
     color: "#276A43",
-    body: "Every funding round is recorded as a numbered batch on this dashboard. Batch #, date, loans funded, total deployed, SOL/USD rate, and an on-chain transaction hash - full transparency, no trust required.",
+    body: "Every harvest is recorded publicly: which coin generated which dollars, which borrower received them, and the transaction hashes proving each step. Per-coin attribution is snapshotted at claim time - no hand-waving.",
   },
   {
     num: "06",
     icon: "refresh",
-    title: "Repayments Get Recycled",
+    title: "The Cycle Continues",
     color: "#276A43",
-    body: "Kiva borrowers repay their loans over time. When repayments come in, we reinvest them into new loans rather than withdrawing. Your fees keep giving - one dollar lifts multiple lives over time.",
+    body: "When a loan fills, excess fees follow one public rule: 80% adopts the creator's next borrower, 10% burns $SOW, 10% rewards the creator for every life their coin lifted. Repayments recycle into new loans. Sow, grow, harvest, repeat.",
   },
 ];
 
@@ -63,7 +63,7 @@ export default function HowItWorksPage() {
             How It Works
           </h1>
           <p className="text-lg opacity-80 leading-relaxed">
-            From your first trade to a borrower&apos;s funded dream - here&apos;s the full journey, step by step.
+            From launching a coin to a borrower&apos;s funded dream - here&apos;s the full journey, step by step.
           </p>
         </div>
       </div>
@@ -97,9 +97,9 @@ export default function HowItWorksPage() {
           <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Why You Can Trust This</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
-              { icon: "lock", title: "On-Chain Treasury", body: "Every SOL deposit and spend is recorded on Solana's public ledger. Anyone can verify the wallet balance and transaction history - no middlemen." },
-              { icon: "ledger", title: "Public Batch Ledger", body: "Each funding round is published on this dashboard with a numbered batch, borrower names, and the Solana TX hash proving the spend." },
-              { icon: "globe", title: "Kiva Verification", body: "Loans are funded through Kiva.org - a non-profit with 97%+ repayment rates and 15+ years of verified impact across 80 countries." },
+              { icon: "lock", title: "Immutable Splits", body: "The 45/45/10 fee split is enforced by each pool's on-chain config, set once at launch. Liquidity is permanently locked at graduation - no rug, no rewrite." },
+              { icon: "ledger", title: "Public Harvest Ledger", body: "Every harvest is published with per-coin claim snapshots, borrower names, and the transaction hashes proving each hop from pool to loan." },
+              { icon: "globe", title: "Kiva Verification", body: "Loans are funded through Kiva.org - a non-profit with 96%+ repayment rates and nearly two decades of verified impact across 80 countries." },
             ].map(({ icon, title, body }) => (
               <div key={title} className="text-center p-4">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
@@ -114,8 +114,8 @@ export default function HowItWorksPage() {
 
         {/* CTA */}
         <div className="mt-10 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-8 py-3.5 text-sm font-bold transition-all shadow-lg">
-            ← Back to Dashboard
+          <Link href="/launch" className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-8 py-3.5 text-sm font-bold transition-all shadow-lg">
+            Launch a coin for a borrower →
           </Link>
         </div>
       </div>
