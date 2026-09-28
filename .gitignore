@@ -9,3 +9,5 @@ node_modules/
 
 # promo video sources/renders (heavy binaries, kept local only)
 public/brand/video/*.mp4
+public/brand/video/*.wav
+public/brand/video/*.png
