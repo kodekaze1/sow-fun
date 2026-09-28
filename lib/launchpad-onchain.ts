@@ -128,6 +128,77 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
   return launches;
 }
 
+export interface CreatorLaunch extends LaunchSummary {
+  creatorPendingSol: number;
+  creatorPendingLamports: string;
+}
+
+// All coins a wallet has launched from the sow.fun config, with their
+// unclaimed creator fee share.
+export async function getLaunchesByCreator(creator: string): Promise<CreatorLaunch[]> {
+  if (!DBC_CONFIG_KEY || DBC_CONFIG_KEY.length < 30) return [];
+  const { connection, client } = getDbcClient();
+  const creatorKey = new PublicKey(creator);
+
+  const pools = await client.state.getPoolsByCreator(creatorKey);
+  const entries = pools
+    .map((p) => {
+      const pa = p as unknown as {
+        address?: PublicKey; publicKey?: PublicKey;
+        account: { baseMint?: PublicKey; config?: PublicKey };
+      };
+      return { address: (pa.address ?? pa.publicKey) as PublicKey, account: pa.account };
+    })
+    .filter((e) => e.account.config?.toBase58() === DBC_CONFIG_KEY);
+
+  const results: CreatorLaunch[] = [];
+  for (const entry of entries) {
+    let name = "Unknown token";
+    let symbol = "?";
+    let loanId: number | null = null;
+    let borrowerName: string | null = null;
+    let image: string | null = null;
+    if (entry.account.baseMint) {
+      const info = await connection.getAccountInfo(metadataPda(entry.account.baseMint));
+      if (info?.data) {
+        try {
+          const meta = parseMetadata(info.data as Buffer);
+          name = meta.name || name;
+          symbol = meta.symbol || symbol;
+          const parsed = parseLaunchUri(meta.uri);
+          loanId = parsed.loanId;
+          borrowerName = parsed.borrower;
+          image = parsed.image;
+        } catch { /* unparseable */ }
+      }
+    }
+    let creatorPendingLamports = "0";
+    let lifetimeFeesSol = 0;
+    try {
+      const metrics = await client.state.getPoolFeeMetrics(entry.address);
+      creatorPendingLamports = metrics.current.creatorQuoteFee.toString();
+      lifetimeFeesSol = metrics.total.totalTradingQuoteFee.toNumber() / 1e9;
+    } catch { /* metrics unavailable */ }
+
+    results.push({
+      pool: entry.address.toBase58(),
+      mint: entry.account.baseMint?.toBase58() ?? null,
+      name,
+      symbol,
+      image,
+      loanId,
+      borrowerName,
+      pendingVaultSol: 0,
+      lifetimeFeesSol,
+      impactShareSol: lifetimeFeesSol * VAULT_SHARE,
+      creatorPendingSol: Number(creatorPendingLamports) / 1e9,
+      creatorPendingLamports,
+    });
+  }
+  results.sort((a, b) => b.lifetimeFeesSol - a.lifetimeFeesSol);
+  return results;
+}
+
 export async function getLaunchByMint(mint: string): Promise<LaunchSummary | null> {
   let mintKey: PublicKey;
   try {

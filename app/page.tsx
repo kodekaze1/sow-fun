@@ -67,8 +67,9 @@ export default async function Home() {
     color: SECTOR_COLORS[label] || SECTOR_COLORS.default,
   })).sort((a, b) => b.pct - a.pct);
 
-  // Combine active Kiva loans with our funded Uplift loans for the map
-  const fundedLoans = waves.flatMap(wave => 
+  // The map shows ONLY harvest-funded loans - never browse listings,
+  // so the marker count always matches lives actually funded.
+  const allMapLoans = waves.flatMap(wave =>
     wave.loans.map(loan => ({
       id: parseInt(loan.kiva_id) || 1001,
       name: loan.borrower,
@@ -79,6 +80,7 @@ export default async function Home() {
       loan_amount: loan.uplift_cents / 100,
       funded_amount: loan.uplift_cents / 100,
       image: { id: 0, template_id: 1 },
+      image_url: loan.photo_url || undefined,
       borrower_count: 1,
       lender_count: 1,
       partner_id: 0,
@@ -86,8 +88,6 @@ export default async function Home() {
       planned_expiration_date: "",
     }))
   );
-
-  const allMapLoans = [...fundedLoans, ...loans];
 
   // The Collection: distinct countries/sectors the treasury lender has reached
   const collectedCountries = [...new Set(impactLoans.map((l) => l.location.country))].filter((c) => c && c !== "Unknown");
@@ -182,7 +182,7 @@ export default async function Home() {
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="pin" className="w-4 h-4" /></span>The Global Pulse</h2>
-              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{allMapLoans.length} markers on map</span>
+              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{allMapLoans.length} {allMapLoans.length === 1 ? "life" : "lives"} funded</span>
             </div>
             <MapWrapper loans={allMapLoans} />
           </div>

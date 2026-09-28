@@ -11,8 +11,6 @@ export const X_LINK = "https://x.com/sowfunhq";
 // Every wave's impact share is topped up here (publicly visible), then the
 // Visa card pays Kiva at checkout; amounts match the harvest ledger receipts.
 export const IMPACT_CARD_ADDRESS = "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q";
-export const IMPACT_PERCENT = 95;
-export const OPS_PERCENT = 5;
 export const KIVA_TEAM_URL = "https://www.kiva.org/team/sowfun";
 export const KIVA_LENDER_URL = "https://www.kiva.org/lender/sowfun";
 export const KIVA_LENDER_ID = "sowfun";

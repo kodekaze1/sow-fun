@@ -86,12 +86,7 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
       {/* Legend */}
       <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur rounded-xl p-2.5 text-xs flex flex-col gap-1.5 z-[400] border border-gray-200 shadow">
         {[
-          { color: "#F8CD69", label: "sow.fun Funded" },
-          { color: "#2AA967", label: "Agriculture / Food" },
-          { color: "#8578B8", label: "Retail" },
-          { color: "#4A7DB5", label: "Education" },
-          { color: "#D99A2B", label: "Clean Energy" },
-          { color: "#276A43", label: "Other" },
+          { color: "#F8CD69", label: "Harvest-funded loan" },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5 text-gray-600 font-medium">
             <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
@@ -101,7 +96,7 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
       </div>
       {/* Counter badge */}
       <div className="absolute top-3 right-3 bg-[#276A43] text-white text-xs font-bold px-3 py-1 rounded-full z-[400] shadow">
-        {loans.length} loans on map
+        {loans.length} {loans.length === 1 ? "life" : "lives"} funded
       </div>
     </div>
   );

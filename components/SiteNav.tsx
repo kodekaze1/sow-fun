@@ -6,10 +6,10 @@ import { KIVA_LENDER_URL } from "@/lib/constants";
 
 const LINKS = [
   { href: "/launches", label: "Launches" },
+  { href: "/my", label: "My coins" },
   { href: "/how-it-works", label: "How it works" },
   { href: "/tokenomics", label: "Tokenomics" },
   { href: "/treasury", label: "Treasury" },
-  { href: "/roadmap", label: "Roadmap" },
   { href: "/faq", label: "FAQ" },
 ];
 
