@@ -87,7 +87,7 @@ export default function TreasuryPage() {
                   href={`https://explorer.solana.com/address/${treasury.wallet}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-blue-500 hover:text-blue-700 transition-colors"
+                  className="flex items-center gap-1 mt-3 text-xs font-bold font-sans text-[#276A43] hover:text-[#223829] transition-colors"
                 >
                   View on Solana Explorer →
                 </a>
@@ -111,9 +111,10 @@ export default function TreasuryPage() {
           </div>
 
           <p className="text-sm text-gray-500 leading-relaxed mb-5">
-            The fiat bridge: each harvest, the vault&apos;s impact share is swapped to USDC and sent here -
-            publicly, on-chain - then the Visa card pays Kiva at checkout. Card top-ups below always match
-            the Kiva receipts in the harvest ledger.
+            Backup rail of the fiat bridge. Deposits here are visible on-chain below, but card purchases
+            settle inside KAST&apos;s own ledger - so spends are proven by invoices and Kiva receipts rather
+            than on-chain debits. The primary bridge keeps every hop watchable: harvest funds leave the
+            treasury address directly to purchase the prepaid card used at Kiva checkout.
           </p>
 
           <div className="flex flex-wrap gap-8 mb-5">
@@ -130,7 +131,7 @@ export default function TreasuryPage() {
               href={`https://solscan.io/account/${card?.address ?? "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q"}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-3 text-xs font-bold font-sans text-[#276A43] hover:text-[#223829] transition-colors"
+              className="flex items-center gap-1 mt-3 text-xs font-bold font-sans text-[#276A43] hover:text-[#223829] transition-colors"
             >
               Watch it on Solscan →
             </a>

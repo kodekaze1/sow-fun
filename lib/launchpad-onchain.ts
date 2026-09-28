@@ -58,6 +58,26 @@ export interface LaunchSummary {
   pendingVaultSol: number;
   lifetimeFeesSol: number;
   impactShareSol: number; // vault share (impact + ops) of lifetime fees
+  quoteReserveSol: number; // SOL raised on the bonding curve so far
+  curvePct: number | null; // progress toward graduation (null if threshold unknown)
+}
+
+// Migration threshold (lamports) from the config account, cached per process
+let thresholdCache: { key: string; lamports: number | null } | null = null;
+async function getMigrationThresholdLamports(client: DynamicBondingCurveClient): Promise<number | null> {
+  if (thresholdCache?.key === DBC_CONFIG_KEY) return thresholdCache.lamports;
+  let lamports: number | null = null;
+  try {
+    const state = client.state as unknown as { getPoolConfig?: (a: PublicKey) => Promise<unknown> };
+    if (state.getPoolConfig) {
+      const cfg = (await state.getPoolConfig(new PublicKey(DBC_CONFIG_KEY))) as {
+        migrationQuoteThreshold?: { toNumber: () => number };
+      } | null;
+      lamports = cfg?.migrationQuoteThreshold?.toNumber() ?? null;
+    }
+  } catch { /* optional - graduation bar hides without it */ }
+  thresholdCache = { key: DBC_CONFIG_KEY, lamports };
+  return lamports;
 }
 
 const VAULT_SHARE = (IMPACT_FEE_PCT + OPS_FEE_PCT) / 100;
@@ -73,9 +93,17 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
   ]);
   const feeByPool = new Map(fees.map((f) => [f.poolAddress.toBase58(), f]));
 
+  const thresholdLamports = await getMigrationThresholdLamports(client);
   const entries = pools.map((p) => {
-    const pa = p as unknown as { address?: PublicKey; publicKey?: PublicKey; account: { baseMint?: PublicKey } };
-    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: pa.account.baseMint ?? null };
+    const pa = p as unknown as {
+      address?: PublicKey; publicKey?: PublicKey;
+      account: { baseMint?: PublicKey; poolState?: { quoteReserve?: { toNumber: () => number } } };
+    };
+    let quoteReserveLamports = 0;
+    try {
+      quoteReserveLamports = pa.account.poolState?.quoteReserve?.toNumber() ?? 0;
+    } catch { /* shape drift */ }
+    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: pa.account.baseMint ?? null, quoteReserveLamports };
   });
 
   const pdas = entries.filter((e) => e.baseMint).map((e) => metadataPda(e.baseMint as PublicKey));
@@ -121,6 +149,10 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
       pendingVaultSol,
       lifetimeFeesSol,
       impactShareSol: lifetimeFeesSol * VAULT_SHARE,
+      quoteReserveSol: entry.quoteReserveLamports / 1e9,
+      curvePct: thresholdLamports
+        ? Math.min(100, Math.round((entry.quoteReserveLamports / thresholdLamports) * 100))
+        : null,
     });
   }
 
@@ -145,12 +177,13 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
     .map((p) => {
       const pa = p as unknown as {
         address?: PublicKey; publicKey?: PublicKey;
-        account: { baseMint?: PublicKey; config?: PublicKey };
+        account: { baseMint?: PublicKey; config?: PublicKey; poolState?: { quoteReserve?: { toNumber: () => number } } };
       };
       return { address: (pa.address ?? pa.publicKey) as PublicKey, account: pa.account };
     })
     .filter((e) => e.account.config?.toBase58() === DBC_CONFIG_KEY);
 
+  const thresholdLamports = await getMigrationThresholdLamports(client);
   const results: CreatorLaunch[] = [];
   for (const entry of entries) {
     let name = "Unknown token";
@@ -180,6 +213,11 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
       lifetimeFeesSol = metrics.total.totalTradingQuoteFee.toNumber() / 1e9;
     } catch { /* metrics unavailable */ }
 
+    let quoteReserveLamports = 0;
+    try {
+      quoteReserveLamports = entry.account.poolState?.quoteReserve?.toNumber() ?? 0;
+    } catch { /* shape drift */ }
+
     results.push({
       pool: entry.address.toBase58(),
       mint: entry.account.baseMint?.toBase58() ?? null,
@@ -191,6 +229,10 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
       pendingVaultSol: 0,
       lifetimeFeesSol,
       impactShareSol: lifetimeFeesSol * VAULT_SHARE,
+      quoteReserveSol: quoteReserveLamports / 1e9,
+      curvePct: thresholdLamports
+        ? Math.min(100, Math.round((quoteReserveLamports / thresholdLamports) * 100))
+        : null,
       creatorPendingSol: Number(creatorPendingLamports) / 1e9,
       creatorPendingLamports,
     });

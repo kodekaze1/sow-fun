@@ -48,11 +48,17 @@ export default async function LaunchesPage() {
             <p className="text-gray-500 text-sm mb-8 max-w-md mx-auto">
               The first token launched here becomes the genesis of the board. Its borrower becomes the first story.
             </p>
-            <Link href="/launch"
-              className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-7 py-3 text-sm font-bold transition-colors">
-              Launch the first coin
-              <Icon name="arrow" className="w-4 h-4" />
-            </Link>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/launch"
+                className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-7 py-3 text-sm font-bold transition-colors">
+                Launch the first coin
+                <Icon name="arrow" className="w-4 h-4" />
+              </Link>
+              <Link href="/t/demo"
+                className="inline-flex items-center gap-2 border border-[#D9E6DF] hover:border-[#276A43] text-[#223829] rounded-full px-7 py-3 text-sm font-bold transition-colors">
+                Preview a token page
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 gap-5">

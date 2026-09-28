@@ -15,15 +15,18 @@ API integration is built.
    - Receipt: claim tx signatures (solscan links).
 
 2. OFF-RAMP (manual, receipt at every hop)
-   Path A - no-KYC gift-card bridge (default for early harvests):
-   - Swap claimed SOL -> USDC on Jupiter (on-chain tx).
-   - Buy a virtual prepaid Visa with USDC on Bitrefill (no KYC; ~$250-500
-     per card, few % fee). Receipt: the on-chain USDC payment + invoice.
+   Path A - PRIMARY: prepaid Visa bought DIRECTLY from the treasury wallet.
+   - Swap claimed SOL -> USDC on Jupiter (on-chain tx from the treasury).
+   - Pay Bitrefill for a virtual prepaid Visa straight from the TREASURY
+     address (no KYC; ~$250-500/card, few % fee). This makes the outflow
+     publicly visible on the treasury account itself - the whole point.
+     Receipt: treasury outflow tx + Bitrefill invoice.
    - Pay Kiva at checkout with the prepaid Visa (register a ZIP if AVS asks).
-   Path B - KAST card (if volume outgrows gift-card limits):
-   - 2-min KYC once, instant virtual Visa, loads USDC 1:1 over Solana.
-   - Publish the card's Solana deposit address as the "Impact Card" so every
-     top-up is publicly visible; keep the card balance lean (top up per harvest).
+   Path B - BACKUP: KAST card. Tested 2026-09-28; verdict: deposits are
+   on-chain visible but SPENDS SETTLE INSIDE KAST'S LEDGER - no on-chain
+   debit ever appears at the deposit address. Money-flow visibility is
+   top-ups only, so use it only if Bitrefill fails, and lean on Kiva
+   receipts for the spend side.
    Path C - exchange off-ramp (Kraken/Coinbase sell, bank, card/PayPal on Kiva).
    Never use anonymous offshore card issuers - unreliable and reputationally toxic.
    - Keep the 45/10 split here: 45 points of the fee go to loans, 10 to ops.

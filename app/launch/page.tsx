@@ -162,7 +162,8 @@ export default function LaunchPage() {
             {IMPACT_FEE_PCT}% fund their loan, {OPS_FEE_PCT}% keep the lights on.
           </p>
           <p className="opacity-60 max-w-md mx-auto leading-relaxed text-sm mt-3">
-            Nobody can change the split after launch - and every borrower your token fully funds earns you $SOW rewards.
+            Nobody can change the split after launch, fees fund the loan from the very first trade -
+            no graduation required - and every borrower your token fully funds earns you $SOW rewards.
           </p>
         </div>
       </div>
