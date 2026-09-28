@@ -54,7 +54,30 @@ export const COUNTRY_FLAGS: Record<string, string> = {
   Peru: "🇵🇪", Bolivia: "🇧🇴", Pakistan: "🇵🇰", India: "🇮🇳",
   Nigeria: "🇳🇬", Ethiopia: "🇪🇹", Rwanda: "🇷🇼", Malawi: "🇲🇼",
   Zambia: "🇿🇲", Cambodia: "🇰🇭", Indonesia: "🇮🇩", Vietnam: "🇻🇳",
+  Tonga: "🇹🇴", Samoa: "🇼🇸", Fiji: "🇫🇯", "Papua New Guinea": "🇵🇬",
+  "Solomon Islands": "🇸🇧", "Timor-Leste": "🇹🇱", Nepal: "🇳🇵", Thailand: "🇹🇭",
+  Myanmar: "🇲🇲", "Lao PDR": "🇱🇦", "Sri Lanka": "🇱🇰", Tajikistan: "🇹🇯",
+  Kyrgyzstan: "🇰🇬", Armenia: "🇦🇲", Georgia: "🇬🇪", Albania: "🇦🇱",
+  Kosovo: "🇽🇰", Moldova: "🇲🇩", Ukraine: "🇺🇦", Jordan: "🇯🇴",
+  Lebanon: "🇱🇧", Palestine: "🇵🇸", Iraq: "🇮🇶", Egypt: "🇪🇬",
+  Morocco: "🇲🇦", Tunisia: "🇹🇳", Turkey: "🇹🇷", Mozambique: "🇲🇿",
+  Zimbabwe: "🇿🇼", Liberia: "🇱🇷", "Sierra Leone": "🇸🇱", Togo: "🇹🇬",
+  Benin: "🇧🇯", "Burkina Faso": "🇧🇫", Cameroon: "🇨🇲", "Congo (DRC)": "🇨🇩",
+  "Cote D'Ivoire": "🇨🇮", Madagascar: "🇲🇬", "South Sudan": "🇸🇸", Somalia: "🇸🇴",
+  Burundi: "🇧🇮", "Costa Rica": "🇨🇷", Ecuador: "🇪🇨", "El Salvador": "🇸🇻",
+  Guatemala: "🇬🇹", Honduras: "🇭🇳", Nicaragua: "🇳🇮", Mexico: "🇲🇽",
+  Colombia: "🇨🇴", Brazil: "🇧🇷", Paraguay: "🇵🇾", Haiti: "🇭🇹",
+  "Dominican Republic": "🇩🇴", Lesotho: "🇱🇸", "United States": "🇺🇸",
 };
+
+// Kiva's full sector list (19) and active country count - the Collection targets
+export const ALL_KIVA_SECTORS = [
+  "Agriculture", "Arts", "Clean Energy", "Clothing", "Construction",
+  "Education", "Entertainment", "Food", "Health", "Housing",
+  "Manufacturing", "Personal Use", "Retail", "Reuse and Recycle",
+  "Sanitation & Hygiene", "Services", "Transportation", "Water", "Wholesale",
+];
+export const TOTAL_KIVA_COUNTRIES = 72;
 
 export const COUNTRY_COORDS: Record<string, [number, number]> = {
   Philippines: [12.8797, 121.7740], Kenya: [-0.0236, 37.9062],

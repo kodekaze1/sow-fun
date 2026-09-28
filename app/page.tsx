@@ -5,10 +5,11 @@ import MapWrapper from "@/components/MapWrapper";
 import Icon from "@/components/icons";
 import CountUp from "@/components/CountUp";
 import ScrollReveal from "@/components/ScrollReveal";
-import { KivaLoan, MOCK_STATS, MOCK_BATCHES, SECTOR_TAGS, SECTOR_COLORS } from "@/lib/types";
+import { KivaLoan, MOCK_STATS, MOCK_BATCHES, SECTOR_TAGS, SECTOR_COLORS, COUNTRY_FLAGS, ALL_KIVA_SECTORS, TOTAL_KIVA_COUNTRIES } from "@/lib/types";
 import { getKivaImpactStats } from "@/lib/kiva-stats";
 import { getAllWaves } from "@/lib/waves";
 import { KIVA_FETCH_HEADERS, KIVA_TEAM_URL } from "@/lib/constants";
+import badges from "@/data/badges.json";
 
 async function getLoans(): Promise<KivaLoan[]> {
   try {
@@ -87,6 +88,10 @@ export default async function Home() {
   );
 
   const allMapLoans = [...fundedLoans, ...loans];
+
+  // The Collection: distinct countries/sectors the treasury lender has reached
+  const collectedCountries = [...new Set(impactLoans.map((l) => l.location.country))].filter((c) => c && c !== "Unknown");
+  const collectedSectors = [...new Set(impactLoans.map((l) => l.sector))].filter(Boolean);
 
   return (
     <div className="min-h-screen">
@@ -311,6 +316,94 @@ export default async function Home() {
             </a>
           </div>
 
+        </div>
+      </div>
+
+      {/* THE COLLECTION */}
+      <div className="max-w-[1100px] mx-auto px-6 pt-16 pb-6" data-reveal>
+        <div className="text-center mb-8">
+          <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2.5">The Collection</div>
+          <h2 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-[#223829]">
+            Collect the <span className="italic text-[#276A43]">whole world.</span>
+          </h2>
+          <p className="text-gray-500 text-sm mt-3 max-w-lg mx-auto">
+            Every harvest plants a flag. {TOTAL_KIVA_COUNTRIES} countries, {ALL_KIVA_SECTORS.length} sectors,
+            one community garden - each launch grows the collection.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-5">
+          {/* COUNTRIES */}
+          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center gap-2 text-sm font-bold"><Icon name="globe" className="w-4 h-4 text-[#223829]" />Countries</h3>
+              <span className="text-sm font-black text-[#276A43]">{collectedCountries.length} / {TOTAL_KIVA_COUNTRIES}</span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
+              <div className="h-full bg-[#2AA967] rounded-full" style={{ width: `${Math.max(2, (collectedCountries.length / TOTAL_KIVA_COUNTRIES) * 100)}%` }} />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {collectedCountries.map((c) => (
+                <span key={c} className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#EDF4F1] text-[#223829]">
+                  {COUNTRY_FLAGS[c] ?? "🌍"} {c}
+                </span>
+              ))}
+            </div>
+            <div className="text-xs text-gray-400 mt-3">{TOTAL_KIVA_COUNTRIES - collectedCountries.length} still unexplored</div>
+          </div>
+
+          {/* SECTORS */}
+          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center gap-2 text-sm font-bold"><Icon name="chart" className="w-4 h-4 text-[#223829]" />Sectors</h3>
+              <span className="text-sm font-black text-[#276A43]">{collectedSectors.length} / {ALL_KIVA_SECTORS.length}</span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
+              <div className="h-full bg-[#2AA967] rounded-full" style={{ width: `${Math.max(2, (collectedSectors.length / ALL_KIVA_SECTORS.length) * 100)}%` }} />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ALL_KIVA_SECTORS.map((s) => {
+                const got = collectedSectors.includes(s);
+                return (
+                  <span key={s} className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                    got ? "bg-[#276A43] text-white" : "bg-gray-50 text-gray-300"
+                  }`}>
+                    {s}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* BADGES */}
+          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="flex items-center gap-2 text-sm font-bold"><Icon name="sparkle" className="w-4 h-4 text-[#223829]" />Kiva badges</h3>
+              <span className="text-sm font-black text-[#276A43]">{badges.length}</span>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {badges.map((b) => (
+                <div key={b.name} className="flex items-center gap-3 bg-[#EDF4F1] rounded-xl px-3.5 py-2.5">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#276A43] flex-shrink-0">
+                    <Icon name="sparkle" className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-[13px] font-bold text-[#223829]">{b.name}</div>
+                    <div className="text-[11px] text-gray-500">{b.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-xs text-gray-400 mt-3">Earned on our Kiva lender profile - verify anytime</div>
+          </div>
+        </div>
+
+        <div className="text-center mt-8">
+          <a href="/launch"
+            className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-7 py-3 text-sm font-bold transition-colors">
+            Sow the next one
+            <Icon name="arrow" className="w-4 h-4" />
+          </a>
         </div>
       </div>
 
