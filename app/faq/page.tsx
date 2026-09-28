@@ -42,7 +42,7 @@ const FAQS = [
       },
       {
         q: "What happens when a token raises more than its borrower needs?",
-        a: "That is the normal case - a busy token can out-earn a $500 loan in days. The excess follows one public rule: 80% goes to the next borrower (the token's creator adopts a new fundraising borrower, and the token's lives-lifted counter keeps climbing), and 20% buys $SOW - half is burned, half rewards the creator for every borrower their token fully funds. If a beneficiary's loan fills or expires before a harvest executes, the whole harvest rolls to the next adopted borrower.",
+        a: "That is the normal case - a busy token can out-earn a $500 loan in days. The excess follows one public rule, per coin, per harvest: 80% goes to the next borrower (the creator adopts a new fundraising borrower from their dashboard, signed with a free on-chain memo, and the coin's lives-lifted counter keeps climbing); 20% market-buys $SOW, of which half (10 points) is burned with a published transaction and half (10 points) accrues as the creator's reward. Rewards pay out to the creator's wallet each time their coin fully funds a borrower - verified against the Kiva loan, never raw volume, so wash trading earns nothing. Every buy, burn, and payout is listed in the public rewards ledger and on the creator dashboard. If a beneficiary's loan fills or expires before a harvest executes, the whole harvest rolls to the next adopted borrower.",
       },
       {
         q: "What if the borrower's loan fills up before my coin's fees are harvested?",

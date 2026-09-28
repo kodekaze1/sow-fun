@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Icon from "@/components/icons";
 import { getLaunchByMint, getSolPrice } from "@/lib/launchpad-onchain";
 import { getLoansById } from "@/lib/kiva-graphql";
+import { getActiveSuccession } from "@/lib/impact-ledger";
 import { CREATOR_FEE_PCT, IMPACT_FEE_PCT, OPS_FEE_PCT, POOL_FEE_BPS, SITE_URL } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 
@@ -58,11 +59,20 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
   const launch = isDemo ? DEMO_LAUNCH : await getLaunchByMint(mint).catch(() => null);
   if (!launch) notFound();
 
+  // If the original loan closed and the creator adopted a successor (proven
+  // by an on-chain memo, committed to data/successions.json), the successor
+  // is the active beneficiary and the original becomes history.
+  const succession = !isDemo && launch.mint ? getActiveSuccession(launch.mint) : null;
+  const activeLoanId = succession?.to_loan_id ?? launch.loanId;
+  const loanIdsToFetch = [activeLoanId, succession ? launch.loanId : null]
+    .filter((id): id is number => typeof id === "number");
+
   const [loans, solPrice] = await Promise.all([
-    isDemo ? Promise.resolve(new Map()) : getLoansById(launch.loanId ? [launch.loanId] : []).catch(() => new Map()),
+    isDemo ? Promise.resolve(new Map()) : getLoansById(loanIdsToFetch).catch(() => new Map()),
     getSolPrice(),
   ]);
-  const loan = isDemo ? DEMO_LOAN : launch.loanId ? loans.get(launch.loanId) : undefined;
+  const loan = isDemo ? DEMO_LOAN : activeLoanId ? loans.get(activeLoanId) : undefined;
+  const originalLoan = succession && launch.loanId ? loans.get(launch.loanId) : undefined;
   const pct = loan && loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
   const img = launch.image ?? loan?.image ?? "/sow-logo.png";
 
@@ -116,7 +126,23 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           {/* BORROWER */}
           <div className="bg-[#EDF4F1] rounded-2xl p-6">
-            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Beneficiary</div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">
+              {succession ? "Adopted borrower" : "Beneficiary"}
+            </div>
+            {succession && (
+              <div className="mb-4 bg-white/70 rounded-xl p-3 text-[12px] text-[#223829]/70 leading-relaxed">
+                Originally pledged to{" "}
+                <span className="font-bold text-[#223829]">{originalLoan?.name ?? launch.borrowerName ?? `loan #${launch.loanId}`}</span>
+                {originalLoan?.status === "funded" ? " - fully funded ✓." : " - that loan closed."}{" "}
+                The creator adopted {succession.borrower} as the next borrower.
+                {succession.memo_tx && (
+                  <>{" "}
+                    <a href={`https://solscan.io/tx/${succession.memo_tx}`} target="_blank" rel="noopener noreferrer"
+                      className="font-bold text-[#276A43] hover:underline">Adoption receipt ↗</a>
+                  </>
+                )}
+              </div>
+            )}
             {loan ? (
               <>
                 <div className="flex items-center gap-3 mb-3">

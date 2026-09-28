@@ -76,6 +76,48 @@ Per token, per harvest, from the vault's impact share:
    entire harvest rolls to the adopted next borrower.
 5. Repayments recycle into the same token's impact counter.
 
+## Per-coin attribution (data/claims/)
+
+claim-fees.mjs now writes data/claims/claim-<timestamp>.json on every real
+run: per pool - mint, name/symbol, Kiva loan id, exact lamports claimed, and
+the claim tx. COMMIT THE FILE with the harvest. It is the public source of
+truth for "which coin generated which dollars"; wave records and per-token
+impact counters derive from these snapshots, never from memory.
+
+## Borrower adoption (data/successions.json)
+
+When a coin's loan closes, its creator adopts the next borrower from /my.
+The dashboard sends a free on-chain memo from the creator wallet:
+  sow-adopt:{"mint":"<mint>","loan":<kivaId>,"name":"<borrower>"}
+Operator loop (run before each harvest, and when a creator pings):
+1. Verify the memo tx on Solscan: signer MUST be the pool's creator wallet,
+   memo names the right mint, and the Kiva loan is still fundraising.
+2. Append to data/successions.json:
+   { "mint": "...", "from_loan_id": <old>, "to_loan_id": <new>,
+     "borrower": "<name>", "memo_tx": "<sig>", "adopted_at": "<ISO date>" }
+   (Chains are fine - the site treats the latest entry per mint as active.)
+3. Commit + push. The token page flips to the adopted borrower with the
+   memo linked as the adoption receipt.
+If a creator never adopts within ~7 days of their loan closing, operator
+assigns the next borrower in the same sector/country (memo_tx stays ""),
+noted as operator-assigned. The pledge never idles.
+
+## Creator rewards (data/rewards.json)
+
+Executed at harvest time, from each coin's EXCESS only (80/10/10 rule):
+1. Compute the coin's excess from the claim snapshot + Kiva remaining.
+2. Market-buy $SOW with 20% of excess (one tx). Burn half (second tx).
+3. Append to data/rewards.json:
+   { "mint","symbol","creator": <pool creator wallet>,
+     "borrower_loan_id","borrower","sow_amount": <creator half>,
+     "buy_tx","burn_tx","payout_tx": "", "harvest": "<wave id>",
+     "date": "<ISO>", "status": "accruing" }
+4. When the coin's borrower shows FUNDED and verified in the wave ledger,
+   send the accrued $SOW to the creator wallet, set payout_tx and
+   status: "paid", commit. /my shows the row flip from Accruing to Paid.
+Anti-wash rule is structural: rewards only exist as a fraction of excess
+that already funded a real loan, and only unlock on Kiva-verified loans.
+
 KAST bridge: the card's Solana deposit address is published on /treasury as
 the Impact Card once provided. Top up per harvest only - never park the vault.
 
