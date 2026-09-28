@@ -45,6 +45,10 @@ const FAQS = [
         a: "That is the normal case - a busy token can out-earn a $500 loan in days. The excess follows one public rule: 80% goes to the next borrower (the token's creator adopts a new fundraising borrower, and the token's lives-lifted counter keeps climbing), and 20% buys $SOW - half is burned, half rewards the creator for every borrower their token fully funds. If a beneficiary's loan fills or expires before a harvest executes, the whole harvest rolls to the next adopted borrower.",
       },
       {
+        q: "What if the borrower's loan fills up before my coin's fees are harvested?",
+        a: "It can happen - Kiva loans are funded by thousands of lenders worldwide, and a popular loan can close in days while your coin's fees are still accruing. Three things protect the pledge: the launch picker shows each loan's remaining amount, days left, and a 'filling fast' warning so you pick with eyes open; our claims console flags any coin whose loan is over 80% funded so we harvest early, before the crowd closes it; and if the loan closes anyway, 100% of the pledged fees roll to the next borrower the coin adopts. Nothing is ever lost, held back, or quietly rerouted - the token page shows exactly which borrower the fees flow to at any moment.",
+      },
+      {
         q: "How often are loans funded?",
         a: "When the treasury accumulates enough for a meaningful batch (typically 5-10 loans), we fund a round. Each batch is published on the dashboard with borrower names, countries, loan amounts, and an on-chain TX hash proving the spend.",
       },

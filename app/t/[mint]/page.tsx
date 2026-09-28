@@ -144,6 +144,23 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                 ) : (
                   <span className="text-sm font-bold text-gray-400">Kiva loan link appears here</span>
                 )}
+                {loan.status !== "fundraising" && (
+                  <div className={`mt-4 rounded-xl p-3.5 text-[12px] leading-relaxed ${
+                    loan.status === "funded"
+                      ? "bg-white border border-[#2AA967]/30 text-[#223829]/80"
+                      : "bg-[#F8F2E6] border border-[#F8CD69]/50 text-[#996210]"
+                  }`}>
+                    {loan.status === "funded" ? (
+                      <><span className="font-bold text-[#276A43]">This loan is fully funded on Kiva.</span>{" "}
+                      Fees this coin generates now roll to its next adopted borrower - the pledge never
+                      stops, it just moves to the next person in line.</>
+                    ) : (
+                      <><span className="font-bold">This loan closed on Kiva before filling.</span>{" "}
+                      Every pledged cent rolls to the coin&apos;s next adopted borrower instead - nothing
+                      is lost or held back.</>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <p className="text-sm text-gray-500">

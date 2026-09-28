@@ -11,7 +11,7 @@ interface ClaimRow {
   loanId: number | null;
   pendingSol: number;
   pendingUsd: number;
-  state: "fund-now" | "roll-over" | "accruing";
+  state: "fund-now" | "harvest-soon" | "roll-over" | "accruing";
   borrower: {
     id: number;
     name: string;
@@ -32,6 +32,7 @@ interface ClaimsData {
 
 const STATE_STYLES: Record<ClaimRow["state"], { label: string; cls: string }> = {
   "fund-now": { label: "Fund now", cls: "bg-[#276A43] text-white" },
+  "harvest-soon": { label: "Loan filling fast - harvest early", cls: "bg-[#F8CD69] text-[#223829]" },
   "roll-over": { label: "Roll to next borrower", cls: "bg-[#F8F2E6] text-[#996210]" },
   accruing: { label: "Accruing", cls: "bg-[#EDF4F1] text-[#276A43]" },
 };
@@ -156,7 +157,9 @@ export default function AdminPage() {
             return (
               <div key={row.pool}
                 className={`bg-white rounded-2xl border p-5 shadow-[0_4px_15px_rgba(0,0,0,0.05)] ${
-                  row.state === "fund-now" ? "border-[#276A43]" : "border-[#E4EBE7]"
+                  row.state === "fund-now" ? "border-[#276A43]"
+                    : row.state === "harvest-soon" ? "border-[#F8CD69]"
+                    : "border-[#E4EBE7]"
                 }`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">

@@ -58,6 +58,8 @@ export interface FundraisingLoan {
   image: string | null;
   loanAmount: number;
   fundedAmount: number;
+  remaining: number;
+  expiresAt: string | null; // Kiva plannedExpirationDate (ISO)
   borrowerCount: number;
 }
 

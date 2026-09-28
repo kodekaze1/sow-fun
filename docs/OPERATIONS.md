@@ -8,6 +8,15 @@ API integration is built.
 
 ## The loop (run when vault fees justify a harvest, e.g. >= 0.5 SOL)
 
+EXCEPTION - sprint harvest: if a coin's beneficiary loan is >= 80% funded by
+the crowd (or <= $100 remaining, or expiring within ~72h) and the coin has any
+meaningful pending fees, run the loop for that pool IMMEDIATELY and ignore the
+0.5 SOL threshold. Otherwise other Kiva lenders close the loan first and the
+coin's own money never reaches its named borrower. The claims console (/admin)
+flags these rows as "Loan filling fast - harvest early" (gold badge), sorted
+just under fund-now. If the loan still closes before the money lands, the
+whole harvest rolls to the next adopted borrower per the allocation policy.
+
 1. CLAIM (automated, on-chain receipt)
    KEYPAIR=<treasury.json> CONFIG=<config pubkey> node scripts/claim-fees.mjs
    - Sweeps the partner 55% share (SOL) from every launched pool to the treasury.

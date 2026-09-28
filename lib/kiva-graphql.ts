@@ -42,6 +42,7 @@ type FundraisingSearchData = {
         sector?: { name?: string } | null;
         geocode?: { country?: { name?: string } } | null;
         borrowerCount?: number | null;
+        plannedExpirationDate?: string | null;
         loanFundraisingInfo?: { fundedAmount?: string } | null;
       }[];
     };
@@ -79,21 +80,27 @@ export async function searchFundraisingLoans(params: LoanSearchParams = {}, limi
   const validSorts = ["popularity", "newest", "expiringSoon", "amountLeft", "loanAmount", "loanAmountDesc"];
   const sort = validSorts.includes(params.sort ?? "") ? params.sort : "popularity";
   const data = await kivaGQL<FundraisingSearchData>(
-    `{lend{loans(filters:{${filters.join(",")}}${q},limit:${limit},sortBy:${sort}){totalCount values{id name loanAmount use image{url(customSize:"w480h360")} activity{name} sector{name} geocode{country{name}} borrowerCount loanFundraisingInfo{fundedAmount}}}}}`,
+    `{lend{loans(filters:{${filters.join(",")}}${q},limit:${limit},sortBy:${sort}){totalCount values{id name loanAmount use image{url(customSize:"w480h360")} activity{name} sector{name} geocode{country{name}} borrowerCount plannedExpirationDate loanFundraisingInfo{fundedAmount}}}}}`,
     120
   );
-  return (data.lend.loans.values ?? []).map((l) => ({
-    id: l.id,
-    name: l.name,
-    country: l.geocode?.country?.name ?? "Unknown",
-    activity: l.activity?.name ?? "Small Business",
-    sector: l.sector?.name ?? "Retail",
-    use: l.use ?? "to grow their business",
-    image: l.image?.url ?? null,
-    loanAmount: parseFloat(l.loanAmount) || 0,
-    fundedAmount: parseFloat(l.loanFundraisingInfo?.fundedAmount ?? "0") || 0,
-    borrowerCount: l.borrowerCount ?? 1,
-  }));
+  return (data.lend.loans.values ?? []).map((l) => {
+    const loanAmount = parseFloat(l.loanAmount) || 0;
+    const fundedAmount = parseFloat(l.loanFundraisingInfo?.fundedAmount ?? "0") || 0;
+    return {
+      id: l.id,
+      name: l.name,
+      country: l.geocode?.country?.name ?? "Unknown",
+      activity: l.activity?.name ?? "Small Business",
+      sector: l.sector?.name ?? "Retail",
+      use: l.use ?? "to grow their business",
+      image: l.image?.url ?? null,
+      loanAmount,
+      fundedAmount,
+      remaining: Math.max(0, loanAmount - fundedAmount),
+      expiresAt: l.plannedExpirationDate ?? null,
+      borrowerCount: l.borrowerCount ?? 1,
+    };
+  });
 }
 
 export interface KivaLoanLive {

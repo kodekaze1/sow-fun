@@ -21,6 +21,19 @@ import { COUNTRY_FLAGS } from "@/lib/types";
 
 type Step = 1 | 2 | 3;
 
+function daysLeft(expiresAt: string | null): number | null {
+  if (!expiresAt) return null;
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  return Number.isFinite(ms) ? Math.max(0, Math.ceil(ms / 86_400_000)) : null;
+}
+
+// A loan this close to full may be finished by the Kiva crowd before this
+// coin's first fee harvest - flag it so creators pick with eyes open.
+function fillRisk(loan: FundraisingLoan): boolean {
+  const pct = loan.loanAmount > 0 ? loan.fundedAmount / loan.loanAmount : 0;
+  return pct >= 0.8 || loan.remaining <= 100;
+}
+
 export default function LaunchPage() {
   const { connection } = useConnection();
   const wallet = useWallet();
@@ -236,6 +249,7 @@ export default function LaunchPage() {
               <div className="grid sm:grid-cols-2 gap-4">
                 {loans.map((loan) => {
                   const pct = loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
+                  const days = daysLeft(loan.expiresAt);
                   return (
                     <button
                       key={loan.id}
@@ -259,7 +273,12 @@ export default function LaunchPage() {
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                           <div className="h-full bg-[#2AA967] rounded-full" style={{ width: `${pct}%` }} />
                         </div>
-                        <div className="text-[11px] text-gray-400 mt-1">{pct}% funded on Kiva</div>
+                        <div className="flex items-center justify-between text-[11px] text-gray-400 mt-1">
+                          <span>{pct}% funded · ${loan.remaining.toFixed(0)} to go{days !== null ? ` · ${days}d left` : ""}</span>
+                          {fillRisk(loan) && (
+                            <span className="font-bold text-[#996210] bg-[#F8F2E6] px-2 py-0.5 rounded-full">Filling fast</span>
+                          )}
+                        </div>
                       </div>
                     </button>
                   );
@@ -280,6 +299,16 @@ export default function LaunchPage() {
               </div>
               <button onClick={() => setStep(1)} className="ml-auto text-xs font-bold text-[#276A43] hover:underline">Change</button>
             </div>
+
+            {fillRisk(borrower) && (
+              <div className="mb-6 bg-[#F8F2E6] border border-[#F8CD69]/50 rounded-2xl p-4 text-[13px] text-[#996210] leading-relaxed">
+                <span className="font-bold">Heads up:</span> {borrower.name}&apos;s loan is{" "}
+                {borrower.loanAmount > 0 ? Math.round((borrower.fundedAmount / borrower.loanAmount) * 100) : 0}% funded
+                (${borrower.remaining.toFixed(0)} to go) and other Kiva lenders may finish it before your coin&apos;s
+                first fee harvest. If that happens nothing is lost - every pledged cent rolls to the next borrower
+                your coin adopts. Prefer a bigger runway? <button onClick={() => setStep(1)} className="underline font-bold">Pick a loan with more to go</button>.
+              </div>
+            )}
 
             <label className="block text-xs font-black uppercase tracking-widest text-[#276A43] mb-1.5">Token name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} maxLength={32}
@@ -328,6 +357,8 @@ export default function LaunchPage() {
                   <span className="font-bold">{CREATOR_FEE_PCT}% you · {IMPACT_FEE_PCT}% loans · {OPS_FEE_PCT}% ops</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Excess fees</span>
                   <span className="font-bold">80% next borrower · 20% $SOW</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">If the loan fills first</span>
+                  <span className="font-bold">Fees roll to your next borrower</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Creator rewards</span>
                   <span className="font-bold">$SOW per life lifted</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Supply</span><span className="font-bold">1,000,000,000</span></div>

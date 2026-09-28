@@ -141,8 +141,13 @@ export async function GET(request: Request) {
       const funded = loan ? parseFloat(loan.loanFundraisingInfo?.fundedAmount ?? "0") || 0 : 0;
       const remaining = Math.max(0, loanAmount - funded);
       const fundraising = loan?.status === "fundraising";
-      let state: "fund-now" | "roll-over" | "accruing" = "accruing";
+      // Crowd is close to finishing the loan - harvest early (ignore the usual
+      // SOL threshold) or this coin's fees will arrive after it closes.
+      const fillingFast = fundraising && remaining > 0 &&
+        (remaining <= 100 || (loanAmount > 0 && funded / loanAmount >= 0.8));
+      let state: "fund-now" | "harvest-soon" | "roll-over" | "accruing" = "accruing";
       if (r.pendingUsd > 1 && fundraising && remaining > 0 && r.pendingUsd >= remaining) state = "fund-now";
+      else if (r.pendingUsd > 1 && fillingFast) state = "harvest-soon";
       else if (r.pendingUsd > 1 && (!fundraising || remaining === 0)) state = "roll-over";
       return {
         ...r,
@@ -153,7 +158,7 @@ export async function GET(request: Request) {
       };
     });
 
-    const order = { "fund-now": 0, "roll-over": 1, accruing: 2 };
+    const order = { "fund-now": 0, "harvest-soon": 1, "roll-over": 2, accruing: 3 };
     enriched.sort((a, b) => order[a.state] - order[b.state] || b.pendingUsd - a.pendingUsd);
 
     return NextResponse.json({
