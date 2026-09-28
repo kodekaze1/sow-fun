@@ -56,7 +56,7 @@ export default function TreasuryCard() {
             <div className="absolute right-0 top-0 w-1 h-full bg-white/50 rounded-r-full animate-shimmer" />
           </div>
         </div>
-        <div className="text-center text-[11px] text-gray-400 mt-1.5">Founder-seeded $25 loan active while treasury scales</div>
+        <div className="text-center text-[11px] text-gray-400 mt-1.5">Founder-seeded $50 across two loans while treasury scales</div>
       </div>
     </div>
   );

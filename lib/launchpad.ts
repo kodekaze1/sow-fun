@@ -18,6 +18,36 @@ export const OPS_FEE_PCT = 10;
 
 export const SITE_URL = "https://sow.fun";
 
+// Kiva's canonical sector ids (verified via API introspection)
+export const KIVA_SECTOR_IDS: Record<string, number> = {
+  Agriculture: 1, Transportation: 3, Services: 4, Clothing: 5, Health: 6,
+  Retail: 7, Manufacturing: 8, Arts: 9, Housing: 10, Food: 12, Wholesale: 13,
+  Construction: 14, Education: 15, "Personal Use": 16, Entertainment: 17,
+  "Clean Energy": 18, "Reuse & Recycle": 19, Water: 20, "Sanitation & Hygiene": 21,
+};
+
+export const KIVA_REGIONS = [
+  "Africa", "Asia", "Central America", "Eastern Europe",
+  "Middle East", "North America", "Oceania", "South America",
+];
+
+export const LOAN_SORTS: { value: string; label: string }[] = [
+  { value: "popularity", label: "Recommended" },
+  { value: "newest", label: "Most recent" },
+  { value: "expiringSoon", label: "Ending soon" },
+  { value: "amountLeft", label: "Almost funded" },
+  { value: "loanAmount", label: "Amount: low to high" },
+  { value: "loanAmountDesc", label: "Amount: high to low" },
+];
+
+export interface LoanSearchParams {
+  q?: string;
+  sector?: number;
+  region?: string;
+  women?: boolean;
+  sort?: string;
+}
+
 export interface FundraisingLoan {
   id: number;
   name: string;

@@ -131,9 +131,9 @@ export default async function Home() {
                 className="bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
                 Launch a coin for a borrower
               </a>
-              <a href="https://www.kiva.org/lend/3157094" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.kiva.org/lender/sowfun" target="_blank" rel="noopener noreferrer"
                 className="border border-[#EDF4F1]/40 hover:border-[#EDF4F1] rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
-                See the first funded loan
+                See the funded loans
               </a>
             </div>
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] opacity-85 mb-4">
@@ -141,7 +141,7 @@ export default async function Home() {
               <span className="flex items-center gap-1.5"><Icon name="vault" className="w-4 h-4 text-[#7FC79E]" />Public treasury on Solana</span>
               <span className="flex items-center gap-1.5"><Icon name="refresh" className="w-4 h-4 text-[#7FC79E]" />Repayments recycled</span>
             </div>
-            <p className="text-sm opacity-70">Harvest #001 is live - Ailyn in the Philippines is already funded</p>
+            <p className="text-sm opacity-70">Harvest #001 is live - Valeti in Tonga and Monica in Kenya are already funded</p>
           </div>
         </div>
       </div>
@@ -227,11 +227,14 @@ export default async function Home() {
                   Proof: <a href={batch.txHash} target="_blank" rel="noopener noreferrer" className="font-mono bg-[#EDF4F1] text-[#276A43] px-1.5 py-0.5 rounded hover:bg-[#D9E6DF] transition-colors">
                     {batch.txHash.includes("kiva.org") ? "Kiva Receipt ↗" : `${batch.txHash.slice(0, 8)}...`}
                   </a>
-                  {" "}{batch.loans} life touched · {stats.feesCollected === 25 ? "Founder Seed" : `$${batch.rate.toFixed(2)}/SOL`}
+                  {" "}{batch.loans} {batch.loans === 1 ? "life" : "lives"} touched · Founder Seed
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDF4F1] text-[#223829]">
-                    🇵🇭 Ailyn $25
+                    🇹🇴 Valeti $25
+                  </span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDF4F1] text-[#223829]">
+                    🇰🇪 Monica $25
                   </span>
                 </div>
               </div>
@@ -410,23 +413,25 @@ export default async function Home() {
       {/* STORY: WAVE #001 */}
       <div className="bg-[#EDF4F1] mt-6">
         <div data-reveal className="max-w-[1100px] mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
-          <img src="/images/ailyn.webp"
-            alt="Ailyn standing in front of her sari-sari store in Barotac Viejo, Philippines"
+          <img src="https://www.kiva.org/img/w960h720/e078314a12027aedad4d2b7069551a72.webp"
+            alt="Valeti, a tapa cloth maker in Tonga"
             className="rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.08)] w-full object-cover aspect-[4/3]" />
           <div>
-            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Harvest #001 · Genesis Loan</div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Harvest #001 · Genesis</div>
             <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-[#223829] mb-4"
               style={{ fontFamily: "var(--font-serif)" }}>
-              Meet Ailyn - <span className="italic text-[#276A43]">the first life lifted.</span>
+              Meet Valeti - <span className="italic text-[#276A43]">the first seed sown.</span>
             </h2>
             <p className="text-[#223829]/80 leading-relaxed mb-3">
-              Ailyn runs a sari-sari store in Barotac Viejo, Iloilo, Philippines. Her Kiva loan helps her stock
-              toothpaste, shampoo, canned sardines, soy sauce and soap - the everyday goods her neighbors count on.
+              Valeti makes tapa cloth in Tonga, and her Kiva loan buys the mulberry her craft depends on.
+              She was funded alongside Monica, whose posho mill feeds her corner of Kenya - two lives,
+              one genesis harvest.
             </p>
             <p className="text-sm text-[#223829]/60 leading-relaxed mb-6">
-              Funded as the sow.fun genesis loan and verifiable on Kiva. Every future harvest adds another story here.
+              Founder-seeded through the card bridge to prove the loop, verifiable on Kiva.
+              Every future harvest adds another story here.
             </p>
-            <a href="https://www.kiva.org/lend/3157094" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.kiva.org/lend/3246961" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
               View her loan on Kiva
               <Icon name="arrow" className="w-4 h-4" />

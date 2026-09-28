@@ -3,50 +3,68 @@
   "wave_number": 1,
   "status": "funding",
   "display": {
-    "headline": "Genesis Harvest: Planting Seeds of Impact",
-    "summary": "The first UPLIFT wave has begun with founder-seeded funding to prove the loop. More loans will be added as treasury deployment scales.",
-    "countries": ["Philippines"],
-    "sectors": ["Personal Care"]
+    "headline": "Genesis Harvest: The First Seeds",
+    "summary": "The first sow.fun harvest, founder-seeded through the KAST card bridge to prove the loop end to end: card deposit, Kiva checkout, two lives funded. A separate one-time $25 donation was made to Kiva's own operations (promo-matched to $50 by Kiva) - donations fund Kiva itself, never borrowers, and are not counted in harvest totals.",
+    "countries": ["Tonga", "Kenya"],
+    "sectors": ["Arts", "Services"]
   },
   "timestamps": {
-    "started": "2026-04-13T14:00:00Z",
-    "last_checked": "2026-04-13T14:15:00Z"
+    "started": "2026-09-28T00:00:00Z",
+    "last_checked": "2026-09-28T00:00:00Z"
   },
   "movements": [
     {
       "direction": "inflow",
-      "type": "donation",
+      "type": "card_deposit",
       "asset": "USD",
-      "amount_raw": "2500",
-      "value_cents": 2500,
-      "tx_hash": "founder_manual_seed",
+      "amount_raw": "5000",
+      "value_cents": 5000,
+      "tx_hash": "kast_card_bridge_test",
       "explorer_url": "manual_seed"
     }
   ],
   "loans": [
     {
-      "kiva_id": "3157094",
+      "kiva_id": "3246961",
       "status": "funded",
-      "borrower": "Ailyn",
-      "location": "Philippines",
+      "borrower": "Valeti",
+      "location": "Tonga",
       "uplift_cents": 2500,
-      "total_loan_cents": 2500,
+      "total_loan_cents": 42500,
       "repaid_cents": 0,
-      "photo_url": "",
+      "photo_url": "https://www.kiva.org/img/w960h720/e078314a12027aedad4d2b7069551a72.webp",
       "verification": {
         "verified": true,
-        "verified_at": "2026-04-13T14:06:00Z",
+        "verified_at": "2026-09-28T00:00:00Z",
         "source_urls": [
-          "https://www.kiva.org/lend/3157094",
-          "https://www.kiva.org/lender/upliftifyfun"
+          "https://www.kiva.org/lend/3246961",
+          "https://www.kiva.org/lender/sowfun"
         ]
       },
-
-      "notes": "Initial test funding made by project founder via personal card before treasury-funded waves begin."
+      "notes": "Tapa cloth maker purchasing mulberry for her textiles business. Founder-seeded via the KAST card bridge test."
+    },
+    {
+      "kiva_id": "3248088",
+      "status": "funded",
+      "borrower": "Monica",
+      "location": "Kenya",
+      "uplift_cents": 2500,
+      "total_loan_cents": 20000,
+      "repaid_cents": 0,
+      "photo_url": "https://www.kiva.org/img/w960h720/84368dc8b926b6178b83a7882f6d546d.webp",
+      "verification": {
+        "verified": true,
+        "verified_at": "2026-09-28T00:00:00Z",
+        "source_urls": [
+          "https://www.kiva.org/lend/3248088",
+          "https://www.kiva.org/lender/sowfun"
+        ]
+      },
+      "notes": "Posho mill operator maintaining equipment and buying spare parts. Founder-seeded via the KAST card bridge test."
     }
   ],
   "totals": {
-    "uplift_deployed_cents": 2500,
-    "loan_principal_supported_cents": 2500
+    "uplift_deployed_cents": 5000,
+    "loan_principal_supported_cents": 62500
   }
 }

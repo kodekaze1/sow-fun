@@ -208,6 +208,12 @@ export default function TreasuryPage() {
           ))}
         </div>
 
+        <div className="text-xs text-gray-400 text-center leading-relaxed -mt-3 px-4">
+          Separately from harvests: a one-time $25 donation was made to Kiva&apos;s own operations
+          (promo-matched to $50 by Kiva). Donations fund Kiva itself, never borrowers, so they are
+          disclosed here but never counted as loans deployed.
+        </div>
+
         {/* HOW FUNDS FLOW */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-xl font-extrabold text-[#223829] mb-4">How Funds Flow</h2>

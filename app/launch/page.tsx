@@ -11,6 +11,9 @@ import {
   IMPACT_FEE_PCT,
   OPS_FEE_PCT,
   POOL_FEE_BPS,
+  KIVA_SECTOR_IDS,
+  KIVA_REGIONS,
+  LOAN_SORTS,
   tokenMetadataUri,
   type FundraisingLoan,
 } from "@/lib/launchpad";
@@ -26,6 +29,10 @@ export default function LaunchPage() {
   const [loans, setLoans] = useState<FundraisingLoan[]>([]);
   const [loadingLoans, setLoadingLoans] = useState(true);
   const [search, setSearch] = useState("");
+  const [region, setRegion] = useState("");
+  const [sector, setSector] = useState("");
+  const [women, setWomen] = useState(false);
+  const [sort, setSort] = useState("popularity");
   const [borrower, setBorrower] = useState<FundraisingLoan | null>(null);
 
   const [name, setName] = useState("");
@@ -38,10 +45,16 @@ export default function LaunchPage() {
 
   const configReady = DBC_CONFIG_KEY.length > 30;
 
-  const fetchLoans = useCallback(async (q: string) => {
+  const fetchLoans = useCallback(async (params: { q: string; region: string; sector: string; women: boolean; sort: string }) => {
     setLoadingLoans(true);
     try {
-      const res = await fetch(`/api/kiva/fundraising${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+      const query = new URLSearchParams();
+      if (params.q) query.set("q", params.q);
+      if (params.region) query.set("region", params.region);
+      if (params.sector) query.set("sector", params.sector);
+      if (params.women) query.set("women", "1");
+      if (params.sort) query.set("sort", params.sort);
+      const res = await fetch(`/api/kiva/fundraising?${query.toString()}`);
       const data = await res.json();
       setLoans(data.loans ?? []);
     } catch {
@@ -52,14 +65,9 @@ export default function LaunchPage() {
   }, []);
 
   useEffect(() => {
-    fetchLoans("");
-  }, [fetchLoans]);
-
-  useEffect(() => {
-    const t = setTimeout(() => fetchLoans(search), 450);
+    const t = setTimeout(() => fetchLoans({ q: search, region, sector, women, sort }), 400);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, region, sector, women, sort, fetchLoans]);
 
   const launch = async () => {
     if (!wallet.publicKey || !wallet.sendTransaction || !borrower) return;
@@ -149,10 +157,12 @@ export default function LaunchPage() {
           <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight mb-3">
             Launch a coin <span className="italic text-[#F8CD69]">for a borrower.</span>
           </h1>
-          <p className="opacity-80 max-w-lg mx-auto">
+          <p className="opacity-85 max-w-md mx-auto leading-relaxed">
             Pick a real person raising on Kiva. {CREATOR_FEE_PCT}% of trading fees are yours,{" "}
-            {IMPACT_FEE_PCT}% fund their loan and future harvests, {OPS_FEE_PCT}% keep the lights on. Nobody can change it after launch.
-            And every borrower your token fully funds earns you $SOW rewards.
+            {IMPACT_FEE_PCT}% fund their loan, {OPS_FEE_PCT}% keep the lights on.
+          </p>
+          <p className="opacity-60 max-w-md mx-auto leading-relaxed text-sm mt-3">
+            Nobody can change the split after launch - and every borrower your token fully funds earns you $SOW rewards.
           </p>
         </div>
       </div>
@@ -186,13 +196,38 @@ export default function LaunchPage() {
         {/* STEP 1 */}
         {step === 1 && (
           <div className="pb-16">
-            <div className="relative mb-5">
+            <div className="relative mb-3">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search borrowers - try 'tailor', 'farm', 'Philippines'..."
+                placeholder="Search borrowers - try 'tailor', 'farm', 'solar'..."
                 className="w-full rounded-full border border-[#D9E6DF] px-5 py-3 text-sm focus:outline-none focus:border-[#276A43]"
               />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              <select value={region} onChange={(e) => setRegion(e.target.value)}
+                className="rounded-full border border-[#D9E6DF] bg-white px-3.5 py-2 text-xs font-bold text-[#223829] focus:outline-none focus:border-[#276A43]">
+                <option value="">All regions</option>
+                {KIVA_REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+              <select value={sector} onChange={(e) => setSector(e.target.value)}
+                className="rounded-full border border-[#D9E6DF] bg-white px-3.5 py-2 text-xs font-bold text-[#223829] focus:outline-none focus:border-[#276A43]">
+                <option value="">All sectors</option>
+                {Object.entries(KIVA_SECTOR_IDS).map(([name, id]) => <option key={id} value={id}>{name}</option>)}
+              </select>
+              <button onClick={() => setWomen(!women)}
+                className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors border ${
+                  women ? "bg-[#276A43] text-white border-[#276A43]" : "bg-white text-[#223829] border-[#D9E6DF] hover:border-[#276A43]"
+                }`}>
+                Women
+              </button>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">Sort</span>
+                <select value={sort} onChange={(e) => setSort(e.target.value)}
+                  className="rounded-full border border-[#D9E6DF] bg-white px-3.5 py-2 text-xs font-bold text-[#223829] focus:outline-none focus:border-[#276A43]">
+                  {LOAN_SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
             </div>
             {loadingLoans ? (
               <div className="py-16 text-center text-gray-400 text-sm">Finding live borrowers on Kiva...</div>

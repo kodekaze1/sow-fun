@@ -1,5 +1,5 @@
 import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID } from "@/lib/constants";
-import type { FundraisingLoan } from "@/lib/launchpad";
+import type { FundraisingLoan, LoanSearchParams } from "@/lib/launchpad";
 
 const GRAPHQL_URL = "https://api.kivaws.org/graphql";
 
@@ -48,12 +48,39 @@ type FundraisingSearchData = {
   };
 };
 
-// Live fundraising borrowers for the launchpad picker.
-export async function searchFundraisingLoans(query?: string, limit = 12): Promise<FundraisingLoan[]> {
-  const q = query ? `,queryString:${JSON.stringify(query)}` : "";
+// Region -> ISO country codes, resolved live from Kiva's country facets (cached 1h)
+let regionMapCache: { at: number; map: Record<string, string[]> } | null = null;
+async function getRegionCountryMap(): Promise<Record<string, string[]>> {
+  if (regionMapCache && Date.now() - regionMapCache.at < 3600_000) return regionMapCache.map;
+  const data = await kivaGQL<{ lend: { countryFacets: { country: { isoCode: string; region: string } }[] } }>(
+    `{lend{countryFacets{country{isoCode region}}}}`,
+    3600
+  );
+  const map: Record<string, string[]> = {};
+  for (const f of data.lend.countryFacets) {
+    if (!f.country.region || !f.country.isoCode) continue;
+    (map[f.country.region] ??= []).push(f.country.isoCode);
+  }
+  regionMapCache = { at: Date.now(), map };
+  return map;
+}
+
+// Live fundraising borrowers for the launchpad picker, with Kiva-style filters.
+export async function searchFundraisingLoans(params: LoanSearchParams = {}, limit = 12): Promise<FundraisingLoan[]> {
+  const filters: string[] = ["status:fundraising"];
+  if (params.sector) filters.push(`sector:[${params.sector}]`);
+  if (params.women) filters.push("gender:female");
+  if (params.region) {
+    const map = await getRegionCountryMap().catch(() => ({} as Record<string, string[]>));
+    const isoCodes = map[params.region];
+    if (isoCodes?.length) filters.push(`country:${JSON.stringify(isoCodes)}`);
+  }
+  const q = params.q ? `,queryString:${JSON.stringify(params.q)}` : "";
+  const validSorts = ["popularity", "newest", "expiringSoon", "amountLeft", "loanAmount", "loanAmountDesc"];
+  const sort = validSorts.includes(params.sort ?? "") ? params.sort : "popularity";
   const data = await kivaGQL<FundraisingSearchData>(
-    `{lend{loans(filters:{status:fundraising}${q},limit:${limit},sortBy:popularity){totalCount values{id name loanAmount use image{url(customSize:"w480h360")} activity{name} sector{name} geocode{country{name}} borrowerCount loanFundraisingInfo{fundedAmount}}}}}`,
-    300
+    `{lend{loans(filters:{${filters.join(",")}}${q},limit:${limit},sortBy:${sort}){totalCount values{id name loanAmount use image{url(customSize:"w480h360")} activity{name} sector{name} geocode{country{name}} borrowerCount loanFundraisingInfo{fundedAmount}}}}}`,
+    120
   );
   return (data.lend.loans.values ?? []).map((l) => ({
     id: l.id,
