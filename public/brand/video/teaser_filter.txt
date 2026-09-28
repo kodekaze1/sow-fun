@@ -1,0 +1,9 @@
+[0:v]trim=0:6,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24[v0];
+[0:a]atrim=0:6,asetpts=PTS-STARTPTS[a0];
+[1:v]trim=0:7,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24[v1];
+[1:a]atrim=0:7,asetpts=PTS-STARTPTS[a1];
+[2:v]scale=520:520,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0xF8F2E6,setsar=1,fps=24[v2];
+[v0][v1]xfade=transition=fade:duration=0.5:offset=5.5[x1];
+[x1][v2]xfade=transition=fade:duration=0.5:offset=12[vout];
+[a0][a1]acrossfade=d=0.5[am];
+[am][3:a]acrossfade=d=0.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]

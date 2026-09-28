@@ -1,0 +1,16 @@
+[0:v]scale=1920:1080:flags=lanczos,setsar=1,fps=24[v0];
+[1:v]scale=1920:1080:flags=lanczos,setsar=1,fps=24[v1];
+[2:v]scale=1920:1080:flags=lanczos,setsar=1,fps=24[v2];
+[3:v]scale=1920:1080:flags=lanczos,setsar=1,fps=24[v3];
+[4:v]scale=1920:1080:flags=lanczos,setsar=1,fps=24[v4];
+[5:v]scale=1920:1080:flags=lanczos,setsar=1,fps=24[v5];
+[v0][v1]xfade=transition=fade:duration=0.5:offset=7.5[x1];
+[x1][v2]xfade=transition=fade:duration=0.5:offset=15[x2];
+[x2][v3]xfade=transition=fade:duration=0.5:offset=22.5[x3];
+[x3][v4]xfade=transition=fade:duration=0.5:offset=30[x4];
+[x4][v5]xfade=transition=fade:duration=0.5:offset=37.5[vout];
+[0:a][1:a]acrossfade=d=0.5[a1];
+[a1][2:a]acrossfade=d=0.5[a2];
+[a2][3:a]acrossfade=d=0.5[a3];
+[a3][4:a]acrossfade=d=0.5[a4];
+[a4][5:a]acrossfade=d=0.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]

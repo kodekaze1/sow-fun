@@ -6,3 +6,6 @@ node_modules/
 # playwright artifacts
 .playwright-mcp/
 .vercel
+
+# promo video sources/renders (heavy binaries, kept local only)
+public/brand/video/*.mp4
