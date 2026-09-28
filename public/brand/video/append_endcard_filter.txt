@@ -1,0 +1,2 @@
+[0:v][1:v]xfade=transition=fade:duration=0.7:offset=44.8[vout];
+[0:a][1:a]acrossfade=d=0.7[aout]

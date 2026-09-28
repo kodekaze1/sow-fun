@@ -1,0 +1,5 @@
+[0:v]scale=1920:1080:flags=lanczos,setsar=1,fps=24,
+drawbox=x=0:y=0:w=iw:h=ih:color=0xF8F2E6@0.82:t=fill,
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='sow.fun':fontsize=190:fontcolor=0x223829:x=(w-text_w)/2:y=360,
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='Sow a coin. Grow a life.':fontsize=68:fontcolor=0x276A43:x=(w-text_w)/2:y=620,
+drawtext=fontfile='C\:/Windows/Fonts/georgia.ttf':text='@sowfunhq':fontsize=42:fontcolor=0x223829@0.55:x=(w-text_w)/2:y=960[vout]
