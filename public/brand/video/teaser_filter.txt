@@ -2,5 +2,7 @@
 [1:v]trim=0:7.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v1];
 [2:v]fps=24,settb=AVTB[v2];
 [v0][v1]xfade=transition=fade:duration=0.5:offset=5.0[x1];
-[x1][v2]xfade=transition=fade:duration=0.7:offset=11.8[vout];
+[x1]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Launch a coin.':expansion=none:fontsize=58:fontcolor=0x223829:box=1:boxcolor=0xF8F2E6@0.85:boxborderw=20:x=(w-text_w)/2:y=h-200:enable='between(t,0.8,4.6)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='45% of every trade funds a real Kiva loan.':expansion=none:fontsize=52:fontcolor=0x223829:box=1:boxcolor=0xF8F2E6@0.85:boxborderw=20:x=(w-text_w)/2:y=h-200:enable='between(t,5.8,11.2)'[xt];
+[xt][v2]xfade=transition=fade:duration=0.7:offset=11.8[vout];
 [3:a]atrim=0:15.3,afade=t=out:st=12.8:d=2.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]
