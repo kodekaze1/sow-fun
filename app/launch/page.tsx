@@ -200,6 +200,21 @@ export default function LaunchPage() {
           ))}
         </div>
 
+        {/* WALLET BAR - visible on every step */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          {!wallet.connected && (
+            <span className="text-sm text-gray-500">Connect your wallet to launch:</span>
+          )}
+          <WalletMultiButton style={{
+            borderRadius: "9999px",
+            background: wallet.connected ? "#EDF4F1" : "#276A43",
+            color: wallet.connected ? "#223829" : "#ffffff",
+            fontSize: "13px",
+            fontWeight: 700,
+            height: "40px",
+          }} />
+        </div>
+
         {!configReady && (
           <div className="mb-8 bg-[#F8F2E6] border border-[#F8CD69]/50 rounded-2xl p-4 text-sm text-[#996210] text-center">
             The launchpad pool config is in final setup - you can explore the flow, and launching opens the moment it is live.

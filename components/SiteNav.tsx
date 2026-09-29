@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KIVA_LENDER_URL } from "@/lib/constants";
 
 const LINKS = [
@@ -17,6 +17,16 @@ export default function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  // "My coins" only appears once a wallet has connected on this device
+  // (the wallet adapter persists walletName in localStorage on connect).
+  const [hasWallet, setHasWallet] = useState(false);
+  useEffect(() => {
+    try {
+      setHasWallet(!!localStorage.getItem("walletName"));
+    } catch { /* storage unavailable */ }
+  }, [pathname]);
+  const links = LINKS.filter((l) => l.href !== "/my" || hasWallet || pathname === "/my");
+
   return (
     <nav className="bg-white/95 backdrop-blur border-b border-[#EDF4F1] sticky top-0 z-[500] shadow-[0_2px_12px_rgba(34,56,41,0.05)]">
       <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
@@ -26,7 +36,7 @@ export default function SiteNav() {
         </Link>
 
         <div className="hidden lg:flex items-center gap-6">
-          {LINKS.map(({ href, label }) => {
+          {links.map(({ href, label }) => {
             const active = pathname === href;
             return (
               <Link key={href} href={href}
@@ -71,7 +81,7 @@ export default function SiteNav() {
 
       {open && (
         <div className="lg:hidden border-t border-[#EDF4F1] bg-white px-6 py-4 flex flex-col gap-1">
-          {LINKS.map(({ href, label }) => (
+          {links.map(({ href, label }) => (
             <Link key={href} href={href} onClick={() => setOpen(false)}
               className={`py-2.5 text-sm font-semibold rounded-lg px-3 -mx-3 transition-colors ${
                 pathname === href ? "text-[#276A43] bg-[#EDF4F1]" : "text-[#223829] hover:bg-[#EDF4F1]/60"
