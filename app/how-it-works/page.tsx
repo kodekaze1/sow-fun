@@ -95,7 +95,7 @@ export default function HowItWorksPage() {
         {/* CYCLE ILLUSTRATION */}
         <div className="mt-16 text-center">
           <img src="/images/illustrations/cycle.png" alt="Sow, grow, harvest, repeat"
-            className="w-full max-w-md mx-auto rotate-[-1.5deg]" />
+            className="w-full max-w-md mx-auto rotate-[-1.5deg] mix-blend-multiply" />
           <p className="text-sm text-gray-400 italic mt-3" style={{ fontFamily: "var(--font-serif)" }}>
             Sow. Grow. Harvest. Repeat.
           </p>

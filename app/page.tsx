@@ -168,6 +168,8 @@ export default async function Home() {
 
       {/* SECTION INTRO */}
       <div className="max-w-[1440px] mx-auto px-6 pt-14 pb-2 text-center" data-reveal>
+        <img src="/images/illustrations/lock-sprout.png" alt="" aria-hidden="true"
+          className="w-24 mx-auto mb-4 rotate-[2deg] mix-blend-multiply" />
         <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2.5">Live transparency</div>
         <h2 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-[#223829]">Watch the treasury work.</h2>
       </div>
@@ -323,8 +325,11 @@ export default async function Home() {
       </div>
 
       {/* THE COLLECTION */}
-      <div className="max-w-[1100px] mx-auto px-6 pt-16 pb-6" data-reveal>
+      <div className="bg-[#FBF6EA]/80 border-y border-[#F8CD69]/25 mt-10">
+      <div className="max-w-[1100px] mx-auto px-6 pt-14 pb-14" data-reveal>
         <div className="text-center mb-8">
+          <img src="/images/illustrations/watering.png" alt="" aria-hidden="true"
+            className="w-28 mx-auto mb-4 rotate-[-2deg] mix-blend-multiply" />
           <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2.5">The Collection</div>
           <h2 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-[#223829]">
             Collect the <span className="italic text-[#276A43]">whole world.</span>
@@ -408,6 +413,7 @@ export default async function Home() {
             <Icon name="arrow" className="w-4 h-4" />
           </a>
         </div>
+      </div>
       </div>
 
       {/* STORY: WAVE #001 */}

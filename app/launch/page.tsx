@@ -121,9 +121,8 @@ export default function LaunchPage() {
     return (
       <div className="min-h-screen bg-white">
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-[#EDF4F1] p-2 rotate-[-3deg]">
-            <img src="/images/illustrations/plant-coin.png" alt="" className="w-full h-full object-contain" />
-          </div>
+          <img src="/images/illustrations/watering.png" alt="" aria-hidden="true"
+            className="w-36 mx-auto mb-6 rotate-[-2deg] mix-blend-multiply" />
           <h1 className="font-serif text-4xl font-medium tracking-tight mb-4">${symbol} is live.</h1>
           <p className="text-[#223829]/75 leading-relaxed mb-6">
             Your token is trading on its own bonding curve, and {IMPACT_FEE_PCT}% of every trade is pledged to{" "}

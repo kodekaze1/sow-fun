@@ -217,6 +217,8 @@ export default function TreasuryPage() {
 
         {/* HOW FUNDS FLOW */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
+          <img src="/images/illustrations/receipt-trail.png" alt="" aria-hidden="true"
+            className="w-full max-w-sm mx-auto mb-5 rotate-[-1deg] mix-blend-multiply" />
           <h2 className="text-xl font-extrabold text-[#223829] mb-4">How Funds Flow</h2>
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center">
             {[

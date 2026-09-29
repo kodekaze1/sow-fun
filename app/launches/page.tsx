@@ -41,9 +41,8 @@ export default async function LaunchesPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         {launches.length === 0 ? (
           <div className="py-20 text-center">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-[#EDF4F1] p-2 rotate-[-3deg]">
-              <img src="/images/illustrations/plant-coin.png" alt="" className="w-full h-full object-contain" />
-            </div>
+            <img src="/images/illustrations/plant-coin.png" alt="" aria-hidden="true"
+              className="w-32 mx-auto mb-6 rotate-[-3deg] mix-blend-multiply" />
             <h2 className="font-serif text-2xl font-semibold mb-3">No launches yet - the soil is ready.</h2>
             <p className="text-gray-500 text-sm mb-8 max-w-md mx-auto">
               The first token launched here becomes the genesis of the board. Its borrower becomes the first story.
