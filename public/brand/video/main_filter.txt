@@ -9,11 +9,11 @@
 [x2][v3]xfade=transition=fade:duration=0.5:offset=15.5[x3];
 [x3][v4]xfade=transition=fade:duration=0.5:offset=20.5[x4];
 [x4][v5]xfade=transition=fade:duration=0.5:offset=25.0[x5];
-[x5]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Launch a coin.':expansion=none:fontsize=64:fontcolor=0x223829:borderw=12:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-210:enable='between(t,0.8,4.6)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='45% of every trade is locked for a real Kiva loan.':expansion=none:fontsize=54:fontcolor=0x223829:borderw=12:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-210:enable='between(t,5.6,9.6)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='It funds someone real.':expansion=none:fontsize=64:fontcolor=0x223829:borderw=12:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-210:enable='between(t,10.6,15.0)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Every hop has a receipt.':expansion=none:fontsize=64:fontcolor=0x223829:borderw=12:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-210:enable='between(t,16.0,20.0)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Sow. Grow. Harvest. Repeat.':expansion=none:fontsize=64:fontcolor=0x223829:borderw=12:bordercolor=0xF8F2E6@0.75:x=(w-text_w)/2:y=h-210:enable='between(t,21.0,24.6)'[xt];
+[x5]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Launch a coin.':expansion=none:fontsize=64:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=110:enable='between(t,0.8,4.6)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='45% of every trade is locked for a real Kiva loan.':expansion=none:fontsize=48:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=52:enable='between(t,5.6,9.6)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='It funds someone real.':expansion=none:fontsize=50:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=110:y=505:enable='between(t,10.6,14.5)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Every hop has a receipt.':expansion=none:fontsize=58:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=h-140:enable='between(t,16.0,20.0)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Sow. Grow. Harvest. Repeat.':expansion=none:fontsize=54:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=110:y=84:enable='between(t,21.0,24.6)'[xt];
 [6:v]fps=24,settb=AVTB[v6];
 [xt][v6]xfade=transition=fade:duration=0.7:offset=31.8[vout];
 [7:a]atrim=0:35.8,afade=t=out:st=33.3:d=2.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]

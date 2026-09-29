@@ -92,6 +92,15 @@ export default function HowItWorksPage() {
           </div>
         </div>
 
+        {/* CYCLE ILLUSTRATION */}
+        <div className="mt-16 text-center">
+          <img src="/images/illustrations/cycle.png" alt="Sow, grow, harvest, repeat"
+            className="w-full max-w-md mx-auto rotate-[-1.5deg]" />
+          <p className="text-sm text-gray-400 italic mt-3" style={{ fontFamily: "var(--font-serif)" }}>
+            Sow. Grow. Harvest. Repeat.
+          </p>
+        </div>
+
         {/* TRUST SECTION */}
         <div className="mt-16 bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Why You Can Trust This</h2>
