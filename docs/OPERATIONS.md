@@ -102,6 +102,16 @@ If a creator never adopts within ~7 days of their loan closing, operator
 assigns the next borrower in the same sector/country (memo_tx stays ""),
 noted as operator-assigned. The pledge never idles.
 
+## Genesis Vault ($SOW creator share)
+
+$SOW's 45% creator share belongs to the project and accrues to the Genesis
+Vault (claim with the creator flow, same as any creator). Public commitment:
+it is deployed back into the ecosystem - bonus loans, $SOW buyback+burn, or
+community rewards - at operator discretion based on what $SOW needs, and
+EVERY deployment is published in the ledger with tx receipts. Never market-
+sold quietly. Record vault deployments as movements in the wave files with
+type and explorer links, same standard as harvests.
+
 ## Creator rewards (data/rewards.json)
 
 Executed at harvest time, from each coin's EXCESS only (80/10/10 rule):

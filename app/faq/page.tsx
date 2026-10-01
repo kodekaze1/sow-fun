@@ -20,6 +20,10 @@ const FAQS = [
         a: "No presale. No whitelist. Fair launch only - everyone gets in at the same time, same price. This is intentional: a fair launch creates a level playing field and avoids the insider dumps that kill most tokens.",
       },
       {
+        q: "What happens to $SOW's own trading fees?",
+        a: "$SOW is a launchpad coin like any other - it launched through the same immutable pool config, so 45% of its fees fund its pledged Kiva borrowers and 10% covers operations. The 45% creator share, which for the genesis coin belongs to the project, accrues to the public Genesis Vault. That vault is committed back to the ecosystem - bonus loans beyond the pledge, $SOW buyback-and-burns, or community rewards, depending on what does the most good as the project grows. The mix stays flexible by design, but every deployment is published in the ledger with transaction receipts. It is never sold off quietly.",
+      },
+      {
         q: "What is the total supply?",
         a: "1,000,000,000 $SOW (1 billion). 80% is available via fair launch, 10% goes to the liquidity pool (locked for 1 year), 5% to the team (vested 18 months), and 5% to a community/airdrop reserve.",
       },

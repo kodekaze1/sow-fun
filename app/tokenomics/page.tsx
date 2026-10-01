@@ -144,6 +144,30 @@ export default function TokenomicsPage() {
           </p>
         </div>
 
+        {/* GENESIS VAULT */}
+        <div className="bg-[#FBF6EA]/80 rounded-2xl border border-[#F8CD69]/30 p-8">
+          <h2 className="text-2xl font-extrabold text-[#223829] mb-2">$SOW is a launchpad coin too</h2>
+          <p className="text-gray-400 text-sm mb-5">
+            The genesis coin gets no special treatment - it launched through the same pool config as every other coin.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-4">
+            That means $SOW&apos;s fees follow the same locked split: 45% to its pledged Kiva borrowers,
+            10% to operations - and the 45% creator share, which for $SOW belongs to the project itself,
+            accrues to the <span className="font-bold text-[#223829]">Genesis Vault</span>.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-4">
+            The Genesis Vault is committed back to the garden. Depending on what $SOW needs as it grows,
+            deployments can fund bonus borrower loans beyond the pledge, buy back and burn $SOW, or
+            reward the community. We keep the mix flexible on purpose - but never quiet: every Genesis
+            Vault deployment is published in the ledger with transaction receipts, and the vault&apos;s
+            address is public. It is never sold off silently.
+          </p>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            In short: 55% of every $SOW trade is pre-committed (45 loans, 10 ops), and the remaining 45%
+            works for the ecosystem in whichever form does the most good at the time - with receipts.
+          </p>
+        </div>
+
         {/* CTA */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-8 py-3.5 text-sm font-bold transition-all shadow-lg">
