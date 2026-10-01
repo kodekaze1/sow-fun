@@ -6,13 +6,13 @@ Attach the image listed under each tweet (all in this folder unless noted).
 ---
 
 ## 1. The thesis (PIN THIS)
-Image: ../x-banner.png
+Image: sow-promo-main.mp4 (../video/) - fallback ../x-banner.png
 
-every launchpad points fees at someone famous.
+memecoins generate millions in trading fees. almost none of it lands anywhere that matters.
 
-we point them at someone who needs $500.
+sow.fun points them at people. launch a coin for a real borrower on Kiva - 45% of every trade funds their microloan, some as small as $100.
 
-sow.fun - launch a coin for a real borrower on Kiva. 45% of every trade funds their loan. locked at launch. receipts for every hop.
+locked at launch. receipts for every hop.
 
 you reap what you sow 🌱
 
