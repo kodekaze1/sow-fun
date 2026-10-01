@@ -97,7 +97,7 @@ const SECTIONS: { title: string; body: (string | React.ReactNode)[] }[] = [
   {
     title: "15. Contact",
     body: [
-      "SOW FUN LLC - questions about these Terms: hello@sow.fun, or @sowfunhq on X.",
+      "SOW FUN LLC - questions about these Terms: contact@sow.fun, or @sowfunhq on X.",
     ],
   },
 ];

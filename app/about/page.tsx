@@ -122,9 +122,9 @@ export default function AboutPage() {
               className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-7 py-3 text-sm font-bold transition-colors">
               @sowfunhq on X
             </a>
-            <a href="mailto:hello@sow.fun"
+            <a href="mailto:contact@sow.fun"
               className="inline-flex items-center gap-2 border border-[#D9E6DF] hover:border-[#276A43] text-[#223829] rounded-full px-7 py-3 text-sm font-bold transition-colors">
-              hello@sow.fun
+              contact@sow.fun
             </a>
           </div>
         </div>
