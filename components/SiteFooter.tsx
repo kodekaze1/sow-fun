@@ -16,6 +16,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     title: "Learn",
     links: [
       { href: "/how-it-works", label: "How It Works" },
+      { href: "/about", label: "About Us" },
       { href: "/faq", label: "FAQ" },
       { href: X_LINK, label: "@sowfunhq on X", external: true },
     ],
@@ -74,10 +75,12 @@ export default function SiteFooter() {
 
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="font-mono text-xs opacity-60">
-            sow.fun · Treasury: sowS...HtD2 · Built on Solana
+            © {new Date().getFullYear()} SOW FUN LLC · Treasury: sowS...HtD2 · Built on Solana
           </div>
-          <div className="text-xs opacity-40 text-center sm:text-right">
-            sow.fun is an independent community project, not affiliated with or endorsed by Kiva.
+          <div className="flex items-center gap-4 text-xs">
+            <Link href="/about" className="opacity-60 hover:opacity-100 transition-opacity">About</Link>
+            <Link href="/terms" className="opacity-60 hover:opacity-100 transition-opacity">Terms of Service</Link>
+            <span className="opacity-40 hidden sm:inline">Not affiliated with or endorsed by Kiva.</span>
           </div>
         </div>
       </div>
