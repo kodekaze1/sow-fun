@@ -56,6 +56,50 @@ export default function LaunchPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ mint: string; signature: string } | null>(null);
 
+  // AI helpers
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiReasons, setAiReasons] = useState<Record<number, string>>({});
+  const [aiNote, setAiNote] = useState<string | null>(null);
+  const [ideas, setIdeas] = useState<{ name: string; ticker: string; blurb: string }[] | null>(null);
+  const [ideasLoading, setIdeasLoading] = useState(false);
+
+  const aiMatch = async () => {
+    if (!search.trim() || aiLoading) return;
+    setAiLoading(true);
+    setAiNote(null);
+    try {
+      const res = await fetch("/api/ai/launch-helper", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "search", query: search }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "AI match failed");
+      setLoans(data.loans ?? []);
+      setAiReasons(data.reasons ?? {});
+      if ((data.loans ?? []).length === 0) setAiNote("No live borrowers matched - try different words.");
+    } catch (e) {
+      setAiNote(e instanceof Error ? e.message : "AI match failed - the filters below still work.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const suggestIdeas = async () => {
+    if (!borrower || ideasLoading) return;
+    setIdeasLoading(true);
+    try {
+      const res = await fetch("/api/ai/launch-helper", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "concierge", borrower }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ideas?.length) setIdeas(data.ideas);
+    } catch { /* quiet - manual entry always works */ }
+    finally { setIdeasLoading(false); }
+  };
+
   const configReady = DBC_CONFIG_KEY.length > 30;
 
   const fetchLoans = useCallback(async (params: { q: string; region: string; sector: string; women: boolean; sort: string }) => {
@@ -78,6 +122,8 @@ export default function LaunchPage() {
   }, []);
 
   useEffect(() => {
+    setAiReasons({});
+    setAiNote(null);
     const t = setTimeout(() => fetchLoans({ q: search, region, sector, women, sort }), 400);
     return () => clearTimeout(t);
   }, [search, region, sector, women, sort, fetchLoans]);
@@ -224,14 +270,25 @@ export default function LaunchPage() {
         {/* STEP 1 */}
         {step === 1 && (
           <div className="pb-16">
-            <div className="relative mb-3">
+            <div className="relative mb-3 flex gap-2">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search borrowers - try 'tailor', 'farm', 'solar'..."
-                className="w-full rounded-full border border-[#D9E6DF] px-5 py-3 text-sm focus:outline-none focus:border-[#276A43]"
+                onKeyDown={(e) => e.key === "Enter" && aiMatch()}
+                placeholder="Describe who you want to help - 'a solar seller in East Africa', 'a tailor I can fully fund'..."
+                className="flex-1 rounded-full border border-[#D9E6DF] px-5 py-3 text-sm focus:outline-none focus:border-[#276A43]"
               />
+              <button
+                onClick={aiMatch}
+                disabled={aiLoading || !search.trim()}
+                className="flex-shrink-0 rounded-full bg-[#223829] hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 text-white px-5 py-3 text-sm font-bold transition-colors"
+              >
+                {aiLoading ? "Matching..." : "✨ AI match"}
+              </button>
             </div>
+            {aiNote && (
+              <div className="mb-3 text-sm text-[#996210] bg-[#F8F2E6] border border-[#F8CD69]/40 rounded-xl px-4 py-2.5">{aiNote}</div>
+            )}
             <div className="flex flex-wrap items-center gap-2 mb-5">
               <select value={region} onChange={(e) => setRegion(e.target.value)}
                 className="rounded-full border border-[#D9E6DF] bg-white px-3.5 py-2 text-xs font-bold text-[#223829] focus:outline-none focus:border-[#276A43]">
@@ -267,7 +324,7 @@ export default function LaunchPage() {
                   return (
                     <button
                       key={loan.id}
-                      onClick={() => { setBorrower(loan); setStep(2); }}
+                      onClick={() => { setBorrower(loan); setIdeas(null); setStep(2); }}
                       className="text-left bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden hover:border-[#276A43] hover:shadow-[0_10px_28px_rgba(34,56,41,0.12)] transition-all"
                     >
                       {loan.image && (
@@ -281,6 +338,9 @@ export default function LaunchPage() {
                           <span className="text-sm font-extrabold text-[#223829]">${loan.loanAmount.toLocaleString()}</span>
                         </div>
                         <div className="text-xs text-gray-500 mb-2">{loan.activity} · {loan.country}</div>
+                        {aiReasons[loan.id] && (
+                          <p className="text-[12px] text-[#276A43] font-semibold italic mb-1.5">✨ {aiReasons[loan.id]}</p>
+                        )}
                         <p className="text-[13px] text-gray-600 leading-snug line-clamp-2 mb-3">
                           A loan {loan.use}
                         </p>
@@ -323,6 +383,31 @@ export default function LaunchPage() {
                 your coin adopts. Prefer a bigger runway? <button onClick={() => setStep(1)} className="underline font-bold">Pick a loan with more to go</button>.
               </div>
             )}
+
+            <div className="mb-5">
+              <button
+                onClick={suggestIdeas}
+                disabled={ideasLoading}
+                className="w-full rounded-xl border border-dashed border-[#2AA967]/60 bg-[#EDF4F1]/50 hover:bg-[#EDF4F1] disabled:opacity-60 text-[#276A43] px-4 py-2.5 text-sm font-bold transition-colors"
+              >
+                {ideasLoading ? "Thinking of names..." : `✨ Suggest a name & ticker for ${borrower.name}'s coin`}
+              </button>
+              {ideas && (
+                <div className="mt-2.5 flex flex-col gap-2">
+                  {ideas.map((idea) => (
+                    <button key={idea.ticker}
+                      onClick={() => { setName(idea.name); setSymbol(idea.ticker); }}
+                      className={`text-left rounded-xl border px-4 py-2.5 transition-colors ${
+                        symbol === idea.ticker ? "border-[#276A43] bg-[#EDF4F1]" : "border-[#E4EBE7] hover:border-[#276A43]"
+                      }`}>
+                      <span className="text-sm font-bold text-[#223829]">{idea.name}</span>
+                      <span className="font-mono text-xs text-[#276A43] font-bold ml-2">${idea.ticker}</span>
+                      <span className="block text-xs text-gray-500 mt-0.5">{idea.blurb}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <label className="block text-xs font-black uppercase tracking-widest text-[#276A43] mb-1.5">Token name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} maxLength={32}
