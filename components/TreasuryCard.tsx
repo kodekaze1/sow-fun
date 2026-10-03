@@ -4,10 +4,14 @@ import type { TreasuryData } from "@/lib/types";
 import { MOCK_STATS } from "@/lib/types";
 import Icon from "@/components/icons";
 
+// Flip to true at launch: reveals the live balance and wallet address.
+const SHOW_LIVE_TREASURY = false;
+
 export default function TreasuryCard() {
   const [data, setData] = useState<TreasuryData | null>(null);
 
   useEffect(() => {
+    if (!SHOW_LIVE_TREASURY) return;
     fetch("/api/treasury")
       .then((r) => r.json())
       .then(setData)
@@ -24,13 +28,24 @@ export default function TreasuryCard() {
       {/* Balance hero */}
       <div className="bg-gradient-to-br from-[#223829] to-[#276A43] rounded-2xl p-4 text-center mb-4 relative overflow-hidden">
         <Icon name="globe" className="absolute w-28 h-28 right-[-16px] bottom-[-20px] text-white opacity-10" />
-        <div className="text-3xl font-black text-white leading-none">{sol} SOL</div>
-        <div className="text-sm text-white/70 mt-1">≈ ${usd} USD · on-chain balance</div>
+        {SHOW_LIVE_TREASURY ? (
+          <>
+            <div className="text-3xl font-black text-white leading-none">{sol} SOL</div>
+            <div className="text-sm text-white/70 mt-1">≈ ${usd} USD · on-chain balance</div>
+          </>
+        ) : (
+          <>
+            <div className="text-2xl font-black text-white leading-none">Sprouting soon 🌱</div>
+            <div className="text-sm text-white/70 mt-1.5">Live balance appears at launch</div>
+          </>
+        )}
       </div>
 
       {/* Rows */}
       {[
-        { icon: "pin", label: "Wallet", value: <span className="font-mono text-xs bg-[#EDF4F1] text-[#276A43] px-2 py-0.5 rounded cursor-pointer hover:bg-[#D9E6DF]">{short}</span> },
+        ...(SHOW_LIVE_TREASURY
+          ? [{ icon: "pin", label: "Wallet", value: <span className="font-mono text-xs bg-[#EDF4F1] text-[#276A43] px-2 py-0.5 rounded cursor-pointer hover:bg-[#D9E6DF]">{short}</span> }]
+          : []),
         { icon: "send", label: "Last withdrawal", value: <span className="font-bold text-gray-400">pending launch</span> },
         { icon: "vault", label: "Kiva balance", value: <span className="font-bold text-[#276A43]">$0.00</span> },
         { icon: "coins", label: "Total deployed", value: <span className="font-bold">${MOCK_STATS.feesCollected}</span> },

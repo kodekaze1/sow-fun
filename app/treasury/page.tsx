@@ -10,6 +10,10 @@ interface TreasuryData {
   wallet: string;
 }
 
+// Flip to true at launch: reveals the live wallet balance and the
+// funding-card deposit address sections.
+const SHOW_LIVE_TREASURY = false;
+
 export default function TreasuryPage() {
   const [treasury, setTreasury] = useState<TreasuryData | null>(null);
   const [card, setCard] = useState<{ address: string; sol: number; usdc: number; recent: { signature: string; blockTime: number | null }[] } | null>(null);
@@ -54,7 +58,18 @@ export default function TreasuryPage() {
 
       <div className="max-w-[900px] mx-auto px-6 py-16 flex flex-col gap-8">
 
+        {!SHOW_LIVE_TREASURY && (
+          <div className="bg-[#FBF6EA]/80 border border-[#F8CD69]/30 rounded-2xl p-6 text-center">
+            <div className="text-xs font-black uppercase tracking-widest text-[#996210] mb-2">Pre-launch</div>
+            <p className="text-sm text-[#223829]/80 leading-relaxed max-w-lg mx-auto">
+              The live treasury balance and funding-card address appear here the moment $SOW goes live.
+              Until then, the genesis harvest below is the record - founder-seeded and fully receipted.
+            </p>
+          </div>
+        )}
+
         {/* LIVE BALANCE */}
+        {SHOW_LIVE_TREASURY && (
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-extrabold text-[#223829]">Live Balance</h2>
@@ -97,8 +112,10 @@ export default function TreasuryPage() {
             <div className="h-32 flex items-center justify-center text-gray-400 text-sm">Loading balance...</div>
           )}
         </div>
+        )}
 
         {/* IMPACT CARD */}
+        {SHOW_LIVE_TREASURY && (
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
@@ -155,6 +172,7 @@ export default function TreasuryPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* STATS ROW - real-time genesis data */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
