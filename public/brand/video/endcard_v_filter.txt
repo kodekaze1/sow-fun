@@ -1,0 +1,9 @@
+[0:v]crop=405:720:437:0,scale=1440:2560:flags=lanczos,
+zoompan=z='1+0.001*on':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=84:s=720x1280:fps=24,
+drawbox=x=0:y=0:w=iw:h=ih:color=0xF8F2E6@0.82:t=fill[bg];
+[2:v]scale=170:-1,fade=t=in:st=0.2:d=0.6:alpha=1[lg];
+[bg][lg]overlay=(W-w)/2:220[b1];
+[b1]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='sow.fun':expansion=none:fontsize=110:fontcolor=0x223829:alpha='min(1,max(0,(t-0.4)/0.7))':x=(w-text_w)/2:y=470,
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='Sow a coin. Grow a life.':expansion=none:fontsize=42:fontcolor=0x276A43:alpha='min(1,max(0,(t-1.0)/0.7))':x=(w-text_w)/2:y=640,
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='Let’s make a difference.':expansion=none:fontsize=34:fontcolor=0x223829@0.8:alpha='min(1,max(0,(t-1.6)/0.7))':x=(w-text_w)/2:y=712,
+drawtext=fontfile='C\:/Windows/Fonts/georgia.ttf':text='@sowfunhq':expansion=none:fontsize=28:fontcolor=0x223829@0.55:alpha='min(1,max(0,(t-2.1)/0.7))':x=(w-text_w)/2:y=1120[vout]

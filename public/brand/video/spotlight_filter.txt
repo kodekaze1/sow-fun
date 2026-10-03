@@ -1,0 +1,11 @@
+[0:v]trim=0.5:7.5,setpts=PTS-STARTPTS,scale=720:1280:flags=lanczos,setsar=1,fps=24,settb=AVTB[v0];
+[1:v]trim=0.5:7.5,setpts=PTS-STARTPTS,scale=720:1280:flags=lanczos,setsar=1,fps=24,settb=AVTB[v1];
+[v0][v1]xfade=transition=fade:duration=0.5:offset=6.5[x1];
+[x1]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Valeti makes tapa cloth in Tonga.':expansion=none:fontsize=40:fontcolor=0x223829:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=120:enable='between(t,0.5,6.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='Her loan buys the mulberry her craft needs.':expansion=none:fontsize=28:fontcolor=0x276A43:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=180:enable='between(t,1.1,6.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Monica runs a posho mill in Kenya.':expansion=none:fontsize=40:fontcolor=0x223829:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=120:enable='between(t,7.0,12.5)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='Her mill feeds her corner of Kimilili.':expansion=none:fontsize=28:fontcolor=0x276A43:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=180:enable='between(t,7.6,12.5)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Both funded in Harvest #001.':expansion=none:fontsize=34:fontcolor=0x223829:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=h-160:enable='between(t,9.5,12.8)'[xt];
+[2:v]fps=24,settb=AVTB[v2];
+[xt][v2]xfade=transition=fade:duration=0.7:offset=12.8[vout];
+[3:a]atrim=0:16.3,afade=t=out:st=13.8:d=2.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]
