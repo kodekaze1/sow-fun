@@ -32,10 +32,16 @@ export function parseLaunchUri(uri: string): { loanId: number | null; borrower: 
   try {
     const u = new URL(uri);
     const loan = u.searchParams.get("loan");
+    // Uploaded images are stored as short blob keys (URI length cap);
+    // expand to the public blob URL for display.
+    let image = u.searchParams.get("image");
+    if (image && !image.startsWith("http")) {
+      image = `${process.env.BLOB_BASE_URL ?? ""}/${image}`;
+    }
     return {
       loanId: loan ? parseInt(loan, 10) || null : null,
       borrower: u.searchParams.get("borrower"),
-      image: u.searchParams.get("image"),
+      image,
     };
   } catch {
     return { loanId: null, borrower: null, image: null };

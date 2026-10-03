@@ -7,7 +7,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const name = searchParams.get("name") ?? "sow.fun Launch";
   const symbol = searchParams.get("symbol") ?? "SOW";
-  const image = searchParams.get("image") ?? `${SITE_URL}/sow-logo.png`;
+  // Uploaded images are stored as short blob keys to fit Metaplex's
+  // 200-byte URI cap; expand them to the public blob URL here.
+  let image = searchParams.get("image") ?? `${SITE_URL}/sow-logo.png`;
+  if (image && !image.startsWith("http")) {
+    image = `${process.env.BLOB_BASE_URL ?? ""}/${image}`;
+  }
   const loan = searchParams.get("loan");
   const borrower = searchParams.get("borrower");
 

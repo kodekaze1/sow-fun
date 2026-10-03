@@ -51,6 +51,27 @@ export default function LaunchPage() {
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageKey, setImageKey] = useState(""); // short blob key for metadata
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const uploadImage = async (file: File) => {
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "upload failed");
+      setImageUrl(data.url);
+      setImageKey(data.key);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -138,7 +159,7 @@ export default function LaunchPage() {
       const uri = tokenMetadataUri({
         name,
         symbol,
-        image: imageUrl || borrower.image || "",
+        image: imageKey || imageUrl || borrower.image || "",
         loanId: borrower.id,
         borrower: borrower.name,
       });
@@ -227,7 +248,7 @@ export default function LaunchPage() {
       </div>
 
       {/* STEPPER */}
-      <div className="max-w-3xl mx-auto px-6 pt-8">
+      <div className="max-w-6xl mx-auto px-6 pt-8">
         <div className="flex items-center justify-center gap-2 text-xs font-bold mb-8">
           {[
             [1, "Pick a borrower"],
@@ -270,6 +291,7 @@ export default function LaunchPage() {
         {/* STEP 1 */}
         {step === 1 && (
           <div className="pb-16">
+            <div className="max-w-3xl mx-auto">
             <div className="relative mb-3 flex gap-2">
               <input
                 value={search}
@@ -314,10 +336,11 @@ export default function LaunchPage() {
                 </select>
               </div>
             </div>
+            </div>
             {loadingLoans ? (
               <div className="py-16 text-center text-gray-400 text-sm">Finding live borrowers on Kiva...</div>
             ) : (
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {loans.map((loan) => {
                   const pct = loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
                   const days = daysLeft(loan.expiresAt);
@@ -420,11 +443,24 @@ export default function LaunchPage() {
               className="w-full rounded-xl border border-[#D9E6DF] px-4 py-3 text-sm font-mono mb-5 focus:outline-none focus:border-[#276A43]" />
 
             <label className="block text-xs font-black uppercase tracking-widest text-[#276A43] mb-1.5">
-              Image URL <span className="text-gray-400 normal-case font-semibold">(optional - defaults to {borrower.name}&apos;s Kiva photo)</span>
+              Token image <span className="text-gray-400 normal-case font-semibold">(optional - defaults to {borrower.name}&apos;s Kiva photo)</span>
             </label>
-            <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
-              placeholder={borrower.image ?? "https://..."}
-              className="w-full rounded-xl border border-[#D9E6DF] px-4 py-3 text-sm mb-8 focus:outline-none focus:border-[#276A43]" />
+            <div className="flex items-center gap-3 mb-2">
+              <img src={imageUrl || borrower.image || "/sow-logo.png"} alt=""
+                className="w-14 h-14 rounded-xl object-cover border border-[#E4EBE7] flex-shrink-0" />
+              <label className={`flex-1 text-center rounded-xl border border-dashed px-4 py-3.5 text-sm font-bold cursor-pointer transition-colors ${
+                uploading ? "border-gray-200 text-gray-400" : "border-[#2AA967]/60 bg-[#EDF4F1]/50 hover:bg-[#EDF4F1] text-[#276A43]"
+              }`}>
+                {uploading ? "Uploading..." : imageKey ? "Image uploaded - tap to replace" : "Upload an image (PNG, JPG, WEBP, GIF · max 4MB)"}
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }} />
+              </label>
+            </div>
+            {uploadError && <div className="text-xs text-red-600 mb-2">{uploadError}</div>}
+            <input value={imageKey ? "" : imageUrl} onChange={(e) => { setImageUrl(e.target.value); setImageKey(""); }}
+              placeholder="...or paste an image URL"
+              className="w-full rounded-xl border border-[#D9E6DF] px-4 py-2.5 text-xs mb-8 focus:outline-none focus:border-[#276A43]" />
 
             <button
               onClick={() => setStep(3)}

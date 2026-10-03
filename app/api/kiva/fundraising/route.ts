@@ -12,7 +12,7 @@ export async function GET(request: Request) {
         women: searchParams.get("women") === "1",
         sort: searchParams.get("sort") ?? undefined,
       },
-      12
+      16
     );
     return NextResponse.json({ loans });
   } catch {
