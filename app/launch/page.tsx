@@ -77,6 +77,15 @@ export default function LaunchPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ mint: string; signature: string } | null>(null);
 
+  // One coin per borrower: loans that already have a coin link to it instead
+  const [taken, setTaken] = useState<Record<number, { mint: string | null; symbol: string }>>({});
+  useEffect(() => {
+    fetch("/api/launched-loans")
+      .then((r) => r.json())
+      .then((d) => setTaken(d.taken ?? {}))
+      .catch(() => {});
+  }, []);
+
   // AI helpers
   const [aiLoading, setAiLoading] = useState(false);
   const [aiReasons, setAiReasons] = useState<Record<number, string>>({});
@@ -154,6 +163,13 @@ export default function LaunchPage() {
     setError(null);
     setLaunching(true);
     try {
+      // One coin per borrower - final freshness check before minting
+      const fresh = await fetch("/api/launched-loans").then((r) => r.json()).catch(() => ({ taken: {} }));
+      const existing = fresh.taken?.[borrower.id];
+      if (existing) {
+        setTaken(fresh.taken);
+        throw new Error(`${borrower.name} already has a coin ($${existing.symbol}) - trade it instead, or pick another borrower.`);
+      }
       const client = new DynamicBondingCurveClient(connection, "confirmed");
       const baseMint = Keypair.generate();
       const uri = tokenMetadataUri({
@@ -344,6 +360,38 @@ export default function LaunchPage() {
                 {loans.map((loan) => {
                   const pct = loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
                   const days = daysLeft(loan.expiresAt);
+                  const claimed = taken[loan.id];
+                  if (claimed) {
+                    return (
+                      <a
+                        key={loan.id}
+                        href={claimed.mint ? `/t/${claimed.mint}` : "/launches"}
+                        className="relative text-left bg-white rounded-2xl border border-[#2AA967]/60 shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden hover:shadow-[0_10px_28px_rgba(34,56,41,0.12)] transition-all block"
+                      >
+                        <span className="absolute top-2 right-2 z-10 bg-[#223829]/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                          🌱 Already sown · ${claimed.symbol}
+                        </span>
+                        {loan.image && (
+                          <img src={loan.image} alt={loan.name} className="w-full h-40 object-cover" />
+                        )}
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-[#223829]">
+                              {loan.name} {COUNTRY_FLAGS[loan.country] ?? ""}
+                            </span>
+                            <span className="text-sm font-extrabold text-[#223829]">${loan.loanAmount.toLocaleString()}</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mb-2">{loan.activity} · {loan.country}</div>
+                          <p className="text-[13px] text-gray-600 leading-snug line-clamp-2 mb-3">
+                            A loan {loan.use}
+                          </p>
+                          <div className="text-xs font-bold text-[#276A43]">
+                            This borrower has a coin - trade ${claimed.symbol} →
+                          </div>
+                        </div>
+                      </a>
+                    );
+                  }
                   return (
                     <button
                       key={loan.id}
