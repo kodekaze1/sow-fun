@@ -21,13 +21,11 @@ you reap what you sow 🌱
 ## 2. The meta take
 Image: tw2-coinflight.png
 
-the fee-direction meta has it backwards
+trading fees are the most wasted resource in crypto
 
-$elon sends fees to a billionaire who will never notice
+on sow.fun every trade is a seed: 45% of fees flow to a real person's microloan from the very first swap, and you can watch the loan fill in real time
 
-imagine the same mechanic but the beneficiary is a woman in Iloilo stocking her store, and you can watch the loan fill in real time
-
-that's the whole product
+most Kiva loans are a few hundred dollars. your coin can change a life before it even trends 🌱
 
 ---
 
