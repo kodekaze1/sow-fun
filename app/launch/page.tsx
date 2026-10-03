@@ -340,7 +340,7 @@ export default function LaunchPage() {
             {loadingLoans ? (
               <div className="py-16 text-center text-gray-400 text-sm">Finding live borrowers on Kiva...</div>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {loans.map((loan) => {
                   const pct = loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
                   const days = daysLeft(loan.expiresAt);

@@ -128,10 +128,11 @@ export default function TreasuryPage() {
           </div>
 
           <p className="text-sm text-gray-500 leading-relaxed mb-5">
-            Backup rail of the fiat bridge. Deposits here are visible on-chain below, but card purchases
-            settle inside KAST&apos;s own ledger - so spends are proven by invoices and Kiva receipts rather
-            than on-chain debits. The primary bridge keeps every hop watchable: harvest funds leave the
-            treasury address directly to purchase the prepaid card used at Kiva checkout.
+            The fiat bridge. Each harvest, the treasury sends USDC to this address - that outflow and
+            top-up are visible on-chain below. Card purchases settle inside KAST&apos;s own ledger, so the
+            spend side is proven by the Kiva checkout receipt and loan link in the Harvest Ledger, and
+            the card balance is always shown as in transit, never as deployed. We top up only what a
+            harvest is about to deploy, so this balance sits near zero between harvests.
           </p>
 
           <div className="flex flex-wrap gap-8 mb-5">

@@ -24,18 +24,22 @@ whole harvest rolls to the next adopted borrower per the allocation policy.
    - Receipt: claim tx signatures (solscan links).
 
 2. OFF-RAMP (manual, receipt at every hop)
-   Path A - PRIMARY: prepaid Visa bought DIRECTLY from the treasury wallet.
+   Path A - PRIMARY: KAST card (decided 2026-10-03).
    - Swap claimed SOL -> USDC on Jupiter (on-chain tx from the treasury).
-   - Pay Bitrefill for a virtual prepaid Visa straight from the TREASURY
-     address (no KYC; ~$250-500/card, few % fee). This makes the outflow
-     publicly visible on the treasury account itself - the whole point.
-     Receipt: treasury outflow tx + Bitrefill invoice.
-   - Pay Kiva at checkout with the prepaid Visa (register a ZIP if AVS asks).
-   Path B - BACKUP: KAST card. Tested 2026-09-28; verdict: deposits are
-   on-chain visible but SPENDS SETTLE INSIDE KAST'S LEDGER - no on-chain
-   debit ever appears at the deposit address. Money-flow visibility is
-   top-ups only, so use it only if Bitrefill fails, and lean on Kiva
-   receipts for the spend side.
+   - Send USDC from the TREASURY address to the KAST deposit address
+     (published as the Impact Card). The treasury outflow and card top-up
+     are both publicly visible on-chain.
+   - KNOWN LIMITATION (tested 2026-09-28): spends settle inside KAST's
+     ledger - no on-chain debit appears at the deposit address. The spend
+     side is therefore proven by the Kiva checkout receipt + loan link,
+     and the card balance is ALWAYS displayed as IN TRANSIT, never as
+     deployed (see Fund states below). Top up per harvest only, roughly
+     matching the amount being deployed, so in-transit stays near zero
+     between harvests.
+   - Pay Kiva at checkout with the KAST Visa.
+   Path B - BACKUP: prepaid Visa bought directly from the treasury wallet
+   (Bitrefill, no KYC, ~$250-500/card) - use if KAST declines at Kiva or
+   is unavailable. Receipt: treasury outflow tx + Bitrefill invoice.
    Path C - exchange off-ramp (Kraken/Coinbase sell, bank, card/PayPal on Kiva).
    Never use anonymous offshore card issuers - unreliable and reputationally toxic.
    - Keep the 45/10 split here: 45 points of the fee go to loans, 10 to ops.
