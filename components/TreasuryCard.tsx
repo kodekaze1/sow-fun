@@ -47,8 +47,8 @@ export default function TreasuryCard() {
           ? [{ icon: "pin", label: "Wallet", value: <span className="font-mono text-xs bg-[#EDF4F1] text-[#276A43] px-2 py-0.5 rounded cursor-pointer hover:bg-[#D9E6DF]">{short}</span> }]
           : []),
         { icon: "send", label: "Last withdrawal", value: <span className="font-bold text-gray-400">pending launch</span> },
-        { icon: "vault", label: "Kiva balance", value: <span className="font-bold text-[#276A43]">$0.00</span> },
-        { icon: "coins", label: "Total deployed", value: <span className="font-bold">${MOCK_STATS.feesCollected}</span> },
+        { icon: "vault", label: "In transit (bridge + Kiva)", value: <span className="font-bold text-[#996210]">$0.00</span> },
+        { icon: "coins", label: "Deployed to loans", value: <span className="font-bold text-[#276A43]">${MOCK_STATS.feesCollected}</span> },
         { icon: "refresh", label: "Recycled capital", value: <span className="font-bold text-[#996210]">$0.00</span> },
       ].map(({ icon, label, value }) => (
         <div key={label} className="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0 text-sm">

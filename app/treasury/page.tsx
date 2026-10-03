@@ -136,8 +136,10 @@ export default function TreasuryPage() {
 
           <div className="flex flex-wrap gap-8 mb-5">
             <div>
-              <div className="text-4xl font-black text-[#223829]">${(card?.usdc ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-              <div className="text-gray-400 text-sm mt-1">USDC on card · topped up per harvest</div>
+              <div className="text-4xl font-black text-[#996210]">${(card?.usdc ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+              <div className="text-gray-400 text-sm mt-1">
+                In transit · topped up per harvest, <span className="font-bold">not counted as deployed</span> until the Kiva receipt posts
+              </div>
             </div>
           </div>
 

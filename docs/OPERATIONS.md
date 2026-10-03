@@ -131,6 +131,20 @@ that already funded a real loan, and only unlock on Kiva-verified loans.
 KAST bridge: the card's Solana deposit address is published on /treasury as
 the Impact Card once provided. Top up per harvest only - never park the vault.
 
+## Fund states (accounting language - never blur these)
+
+Every impact dollar is in exactly one state, and the site must label it so:
+1. ON-CHAIN - sitting in the treasury wallet (SOL/USDC). Verifiable by anyone.
+2. IN TRANSIT - left the treasury for the bridge: on a card, at an exchange,
+   or in the Kiva cash balance but NOT yet lent. Shown in amber, explicitly
+   labeled "not yet deployed". Card/bridge balances are NEVER presented as
+   impact delivered.
+3. DEPLOYED - a Kiva loan checkout completed; the kiva.org/lend link exists.
+   Only this state counts toward "Total deployed" / lives-lifted numbers.
+4. RECYCLED - repayments returned to the Kiva balance and re-lent.
+If a harvest pauses mid-bridge, the ledger shows the in-transit amount and
+where it sits. "We have it" and "we spent it on a loan" are different claims.
+
 ## Rules
 - Never describe crypto donations to Kiva as funding loans.
 - Never skip a receipt - the entire pitch is that every hop is verifiable.
