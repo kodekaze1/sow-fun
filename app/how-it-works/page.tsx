@@ -7,7 +7,7 @@ const STEPS = [
     icon: "heart",
     title: "Pick a Real Borrower",
     color: "#276A43",
-    body: "Every launch starts with a person, not a ticker. Browse live fundraising borrowers straight from Kiva - farmers, tailors, market vendors, solar resellers - filter by region and sector, and pick who your coin works for.",
+    body: "Every launch starts with a person, not a ticker. Browse live fundraising borrowers straight from Kiva - farmers, tailors, market vendors, solar resellers - and pick who your coin works for. One coin per borrower: the first launch claims them, so every coin has its own story.",
   },
   {
     num: "02",

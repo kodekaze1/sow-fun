@@ -247,7 +247,7 @@ export default function LaunchPage() {
       <div className="bg-[#223829] text-[#EDF4F1] py-14 px-6 text-center">
         <div className="max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-5">
-            Meteora DBC · {POOL_FEE_BPS / 100}% fee · split locked at launch
+            Meteora DBC · {POOL_FEE_BPS / 100}% fee · split locked · one coin per borrower
           </div>
           <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight mb-3">
             Launch a coin <span className="italic text-[#F8CD69]">for a borrower.</span>
@@ -385,8 +385,14 @@ export default function LaunchPage() {
                           <p className="text-[13px] text-gray-600 leading-snug line-clamp-2 mb-3">
                             A loan {loan.use}
                           </p>
-                          <div className="text-xs font-bold text-[#276A43]">
-                            This borrower has a coin - trade ${claimed.symbol} →
+                          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-[#2AA967] rounded-full" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="flex items-center justify-between text-[11px] mt-1">
+                            <span className="text-gray-400">{pct}% funded · ${loan.remaining.toLocaleString()} to go{days !== null ? ` · ${days}d left` : ""}</span>
+                          </div>
+                          <div className="text-xs font-bold text-[#276A43] mt-2">
+                            Being sown by ${claimed.symbol} - trade it to fill this loan →
                           </div>
                         </div>
                       </a>
