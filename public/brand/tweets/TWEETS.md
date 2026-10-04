@@ -1,12 +1,12 @@
-# sow.fun pre-launch tweet sequence
+# sow.fun pre-launch tweet sequence (v2 - one-of-one urgency)
 
-Post roughly one per day over 7-10 days. #9 goes ~48h before launch, #10 on launch eve.
-Attach the image listed under each tweet (all in this folder unless noted).
+Post roughly one per day. #10 goes ~48h before launch, #11 on launch eve.
+Attach the media listed under each tweet. Tweet 1 is already posted and pinned.
 
 ---
 
-## 1. The thesis (PIN THIS)
-Image: sow-promo-main.mp4 (../video/) - fallback ../x-banner.png
+## 1. The thesis (POSTED + PINNED)
+Media: ../video/sow-promo-main.mp4
 
 memecoins generate millions in trading fees. almost none of it lands anywhere that matters.
 
@@ -19,7 +19,7 @@ you reap what you sow 🌱
 ---
 
 ## 2. The meta take
-Image: tw2-coinflight.png
+Media: tw2-coinflight.png
 
 trading fees are the most wasted resource in crypto
 
@@ -29,8 +29,19 @@ most Kiva loans are a few hundred dollars. your coin can change a life before it
 
 ---
 
-## 3. The anti-rug mechanic
-Image: tw3-lock-sprout.png
+## 3. The one-of-one drop (NEW - the scarcity tweet)
+Media: tw6-podium.png
+
+every borrower on sow.fun is a one-of-one
+
+6,000+ real people fundraising on Kiva right now. each can only ever have ONE coin. the first launch claims them - their story becomes your coin's story, permanently
+
+no duplicates. no reruns. the good ones will go fast 🌱
+
+---
+
+## 4. The anti-rug mechanic
+Media: tw3-lock-sprout.png
 
 other launchpads: fees go wherever the dev feels like this week
 
@@ -40,22 +51,22 @@ sow.fun: the 45% pledge is written into the pool config at launch. immutable. no
 
 ---
 
-## 4. How it works
-Image: tw4-cycle.png
+## 5. How it works
+Media: ../video/sow-explainer.mp4
 
 how sow.fun works:
 
-1. pick a real person fundraising on Kiva (6,000+ live borrowers, real photos, real stories)
+1. claim a real person fundraising on Kiva - one coin per borrower, ever
 2. launch their coin on our Meteora DBC pool, 2% fee
 3. 45% you, 45% their loan, 10% ops. forever
-4. loan fills -> your token adopts the next borrower
+4. loan fills -> your coin adopts the next borrower
 
 one coin, many lives
 
 ---
 
-## 5. The receipts flex
-Image: tw5-receipt.png
+## 6. The receipts flex
+Media: tw5-receipt.png
 
 full pipeline, all public:
 
@@ -65,45 +76,45 @@ every hop has a receipt. the FAQ literally explains the one fiat hop instead of 
 
 ---
 
-## 6. The flywheel / leaderboard
-Image: tw6-podium.png
+## 7. The flywheel / leaderboard
+Media: tw4-cycle.png
 
 the leaderboard isn't market cap
 
 it's lives lifted
 
-your token funds a borrower, adopts the next one, and the counter climbs. harvest after harvest. the winning coin on sow.fun is the one that fed the most families
+your coin claims a borrower, funds them, adopts the next one, and the counter climbs. harvest after harvest. the winning coin on sow.fun is the one that fed the most families
 
 degens competing to do good. what a timeline
 
 ---
 
-## 7. Creator economics
-Image: tw7-watering.png
+## 8. Creator economics
+Media: tw7-watering.png
 
 what launchers get:
 
+- a one-of-one borrower whose story is yours to tell
 - 45% of trading fees, claimed straight from your pool
-- $SOW rewards for every borrower your token fully funds
-- your name on the harvest board
+- $SOW rewards for every borrower your coin fully funds
 
 rewards track verified Kiva loans, not volume. you can't wash trade your way to a halo. you have to actually fund someone
 
 ---
 
-## 8. The humanity one (quote-tweet bait)
-Image: ../../images/ailyn.webp (her real storefront photo)
+## 9. The humanity one (quote-tweet bait)
+Media: ../video/sow-spotlight-vertical.mp4
 
-Ailyn runs a sari-sari store in Barotac Viejo, Philippines. her loan bought toothpaste, sardines, soap. the shelves her neighbors count on
+Valeti makes tapa cloth in Ha'asini, Tonga. Monica runs a posho mill feeding her corner of Kimilili, Kenya
 
-she was funded before we even launched. genesis harvest #001, receipt on Kiva
+both funded in genesis harvest #001, before we asked anyone else to trust us. receipts on our Kiva profile
 
-there are thousands of Ailyns waiting. every one of them is a launchable coin
+they're ours. thousands of one-of-ones are still open. who's yours? 🌱
 
 ---
 
-## 9. The CA tease (~48h before launch)
-Image: tw9-seedpacket.png
+## 10. The CA tease (~48h before launch)
+Media: ../video/sow-seed-tease.mp4
 
 the $SOW contract address ends in "sow"
 
@@ -115,11 +126,11 @@ soon 🌱
 
 ---
 
-## 10. Launch-eve
-Image: tw10-sunrise.png
+## 11. Launch-eve
+Media: tw10-sunrise.png (or ../video/sow-promo-teaser.mp4)
 
 tomorrow we plant the first seed
 
-sow.fun goes live: launch a coin, fund a life, watch the receipts stack. the genesis coin is $SOW and its fees start funding a real Kiva borrower from the first trade
+sow.fun goes live: 6,000+ one-of-one borrowers open at the bell. claim yours, fund a life, watch the receipts stack. the genesis coin is $SOW and its fees start funding a real borrower from the first trade
 
 sow good, reap good. see you in the garden 🌱

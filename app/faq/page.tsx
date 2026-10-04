@@ -53,6 +53,10 @@ const FAQS = [
         a: "No - one coin per borrower. The first coin launched for a Kiva loan claims that borrower, and the launch picker then shows their card as 'Already sown' with a link to the existing token instead. This keeps the story clean: one coin, one borrower, one lives-lifted count - and it means the best way to support a claimed borrower is to trade their existing coin. When a coin's loan fills and it adopts a successor, the new borrower is claimed by that same coin.",
       },
       {
+        q: "Can one wallet claim lots of borrowers at once?",
+        a: "A wallet can hold up to 3 coins whose loans are still fundraising. Once one of your borrowers' loans fills, a slot opens and you can claim your next - so prolific launchers are the ones actually funding people, not just collecting claims. Like the one-coin-per-borrower rule, this is enforced at the interface level; the deeper protections are that launching costs real money, abusive or squatted coins can be de-indexed (which reopens the borrower), and rewards only flow for verified funded loans.",
+      },
+      {
         q: "What if the borrower's loan fills up before my coin's fees are harvested?",
         a: "It can happen - Kiva loans are funded by thousands of lenders worldwide, and a popular loan can close in days while your coin's fees are still accruing. Three things protect the pledge: the launch picker shows each loan's remaining amount, days left, and a 'filling fast' warning so you pick with eyes open; our claims console flags any coin whose loan is over 80% funded so we harvest early, before the crowd closes it; and if the loan closes anyway, 100% of the pledged fees roll to the next borrower the coin adopts. Nothing is ever lost, held back, or quietly rerouted - the token page shows exactly which borrower the fees flow to at any moment.",
       },

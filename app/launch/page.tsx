@@ -173,6 +173,17 @@ export default function LaunchPage() {
         throw new Error(screen.reason || "That name doesn't pass our launch guidelines - try another.");
       }
 
+      // Max 3 coins with still-fundraising loans per wallet - fund one to
+      // completion to open another slot (anti-squatting, pro-serial-impact)
+      const mine = await fetch(`/api/creator?address=${wallet.publicKey.toBase58()}`)
+        .then((r) => r.json()).catch(() => ({ launches: [] }));
+      const activeClaims = (mine.launches ?? []).filter(
+        (l: { loanStatus?: string | null }) => l.loanStatus === "fundraising"
+      ).length;
+      if (activeClaims >= 3) {
+        throw new Error("You already have 3 coins with loans still fundraising. Help one fill to claim your next borrower.");
+      }
+
       // One coin per borrower - final freshness check before minting
       const fresh = await fetch("/api/launched-loans").then((r) => r.json()).catch(() => ({ taken: {} }));
       const existing = fresh.taken?.[borrower.id];
