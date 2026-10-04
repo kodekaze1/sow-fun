@@ -1,14 +1,14 @@
-[0:v]trim=2.0:7.0,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v0];
-[1:v]trim=1.0:6.0,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v1];
-[2:v]trim=1.5:6.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v2];
-[3:v]trim=1.0:6.0,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v3];
-[v0][v1]xfade=transition=fade:duration=0.5:offset=4.5[x1];
-[x1][v2]xfade=transition=fade:duration=0.5:offset=9.0[x2];
-[x2][v3]xfade=transition=fade:duration=0.5:offset=13.5[x3];
-[x3]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='1. Pick a real borrower on Kiva.':expansion=none:fontsize=54:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=h-110:enable='between(t,0.3,4.2)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='2. Launch their coin - the split locks forever.':expansion=none:fontsize=52:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=100:enable='between(t,4.8,8.7)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='3. 45% of every trade flows to their loan.':expansion=none:fontsize=52:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=48:enable='between(t,9.3,13.2)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='4. Harvested into their loan - receipts for every hop.':expansion=none:fontsize=48:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=h-130:enable='between(t,13.8,17.7)'[xt];
+[0:v]trim=0.5:7.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v0];
+[1:v]trim=0.5:7.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v1];
+[2:v]trim=0.5:7.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v2];
+[3:v]trim=0.5:7.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v3];
+[v0][v1]xfade=transition=fade:duration=0.5:offset=6.5[x1];
+[x1][v2]xfade=transition=fade:duration=0.5:offset=13.0[x2];
+[x2][v3]xfade=transition=fade:duration=0.5:offset=19.5[x3];
+[x3]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='1. Pick a real borrower on Kiva.':expansion=none:fontsize=54:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=h-110:enable='between(t,0.3,6.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='2. Launch their coin - the split locks forever.':expansion=none:fontsize=50:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=60:enable='between(t,6.9,12.7)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='3. 45% of every trade flows to their loan.':expansion=none:fontsize=50:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=h-110:enable='between(t,13.4,19.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='4. Harvested into their loan - receipts for every hop.':expansion=none:fontsize=46:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=h-110:enable='between(t,19.9,25.3)'[xt];
 [4:v]fps=24,settb=AVTB,tpad=stop_mode=clone:stop_duration=2.5,fade=t=out:st=5.6:d=0.9:color=0xF8F2E6[v4];
-[xt][v4]xfade=transition=fade:duration=0.7:offset=17.8[vout];
-[5:a]atrim=0:24.3,afade=t=out:st=21.3:d=3,loudnorm=I=-16:TP=-1.5:LRA=11[aout]
+[xt][v4]xfade=transition=fade:duration=0.7:offset=25.8[vout];
+[5:a]atrim=0:32.3,afade=t=out:st=29.3:d=3,loudnorm=I=-16:TP=-1.5:LRA=11[aout]
