@@ -88,6 +88,13 @@ async function getMigrationThresholdLamports(client: DynamicBondingCurveClient):
 
 const VAULT_SHARE = (IMPACT_FEE_PCT + OPS_FEE_PCT) / 100;
 
+// Operator moderation: mints listed in data/delisted.json are removed from
+// the public index (launches board, token pages, borrower claims) - the
+// borrower they claimed reopens for a new coin. Creators can still claim
+// their fees via /my, which does not use this filter.
+import delistedJson from "@/data/delisted.json";
+const DELISTED = new Set<string>(delistedJson as string[]);
+
 export async function getLaunches(): Promise<LaunchSummary[]> {
   if (!DBC_CONFIG_KEY || DBC_CONFIG_KEY.length < 30) return [];
   const { connection, client } = getDbcClient();
@@ -110,7 +117,7 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
       quoteReserveLamports = pa.account.poolState?.quoteReserve?.toNumber() ?? 0;
     } catch { /* shape drift */ }
     return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: pa.account.baseMint ?? null, quoteReserveLamports };
-  });
+  }).filter((e) => !e.baseMint || !DELISTED.has(e.baseMint.toBase58()));
 
   const pdas = entries.filter((e) => e.baseMint).map((e) => metadataPda(e.baseMint as PublicKey));
   const metaAccounts = pdas.length ? await connection.getMultipleAccountsInfo(pdas) : [];

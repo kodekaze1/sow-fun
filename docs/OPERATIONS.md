@@ -88,6 +88,20 @@ the claim tx. COMMIT THE FILE with the harvest. It is the public source of
 truth for "which coin generated which dollars"; wave records and per-token
 impact counters derive from these snapshots, never from memory.
 
+## Launch moderation (data/delisted.json)
+
+Two layers keep borrowers from being claimed by junk:
+1. GATE: the launch flow AI-screens name+ticker before minting (slurs,
+   impersonation, gibberish blocked; playful meme names allowed). Interface-
+   level only - direct contract calls can bypass it.
+2. DELIST: if an abusive/junk coin exists anyway, add its MINT address to
+   data/delisted.json and push. Effect: it disappears from the launches
+   board, its token page, and the borrower-claim index - the borrower
+   REOPENS for a new coin. The creator can still claim their fees on /my
+   (we never touch funds, we just stop indexing the coin). Use sparingly;
+   log the reason in the commit message. The site index is the canonical
+   record of which coin represents which borrower.
+
 ## Borrower adoption (data/successions.json)
 
 When a coin's loan closes, its creator adopts the next borrower from /my.

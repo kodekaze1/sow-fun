@@ -163,6 +163,16 @@ export default function LaunchPage() {
     setError(null);
     setLaunching(true);
     try {
+      // Name screen - keep borrowers from being claimed by junk or abuse
+      const screen = await fetch("/api/ai/launch-helper", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "screen", borrower: { name: borrower.name, tokenName: name, tokenSymbol: symbol } }),
+      }).then((r) => r.json()).catch(() => ({ ok: true }));
+      if (screen.ok === false) {
+        throw new Error(screen.reason || "That name doesn't pass our launch guidelines - try another.");
+      }
+
       // One coin per borrower - final freshness check before minting
       const fresh = await fetch("/api/launched-loans").then((r) => r.json()).catch(() => ({ taken: {} }));
       const existing = fresh.taken?.[borrower.id];

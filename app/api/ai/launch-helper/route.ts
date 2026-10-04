@@ -51,6 +51,10 @@ const RERANK_SYSTEM = `You are matching a user's wish to real Kiva borrowers. Gi
 [{"id": number, "why": string}]
 "why" is one warm sentence (max 90 chars) explaining the fit, grounded in that loan's actual story. Never invent details.`;
 
+const SCREEN_SYSTEM = `You screen token launches on sow.fun, a launchpad where each coin is pledged to a real Kiva microloan borrower. Judge ONLY the token name and ticker. Respond ONLY with JSON: {"ok": boolean, "reason": string}
+REJECT (ok=false) if the name/ticker: contains slurs, hate, or sexual content; mocks or demeans the borrower; impersonates a well-known brand, person, or token; or is meaningless keyboard-mash gibberish (e.g. "asdfgh", "xK9qz").
+ALLOW (ok=true) playful, meme-y, or simple names - this is a memecoin site; creativity and humor are fine. When ok=false, "reason" is one friendly sentence (max 100 chars) telling the creator what to change. When ok=true, reason is "".`;
+
 const CONCIERGE_SYSTEM = `You help someone name a memecoin being launched on sow.fun for a real Kiva borrower. The coin's trading fees will fund the borrower's microloan. Suggest 3 distinct ideas. Respond ONLY with a JSON array:
 [{"name": string, "ticker": string, "blurb": string}]
 - "name": playful but respectful token name, max 22 chars, references the borrower's craft or story
@@ -127,6 +131,20 @@ export async function POST(request: Request) {
           blurb: String(i.blurb).slice(0, 140),
         }));
       return NextResponse.json({ ideas });
+    }
+
+    if (body.action === "screen") {
+      const b = body.borrower ?? {};
+      const name = String((b as Record<string, unknown>).tokenName ?? "").slice(0, 40);
+      const symbol = String((b as Record<string, unknown>).tokenSymbol ?? "").slice(0, 12);
+      if (!name || !symbol) return NextResponse.json({ ok: false, reason: "Name and ticker required." });
+      const raw = await claude(
+        SCREEN_SYSTEM,
+        `Borrower: ${String(b.name ?? "")}\nToken name: ${name}\nTicker: ${symbol}`,
+        150
+      );
+      const verdict = extractJson<{ ok: boolean; reason: string }>(raw);
+      return NextResponse.json({ ok: !!verdict.ok, reason: String(verdict.reason ?? "") });
     }
 
     return NextResponse.json({ error: "unknown action" }, { status: 400 });
