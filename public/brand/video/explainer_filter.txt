@@ -5,10 +5,10 @@
 [v0][v1]xfade=transition=fade:duration=0.5:offset=4.5[x1];
 [x1][v2]xfade=transition=fade:duration=0.5:offset=9.0[x2];
 [x2][v3]xfade=transition=fade:duration=0.5:offset=13.5[x3];
-[x3]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='1. Pick a real borrower on Kiva.':expansion=none:fontsize=56:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=215:enable='between(t,0.3,4.2)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='2. Launch their coin - the split locks forever.':expansion=none:fontsize=50:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=110:enable='between(t,4.8,8.7)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='3. 45% of every trade flows to their loan.':expansion=none:fontsize=50:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=52:enable='between(t,9.3,13.2)',
-drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='4. Harvested into their loan - receipts for every hop.':expansion=none:fontsize=46:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=h-140:enable='between(t,13.8,17.7)'[xt];
-[4:v]fps=24,settb=AVTB[v4];
+[x3]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='1. Pick a real borrower on Kiva.':expansion=none:fontsize=54:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=h-110:enable='between(t,0.3,4.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='2. Launch their coin - the split locks forever.':expansion=none:fontsize=52:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=100:enable='between(t,4.8,8.7)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='3. 45% of every trade flows to their loan.':expansion=none:fontsize=52:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=48:enable='between(t,9.3,13.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='4. Harvested into their loan - receipts for every hop.':expansion=none:fontsize=48:fontcolor=0x223829:borderw=5:bordercolor=0xF8F2E6@0.85:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.8:x=(w-text_w)/2:y=h-130:enable='between(t,13.8,17.7)'[xt];
+[4:v]fps=24,settb=AVTB,tpad=stop_mode=clone:stop_duration=2.5,fade=t=out:st=5.6:d=0.9:color=0xF8F2E6[v4];
 [xt][v4]xfade=transition=fade:duration=0.7:offset=17.8[vout];
-[5:a]atrim=0:21.8,afade=t=out:st=19.3:d=2.5,loudnorm=I=-16:TP=-1.5:LRA=11[aout]
+[5:a]atrim=0:24.3,afade=t=out:st=21.3:d=3,loudnorm=I=-16:TP=-1.5:LRA=11[aout]
