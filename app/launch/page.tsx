@@ -364,22 +364,26 @@ export default function LaunchPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* HERO */}
-      <div className="bg-[#223829] text-[#EDF4F1] py-14 px-6 text-center">
-        <div className="max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-5">
-            Meteora DBC · {POOL_FEE_BPS / 100}% fee · split locked · one coin per borrower
+      <div className="bg-[#223829] text-[#EDF4F1] pt-12 pb-10 px-6 text-center">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest">
+            {POOL_FEE_BPS / 100}% fee · split locked<span className="hidden sm:inline"> · one coin per borrower</span>
           </div>
-          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight mb-3">
-            Launch a coin <span className="italic text-[#F8CD69]">for a borrower.</span>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
+            Launch a coin <span className="italic text-[#F8CD69] whitespace-nowrap">for a borrower.</span>
           </h1>
-          <p className="opacity-85 max-w-md mx-auto leading-relaxed">
-            Pick a real person raising on Kiva. {CREATOR_FEE_PCT}% of trading fees are yours,{" "}
-            {IMPACT_FEE_PCT}% fund their loan, {OPS_FEE_PCT}% keep the lights on.
+          <p className="opacity-85 max-w-lg leading-relaxed [text-wrap:balance]">
+            Pick a real person raising on Kiva. {CREATOR_FEE_PCT}% of trading fees are yours,
+            {" "}{IMPACT_FEE_PCT}% fund their loan, {OPS_FEE_PCT}% keep the lights on.
           </p>
-          <p className="opacity-60 max-w-md mx-auto leading-relaxed text-sm mt-3">
-            Nobody can change the split after launch, fees fund the loan from the very first trade -
-            no graduation required - and every borrower your token fully funds earns you $SOW rewards.
-          </p>
+          <ul className="mt-1 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[13px] text-[#EDF4F1]/75">
+            {["Split locked forever", "Funds the loan from trade one", "Earn $SOW for every borrower funded"].map((t) => (
+              <li key={t} className="flex items-center gap-1.5">
+                <Icon name="check" className="w-4 h-4 text-[#7FC79E]" />
+                {t}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
