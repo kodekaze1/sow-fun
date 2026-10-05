@@ -17,7 +17,7 @@ const FAQS = [
       },
       {
         q: "Is there a presale or whitelist?",
-        a: "No presale. No whitelist. Fair launch only - everyone gets in at the same time, same price. This is intentional: a fair launch creates a level playing field and avoids the insider dumps that kill most tokens.",
+        a: "No presale, no whitelist, no private round. The only buy ahead of the public is the disclosed team buy: about 3 SOL (~10% of supply) bought on the same curve inside the launch transaction, so no sniper can front-run it, and then locked on Streamflow - a 1-month cliff, then unlocking linearly over 6 months. The lock is public and linked from the tokenomics page.",
       },
       {
         q: "What happens to $SOW's own trading fees?",
@@ -25,7 +25,7 @@ const FAQS = [
       },
       {
         q: "What is the total supply?",
-        a: "1,000,000,000 $SOW (1 billion). 80% is available via fair launch, 10% goes to the liquidity pool (locked for 1 year), 5% to the team (vested 18 months), and 5% to a community/airdrop reserve.",
+        a: "1,000,000,000 $SOW (1 billion), fixed forever - the mint authority is revoked at launch. About 80% is sold on the bonding curve: roughly 70% to the public and ~10% as the team buy, which is locked on Streamflow (1-month cliff, then linear over 6 months). The other 20% seeds the Meteora DAMM v2 pool when $SOW graduates at 85 SOL raised, and 100% of that liquidity is permanently locked. No presale, no airdrop reserve, no free team tokens.",
       },
     ],
   },

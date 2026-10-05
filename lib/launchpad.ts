@@ -31,6 +31,18 @@ export const METEORA_PROTOCOL_FEE_PCT = 20; // Meteora's cut of every trading fe
 // If by then it has earned less than CLAIM_MIN_FEES_SOL in lifetime trading
 // fees (and has not graduated), the claim lapses and the borrower reopens.
 export const CLAIM_WINDOW_HOURS = 72;
+
+// $SOW team allocation: bought on the curve inside the launch transaction
+// (FIRST_BUY_SOL, so nobody can front-run it), then locked on Streamflow.
+// ~3 SOL buys ~10% of a fresh pool. Set NEXT_PUBLIC_SOW_LOCK_URL to the
+// Streamflow contract link once the lock exists.
+export const SOW_TEAM_ALLOCATION = {
+  pct: 10,
+  firstBuySol: 3,
+  cliffMonths: 1,
+  linearMonths: 6, // linear unlock over the 6 months after the cliff
+};
+export const SOW_LOCK_URL = process.env.NEXT_PUBLIC_SOW_LOCK_URL ?? "";
 export const CLAIM_MIN_FEES_SOL = 0.05;
 
 // Kiva's canonical sector ids (verified via API introspection)

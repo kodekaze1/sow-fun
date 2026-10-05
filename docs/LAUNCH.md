@@ -29,8 +29,9 @@ log of every command and signature.
 
 ## T-0: go-live
 
-1. FUND THE LAUNCH TREASURY (sowMw8eT...): ~0.1 SOL for the config + the $SOW dev buy amount
-   (FIRST_BUY_SOL) + ~0.1 SOL buffer for fees and rent.
+1. FUND THE LAUNCH TREASURY (sowMw8eT...): ~3.2 SOL total.
+   3 SOL team buy (FIRST_BUY_SOL=3 buys ~10.03% of a fresh pool) + ~0.2 SOL
+   for config rent, the 0.035 launch fee, pool rent, Streamflow fees and tx fees.
 
 2. REVIEW THE ECONOMICS (dry run, sends nothing):
    `node scripts/create-dbc-config.mjs`
@@ -56,15 +57,29 @@ log of every command and signature.
 5. LAUNCH $SOW (vanity mint, atomic dev buy):
    ```
    KEYPAIR=<treasury.json> MINT_KEYPAIR=<sow mint.json> CONFIG=<config> \
-   LOAN=<kiva id> BORROWER="<name>" IMAGE=<blob key> FIRST_BUY_SOL=<amount> \
+   LOAN=<kiva id> BORROWER="<name>" IMAGE=<blob key> FIRST_BUY_SOL=3 \
    node scripts/launch-genesis.mjs
    ```
    Confirm the mint ends in `sow` and the pool shows on /launches and /t/<mint>.
+   Record the exact $SOW received (the team buy) from the treasury's token account.
+
+5b. LOCK THE TEAM BUY ON STREAMFLOW (manual, app.streamflow.finance, connect
+   the launch treasury) - immediately, before the CA reveal:
+   - Token: $SOW (the mint above). Amount: the ENTIRE team buy.
+   - Recipient: the launch treasury (sowMw8eT...).
+   - Cliff: 1 month from now, cliff amount 0; then linear unlock over the
+     following 6 months (fully unlocked at month 7).
+   - Cancelable by sender: OFF. Transferable (sender and recipient): OFF.
+     Top-up and rate change: OFF.
+   - Save the contract link: set NEXT_PUBLIC_SOW_LOCK_URL=<link> on Vercel
+     (the tokenomics page links to it). If the schedule differs, update
+     SOW_TEAM_ALLOCATION in lib/launchpad.ts and the FAQ to match.
 
 6. REVEAL:
    - Vercel: NEXT_PUBLIC_SOW_MINT=<mint> (shows the CA + how-to-buy block),
      flip SHOW_LIVE_TREASURY to true in lib/types.ts, commit, redeploy.
-   - Post the CA and the dev-buy disclosure (amount + stated purpose).
+   - Post the CA and the team-buy disclosure: SOL spent, $SOW received, % of
+     supply, and the Streamflow lock link.
    - Tweet #11.
 
 7. WATCH (first 2 hours): /admin, Helius credit usage, Vercel function errors,

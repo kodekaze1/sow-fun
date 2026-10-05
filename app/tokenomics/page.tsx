@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SOW_TEAM_ALLOCATION, SOW_LOCK_URL } from "@/lib/launchpad";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -82,27 +83,60 @@ export default function TokenomicsPage() {
         {/* DISTRIBUTION */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-6">Token Distribution</h2>
-          <div className="flex flex-col gap-3.5">
+          {/* One bar, two segments: what the immutable config actually does with supply */}
+          <div className="flex h-3 rounded-full overflow-hidden mb-5" role="img"
+            aria-label={`${80 - SOW_TEAM_ALLOCATION.pct}% public on the bonding curve, ${SOW_TEAM_ALLOCATION.pct}% team buy locked on Streamflow, 20% graduation liquidity locked forever`}>
+            <div className="h-full bg-[#276A43]" style={{ width: `${80 - SOW_TEAM_ALLOCATION.pct}%` }} />
+            <div className="h-full bg-[#3E9E68]" style={{ width: `${SOW_TEAM_ALLOCATION.pct}%` }} />
+            <div className="h-full bg-[#F8CD69]" style={{ width: "20%" }} />
+          </div>
+          <div className="flex flex-col gap-4">
             {[
-              { label: "Fair launch on the bonding curve (no presale, no team allocation)", pct: 100, color: "#276A43" },
-            ].map(({ label, pct, color }) => (
-              <div key={label}>
-                <div className="flex justify-between items-center mb-1.5 text-sm">
-                  <span className="font-bold text-gray-800">{label}</span>
-                  <span className="text-xs font-bold" style={{ color }}>{pct}%</span>
-                </div>
-                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg,${color}99,${color})` }} />
+              {
+                color: "#276A43",
+                pct: 80 - SOW_TEAM_ALLOCATION.pct,
+                tokens: `${((80 - SOW_TEAM_ALLOCATION.pct) * 10_000_000).toLocaleString("en-US")}`,
+                label: "Bonding curve - public fair launch",
+                body: "No presale, no private round, no free team tokens. Everyone buys from the same curve.",
+              },
+              {
+                color: "#3E9E68",
+                pct: SOW_TEAM_ALLOCATION.pct,
+                tokens: `~${(SOW_TEAM_ALLOCATION.pct * 10_000_000).toLocaleString("en-US")}`,
+                label: "Team buy - locked on Streamflow",
+                body: `Bought first, at the opening price, inside the launch transaction (~${SOW_TEAM_ALLOCATION.firstBuySol} SOL) so no sniper can front-run it - which is exactly why it is disclosed and locked: ${SOW_TEAM_ALLOCATION.cliffMonths}-month cliff, then unlocking linearly over ${SOW_TEAM_ALLOCATION.linearMonths} months.`,
+                link: SOW_LOCK_URL,
+              },
+              {
+                color: "#C9971F",
+                pct: 20,
+                tokens: "200,000,000",
+                label: "Graduation liquidity - locked forever",
+                body: "At 85 SOL raised these seed a Meteora DAMM v2 pool. 100% of that liquidity is permanently locked (55% vault / 45% creator positions) - it can never be pulled, and it keeps paying the 45/45/10 split at a 1% fee.",
+              },
+            ].map(({ color, pct, tokens, label, body, link }: { color: string; pct: number; tokens: string; label: string; body: string; link?: string }) => (
+              <div key={label} className="flex gap-3">
+                <span className="w-3 h-3 rounded-sm mt-1 flex-shrink-0" style={{ background: color }} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap justify-between items-baseline gap-x-3 text-sm">
+                    <span className="font-bold text-gray-800">{label}</span>
+                    <span className="font-mono text-xs font-bold" style={{ color }}>{pct}% · {tokens}</span>
+                  </div>
+                  <p className="text-[13px] text-gray-500 leading-relaxed mt-0.5">
+                    {body}
+                    {link && (
+                      <>{" "}<a href={link} target="_blank" rel="noopener noreferrer" className="font-bold text-[#276A43] hover:underline">View the lock ↗</a></>
+                    )}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-4 leading-relaxed">
-            All 1,000,000,000 tokens start on the Meteora bonding curve. At graduation (85 SOL raised)
-            about 20% of supply seeds a Meteora DAMM v2 pool and 100% of that liquidity is permanently
-            locked - 55% held by the sow.fun vault, 45% by the creator - so it can never be pulled and
-            keeps paying the same 45/45/10 split at a 1% fee. Launching a coin costs a 0.035 SOL
-            launch fee, enforced on-chain, which funds the vault and makes bot squatting expensive.
+          <p className="text-xs text-gray-400 mt-5 leading-relaxed">
+            Total supply 1,000,000,000, fixed at launch (mint authority revoked). The team buy is an estimate until
+            launch: the exact amount is whatever {SOW_TEAM_ALLOCATION.firstBuySol} SOL buys at the opening price,
+            published with the Streamflow lock. Launching a coin costs a
+            0.035 SOL launch fee, enforced on-chain, which funds the vault and makes bot squatting expensive.
           </p>
         </div>
 
