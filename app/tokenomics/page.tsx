@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SOW_TEAM_ALLOCATION, SOW_LOCK_URL, SOW_TEAM_USES, SOW_TEAM_NOTICE_HOURS } from "@/lib/launchpad";
+import { SOW_TEAM_ALLOCATION, SOW_LOCK_URL, SOW_TEAM_USES } from "@/lib/launchpad";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -99,7 +99,7 @@ export default function TokenomicsPage() {
                   <span className="font-mono text-xs font-bold text-[#276A43]">{100 - SOW_TEAM_ALLOCATION.pct}% · ~{((100 - SOW_TEAM_ALLOCATION.pct) * 10_000_000).toLocaleString("en-US")}</span>
                 </div>
                 <p className="text-[13px] text-gray-500 leading-relaxed mt-0.5">
-                  Everything the team doesn&apos;t buy belongs to the market. About {80 - SOW_TEAM_ALLOCATION.pct}% is sold on the
+                  Everything outside the team&apos;s share belongs to the market. About {80 - SOW_TEAM_ALLOCATION.pct}% is sold on the
                   bonding curve; the last 20% seeds the trading pool when $SOW graduates at 85 SOL raised, and that
                   liquidity is permanently locked - it can never be pulled and keeps paying the 45/45/10 split at a
                   1% fee. No presale, no private round, no free team tokens.
@@ -110,13 +110,12 @@ export default function TokenomicsPage() {
               <span className="w-3 h-3 rounded-sm mt-1 flex-shrink-0 bg-[#C9971F]" />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap justify-between items-baseline gap-x-3 text-sm">
-                  <span className="font-bold text-gray-800">Team - bought, then locked</span>
+                  <span className="font-bold text-gray-800">Team - locked</span>
                   <span className="font-mono text-xs font-bold text-[#996210]">{SOW_TEAM_ALLOCATION.pct}% · ~{(SOW_TEAM_ALLOCATION.pct * 10_000_000).toLocaleString("en-US")}</span>
                 </div>
                 <p className="text-[13px] text-gray-500 leading-relaxed mt-0.5">
-                  Bought first, at the opening price, inside the launch transaction (~{SOW_TEAM_ALLOCATION.firstBuySol} SOL) so no
-                  sniper can front-run it - which is exactly why it is disclosed and locked on Streamflow:
-                  a {SOW_TEAM_ALLOCATION.cliffMonths}-month cliff, then unlocking linearly over {SOW_TEAM_ALLOCATION.linearMonths} months.
+                  Locked on Streamflow: a {SOW_TEAM_ALLOCATION.cliffMonths}-month cliff, then unlocking linearly over{" "}
+                  {SOW_TEAM_ALLOCATION.linearMonths} months.
                   {SOW_LOCK_URL && (
                     <>{" "}<a href={SOW_LOCK_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-[#276A43] hover:underline">View the lock ↗</a></>
                   )}
@@ -129,32 +128,27 @@ export default function TokenomicsPage() {
           <div className="mt-7 pt-6 border-t border-gray-100">
             <h3 className="text-base font-extrabold text-[#223829] mb-1">What the team&apos;s {SOW_TEAM_ALLOCATION.pct}% is for</h3>
             <p className="text-[13px] text-gray-500 leading-relaxed mb-4">
-              The team allocation works for the mission, not a cash-out. As tokens unlock they go to these four uses, and
-              nothing else:
+              The team allocation works for the mission, not a cash-out. As tokens unlock, they go where they do the most
+              good - things like:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {SOW_TEAM_USES.map((u) => (
                 <div key={u.title} className="rounded-xl bg-[#EDF4F1] p-4">
-                  <div className="flex items-baseline justify-between gap-2 mb-1">
-                    <span className="text-sm font-extrabold text-[#223829]">{u.title}</span>
-                    <span className="font-mono text-xs font-bold text-[#276A43]">{u.pct}%</span>
-                  </div>
+                  <div className="text-sm font-extrabold text-[#223829] mb-1">{u.title}</div>
                   <p className="text-[13px] text-gray-600 leading-relaxed">{u.body}</p>
                 </div>
               ))}
             </div>
             <p className="text-[13px] text-gray-500 leading-relaxed mt-4">
               <span className="font-bold text-[#223829]">The rules:</span> nothing can move before the cliff - the
-              Streamflow lock enforces it. After that, every sale or transfer is announced {SOW_TEAM_NOTICE_HOURS} hours ahead
-              and logged in the public ledger with its transaction receipt.
+              Streamflow lock enforces it. After that, every move of team tokens is published in the public ledger with
+              its transaction receipt.
             </p>
           </div>
 
           <p className="text-xs text-gray-400 mt-5 leading-relaxed">
-            Total supply 1,000,000,000, fixed at launch (mint authority revoked). The team buy is an estimate until
-            launch: the exact amount is whatever {SOW_TEAM_ALLOCATION.firstBuySol} SOL buys at the opening price,
-            published with the Streamflow lock. Launching a coin costs a 0.035 SOL launch fee, enforced on-chain,
-            which funds the vault and makes bot squatting expensive.
+            Total supply 1,000,000,000, fixed at launch (mint authority revoked). Launching a coin costs a 0.035 SOL
+            launch fee, enforced on-chain, which funds the vault and makes bot squatting expensive.
           </p>
         </div>
 

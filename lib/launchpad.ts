@@ -44,32 +44,16 @@ export const SOW_TEAM_ALLOCATION = {
 };
 export const SOW_LOCK_URL = process.env.NEXT_PUBLIC_SOW_LOCK_URL ?? "";
 
-// Public commitment for the team's ~10%: what unlocked tokens are used for.
-// Shares are of the team allocation and must add up to 100. Every sale or
-// transfer is announced 48h ahead and logged with its receipt.
-export const SOW_TEAM_USES: { pct: number; title: string; body: string }[] = [
-  {
-    pct: 40,
-    title: "Bonus Kiva loans",
-    body: "Sold only to fund extra microloans beyond any coin's pledge, credited to the sow.fun Kiva team.",
-  },
-  {
-    pct: 30,
-    title: "Creator grants",
-    body: "Paid in $SOW to the creators whose coins fund the most borrowers - rewarding real impact, not volume.",
-  },
-  {
-    pct: 20,
-    title: "Milestone burns",
-    body: "Burned through the Furnace program each time sow.fun passes another 100 lives funded.",
-  },
-  {
-    pct: 10,
-    title: "Operations",
-    body: "Infrastructure, audits and development that keep the launchpad running.",
-  },
+// Where the team's ~10% goes as it unlocks. Deliberately no fixed shares:
+// the mix follows what does the most good as the project grows. The firm
+// promise is transparency - every move of team tokens is published with
+// its transaction receipt.
+export const SOW_TEAM_USES: { title: string; body: string }[] = [
+  { title: "Bonus Kiva loans", body: "Extra microloans beyond any coin's pledge, credited to the sow.fun Kiva team." },
+  { title: "Creator grants", body: "$SOW rewards for the creators whose coins fund the most borrowers." },
+  { title: "$SOW burns", body: "Burns through the Furnace program, published on-chain." },
+  { title: "Building sow.fun", body: "Infrastructure, audits and development that keep the launchpad running." },
 ];
-export const SOW_TEAM_NOTICE_HOURS = 48;
 export const CLAIM_MIN_FEES_SOL = 0.05;
 
 // Kiva's canonical sector ids (verified via API introspection)
