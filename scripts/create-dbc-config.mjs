@@ -21,14 +21,22 @@ import { buildSowCurve, describeCurve, ECONOMICS } from "./lib/sow-config.mjs";
 const NATIVE_MINT = new PublicKey("So11111111111111111111111111111111111111112");
 // Treasury / impact vault - feeClaimer for the partner share of trading fees,
 // the launch fee, and the partner's locked LP position after migration.
-// Mainnet ALWAYS uses the launch treasury. TREASURY=<pubkey> overrides are
-// devnet-only (the old sowSZPr... wallet is the test treasury).
+// Mainnet uses the launch treasury. PILOT=1 creates a mainnet PILOT config
+// whose fees go to the test treasury instead (same economics) - for testing
+// the full loop with real SOL and Kiva. Never put a pilot config on sow.fun.
+// TREASURY=<pubkey> overrides are devnet-only.
 const LAUNCH_TREASURY = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+const TEST_TREASURY = "sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2";
+const PILOT = !!process.env.PILOT;
 if (process.env.TREASURY && NETWORK !== "devnet") {
-  console.error("TREASURY overrides are devnet-only - the mainnet config always uses the launch treasury");
+  console.error("TREASURY overrides are devnet-only - use PILOT=1 for a mainnet test config");
   process.exit(1);
 }
-const TREASURY = new PublicKey(process.env.TREASURY ?? LAUNCH_TREASURY);
+const TREASURY = new PublicKey(process.env.TREASURY ?? (PILOT ? TEST_TREASURY : LAUNCH_TREASURY));
+if (PILOT) {
+  console.log("\n*** PILOT CONFIG - fees go to the TEST treasury " + TEST_TREASURY + " ***");
+  console.log("*** Use it on localhost only. Do NOT set it as NEXT_PUBLIC_DBC_CONFIG_KEY on Vercel. ***\n");
+}
 
 let migrationQuoteSol = ECONOMICS.migrationQuoteSol;
 if (process.env.MIGRATION_SOL) {
@@ -75,7 +83,12 @@ const tx = await client.partner.createConfig({
 const signature = await sendAndConfirmTransaction(connection, tx, [payer, configKeypair]);
 console.log("\nconfig created!");
 console.log("signature:", signature);
-if (NETWORK === "mainnet") {
+if (NETWORK === "mainnet" && PILOT) {
+  console.log(`\nPilot config: ${configKeypair.publicKey.toBase58()}`);
+  console.log("Run the site locally against it - never on Vercel:");
+  console.log(`  NEXT_PUBLIC_DBC_CONFIG_KEY=${configKeypair.publicKey.toBase58()} npm run dev`);
+  console.log(`Claim its fees with KEYPAIR=<test treasury> CONFIG=${configKeypair.publicKey.toBase58()} node scripts/claim-fees.mjs`);
+} else if (NETWORK === "mainnet") {
   console.log("\nSet this in .env.local AND on Vercel, then redeploy:");
   console.log(`NEXT_PUBLIC_DBC_CONFIG_KEY=${configKeypair.publicKey.toBase58()}`);
 } else {

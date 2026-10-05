@@ -39,11 +39,15 @@ const load = (p) => Keypair.fromSecretKey(new Uint8Array(JSON.parse(fs.readFileS
 const creator = load(KEYPAIR);
 // $SOW must be launched by the launch treasury on mainnet (it is the
 // feeClaimer AND $SOW's creator). The old sowSZPr... wallet is test-only.
+// PILOT=1 allows the test treasury for a mainnet pilot genesis (pilot config only).
 const LAUNCH_TREASURY = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
-if (NETWORK === "mainnet" && creator.publicKey.toBase58() !== LAUNCH_TREASURY) {
-  console.error(`KEYPAIR is ${creator.publicKey.toBase58()} - mainnet genesis must be signed by the launch treasury ${LAUNCH_TREASURY}`);
+const TEST_TREASURY = "sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2";
+const expected = process.env.PILOT ? TEST_TREASURY : LAUNCH_TREASURY;
+if (NETWORK === "mainnet" && creator.publicKey.toBase58() !== expected) {
+  console.error(`KEYPAIR is ${creator.publicKey.toBase58()} - mainnet genesis must be signed by ${expected}${process.env.PILOT ? " (pilot)" : " (launch treasury)"}`);
   process.exit(1);
 }
+if (process.env.PILOT) console.log("*** PILOT genesis on the test treasury - not the real $SOW launch ***");
 const baseMint = load(MINT_KEYPAIR);
 
 const uri = `${SITE}/m/${baseMint.publicKey.toBase58()}`;

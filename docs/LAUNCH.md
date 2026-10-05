@@ -10,6 +10,17 @@ Order matters. The DBC config is IMMUTABLE once created, so everything before
 step 4 is a rehearsal and everything after it is permanent. Keep a terminal
 log of every command and signature.
 
+## Mainnet pilot (test treasury)
+
+Pilot config (created 2026-10-05, fees to the TEST treasury sowSZPr...):
+  AJyDjMdvnxysFetFXvfKsYCX1P2z6KRtCGhimUruefgv
+Same economics as the real config. Run the site LOCALLY against it - never
+set it on Vercel, or real users' fees would go to the test wallet:
+  NEXT_PUBLIC_DBC_CONFIG_KEY=AJyDjMdvnxysFetFXvfKsYCX1P2z6KRtCGhimUruefgv npm run dev
+Claim:  KEYPAIR=<sowSZPr json> CONFIG=AJyDj... node scripts/claim-fees.mjs
+Pilot coins are real mainnet coins but are only indexed on that localhost
+site; their sow.fun/t/<mint> default website link 404s on production.
+
 ## T-48h: pre-flight
 
 1. Devnet rehearsal is green on the current code:
