@@ -124,7 +124,6 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                   className="bg-[#EDF4F1] hover:bg-[#D9E6DF] text-[#223829] rounded-full px-3 py-1 transition-colors">{l.label} ↗</a>
               ))}
             </div>
-            <p className="text-[11px] text-gray-400 mt-2">Description and links are set by the coin&apos;s creator, not sow.fun.</p>
           </div>
         )}
 
@@ -141,16 +140,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
               Share on X
             </a>
           )}
-          {!isDemo && launch.mint && (
-            <a href={`https://solscan.io/token/${launch.mint}`} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-[#276A43] px-2 py-2.5 transition-colors">
-              Solscan ↗
-            </a>
-          )}
         </div>
-        {!isDemo && (
-          <p className="-mt-7 mb-10 text-[11px] text-gray-400">Memecoins are volatile and can go to zero. Not investment advice.</p>
-        )}
 
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           {/* BORROWER */}
@@ -192,7 +182,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                   <span>
                     {loan.remaining > 0
                       ? `${loan.remaining.toFixed(0)} to go`
-                      : (loan.reservedAmount ?? 0) > 0 ? "rest reserved by lenders" : "fully funded"}
+                      : (loan.reservedAmount ?? 0) > 0 ? "rest reserved by lenders" : ""}
                   </span>
                 </div>
                 {loan.id > 0 ? (
@@ -202,27 +192,20 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                   </a>
                 ) : null}
                 {loan.status === "fundraising" && loan.remaining <= 0 && (loan.reservedAmount ?? 0) > 0 && (
-                  <div className="mt-4 rounded-xl p-3.5 text-[12px] leading-relaxed bg-white border border-[#2AA967]/30 text-[#223829]/80">
-                    <span className="font-bold text-[#276A43]">Almost there.</span>{" "}
-                    The last ${(loan.reservedAmount ?? 0).toFixed(0)} is in other lenders&apos; checkout baskets, so
-                    Kiva shows this loan as done. If they check out, fees from here on fund the creator&apos;s
-                    borrower queue; if a basket expires, the loan reopens.
+                  <div className="mt-4 rounded-xl px-3.5 py-2.5 text-[12px] bg-white border border-[#2AA967]/30 text-[#223829]/80">
+                    <span className="font-bold text-[#276A43]">Almost there:</span> the last ${(loan.reservedAmount ?? 0).toFixed(0)} is in lenders&apos; baskets.
                   </div>
                 )}
                 {loan.status !== "fundraising" && (
-                  <div className={`mt-4 rounded-xl p-3.5 text-[12px] leading-relaxed ${
+                  <div className={`mt-4 rounded-xl px-3.5 py-2.5 text-[12px] ${
                     loan.status === "funded"
                       ? "bg-white border border-[#2AA967]/30 text-[#223829]/80"
                       : "bg-[#F8F2E6] border border-[#F8CD69]/50 text-[#996210]"
                   }`}>
                     {loan.status === "funded" ? (
-                      <><span className="font-bold text-[#276A43]">This loan is fully funded on Kiva.</span>{" "}
-                      Fees this coin generates now fund the borrowers its creator lined up (up to 5, in order) - the
-                      pledge never stops, it just moves to the next person in line.</>
+                      <><span className="font-bold text-[#276A43]">Fully funded ✓</span> Fees now go to the creator&apos;s next borrowers.</>
                     ) : (
-                      <><span className="font-bold">This loan closed on Kiva before filling.</span>{" "}
-                      Every pledged cent flows to the borrowers in the coin&apos;s queue instead - nothing
-                      is lost or held back.</>
+                      <><span className="font-bold">Closed early.</span> Fees go to the creator&apos;s next borrowers.</>
                     )}
                   </div>
                 )}
@@ -244,10 +227,6 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
             </div>
             <div className="flex flex-col gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Lifetime trading fees</span>
-                <span className="font-black">{launch.lifetimeFeesSol.toFixed(4)} SOL</span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-gray-500">Earned for Kiva loans</span>
                 <span className="font-black text-[#276A43]">≈ ${(launch.impactShareSol * solPrice).toFixed(2)}</span>
               </div>
@@ -257,10 +236,13 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                     <span className="text-gray-500">Lent on Kiva so far</span>
                     <span className="font-black text-[#276A43]">${((plan.ledger.deployedPledgeCents + plan.ledger.deployedExcessCents) / 100).toFixed(0)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Lives funded</span>
-                    <span className="font-black">{plan.ledger.livesFunded}</span>
-                  </div>
+                  {/* Only interesting once the coin has spread beyond its own borrower */}
+                  {plan.ledger.livesFunded > 1 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Borrowers funded</span>
+                      <span className="font-black">{plan.ledger.livesFunded}</span>
+                    </div>
+                  )}
                 </>
               )}
               <div className="flex justify-between">
@@ -268,13 +250,9 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                 <span className="font-black">≈ ${(launch.pendingVaultSol * (IMPACT_FEE_PCT / (100 - CREATOR_FEE_PCT)) * solPrice).toFixed(2)}</span>
               </div>
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2.5 text-[12px] text-gray-500 leading-relaxed">
-              <Icon name="lock" className="w-4 h-4 flex-shrink-0 text-[#223829] mt-0.5" />
-              <div className="flex flex-col gap-1">
-                <span>{CREATOR_FEE_PCT}% of fees to the creator, {IMPACT_FEE_PCT}% to loans, {OPS_FEE_PCT}% ops - locked on-chain. Beyond the loan:</span>
-                <span>80% funds the creator&apos;s borrower queue, in order</span>
-                <span>20% buys $SOW - half burned, half rewards the creator</span>
-              </div>
+            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2 text-[12px] text-gray-500">
+              <Icon name="lock" className="w-4 h-4 flex-shrink-0 text-[#223829]" />
+              <span title="Locked on-chain by the pool config">{IMPACT_FEE_PCT}% of every fee goes to Kiva loans.</span>
             </div>
           </div>
         </div>
@@ -340,12 +318,10 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
               </span>
             ) : (
             <span>
-              <span className="font-bold text-[#223829]">No graduation needed.</span>{" "}
-              {IMPACT_FEE_PCT}% of every trade flows toward the loan from the very first swap -
-              most Kiva loans finish while a coin is still early on its curve.
-              {loan && loan.remaining === 0 && loan.loanAmount > 0 && launch.curvePct !== null && launch.curvePct < 100 && (
-                <> This one proved it: <span className="font-bold text-[#276A43]">loan fully funded at just {launch.curvePct}% of the curve.</span></>
-              )}
+              {/* Only claim it when this coin's own money funded the loan */}
+              {loan && loan.remaining === 0 && loan.loanAmount > 0 && (plan?.ledger.deployedPledgeCents ?? 0) > 0 && launch.curvePct !== null && launch.curvePct < 100
+                ? <>Loan funded at just <span className="font-bold text-[#276A43]">{launch.curvePct}% of the curve</span> - no graduation needed.</>
+                : <>No graduation needed - fees fund the loan from the first trade.</>}
             </span>
             )}
           </div>

@@ -3,8 +3,8 @@
 
 import { Connection, PublicKey } from "@solana/web3.js";
 import { unstable_cache } from "next/cache";
-import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
-import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, OPS_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
+import { DynamicBondingCurveClient, getPriceFromSqrtPrice, TokenDecimal } from "@meteora-ag/dynamic-bonding-curve-sdk";
+import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
 import { serverRpcUrl } from "@/lib/rpc-server";
 import { readCoinMeta } from "@/lib/coin-meta";
 import { getMultipleAccountsChunked } from "@/lib/rpc-chunk.mjs";
@@ -88,11 +88,28 @@ export interface LaunchSummary {
   launchedAt: number | null; // unix seconds (pool activation point)
   migrated: boolean;
   creator: string | null; // pool creator wallet
+  marketCapSol: number | null; // curve price x 1B supply (frozen at graduation)
 }
 
 // The SDK has returned pool fields both flat and nested under poolState
 // across versions - read either shape.
 type BNLike = { toNumber: () => number };
+// Market cap in SOL from the pool's sqrt price: price per token (6-decimal
+// base, 9-decimal SOL) times the fixed 1,000,000,000 supply.
+const TOTAL_SUPPLY = 1_000_000_000;
+function marketCapFromAccount(account: unknown): number | null {
+  try {
+    const sqrt = poolField<BNLike & { toString(): string }>(account, "sqrtPrice");
+    if (!sqrt) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const price = getPriceFromSqrtPrice(sqrt as any, TokenDecimal.SIX, TokenDecimal.NINE);
+    const mc = Number(price.toString()) * TOTAL_SUPPLY;
+    return Number.isFinite(mc) ? mc : null;
+  } catch {
+    return null;
+  }
+}
+
 export function poolField<T>(account: unknown, name: string): T | undefined {
   const a = account as Record<string, unknown> & { poolState?: Record<string, unknown> };
   return (a?.[name] ?? a?.poolState?.[name]) as T | undefined;
@@ -210,7 +227,8 @@ async function loadLaunches(): Promise<LaunchSummary[]> {
     } catch { /* shape drift */ }
     const migrated = Boolean(poolField<number | boolean>(pa.account, "isMigrated"));
     const creator = poolField<PublicKey>(pa.account, "creator")?.toBase58() ?? null;
-    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: poolField<PublicKey>(pa.account, "baseMint") ?? null, quoteReserveLamports, launchedAt, migrated, creator };
+    const marketCapSol = marketCapFromAccount(pa.account);
+    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: poolField<PublicKey>(pa.account, "baseMint") ?? null, quoteReserveLamports, launchedAt, migrated, creator, marketCapSol };
   }).filter((e) => !e.baseMint || !DELISTED.has(e.baseMint.toBase58()));
 
   const pdas = entries.filter((e) => e.baseMint).map((e) => metadataPda(e.baseMint as PublicKey));
@@ -263,6 +281,7 @@ async function loadLaunches(): Promise<LaunchSummary[]> {
       launchedAt: entry.launchedAt,
       migrated: entry.migrated,
       creator: entry.creator,
+      marketCapSol: entry.marketCapSol,
     });
   }
 
@@ -350,6 +369,7 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
       launchedAt,
       migrated,
       creator,
+      marketCapSol: marketCapFromAccount(entry.account),
       creatorPendingSol: Number(creatorPendingLamports) / 1e9,
       creatorPendingLamports,
     });

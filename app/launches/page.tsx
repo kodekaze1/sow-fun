@@ -3,6 +3,8 @@ import Icon from "@/components/icons";
 import { getLaunches, getSolPrice } from "@/lib/launchpad-onchain";
 import { getLoansById } from "@/lib/kiva-graphql";
 import { COUNTRY_FLAGS } from "@/lib/types";
+import { Suspense } from "react";
+import LaunchesBoard, { type BoardItem } from "@/components/LaunchesBoard";
 
 export const revalidate = 60;
 
@@ -19,6 +21,31 @@ export default async function LaunchesPage() {
   const loans = await getLoansById(launches.map((l) => l.loanId ?? 0)).catch(() => new Map());
 
   const totalImpactUsd = launches.reduce((s, l) => s + l.impactShareSol * solPrice, 0);
+
+  // Plain rows for the client board (search / sort / filter)
+  const items: BoardItem[] = launches.filter((l) => l.mint).map((l) => {
+    const loan = l.loanId ? loans.get(l.loanId) : undefined;
+    const taken = loan ? loan.fundedAmount + (loan.reservedAmount ?? 0) : 0;
+    const raising = !!loan && loan.status === "fundraising" && loan.remaining > 0;
+    const done = !!loan && (loan.status === "funded" || (loan.status === "fundraising" && loan.remaining <= 0));
+    return {
+      mint: l.mint!,
+      name: l.name,
+      symbol: l.symbol,
+      image: l.image ?? loan?.image ?? null,
+      borrower: loan?.name ?? l.borrowerName,
+      flag: loan ? COUNTRY_FLAGS[loan.country] ?? "" : "",
+      loanAmount: loan?.loanAmount ?? 0,
+      pct: loan && loan.loanAmount > 0 ? Math.round((taken / loan.loanAmount) * 100) : 0,
+      remaining: loan?.remaining ?? 0,
+      done,
+      raising,
+      earnedUsd: l.impactShareSol * solPrice,
+      marketCapUsd: l.marketCapSol !== null && l.marketCapSol !== undefined ? l.marketCapSol * solPrice : null,
+      migrated: l.migrated,
+      launchedAt: l.launchedAt,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -38,7 +65,7 @@ export default async function LaunchesPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         {launches.length === 0 ? (
           <div className="py-20 text-center">
             <img src="/images/illustrations/plant-coin.png" alt="" aria-hidden="true"
@@ -60,49 +87,9 @@ export default async function LaunchesPage() {
             </div>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-5">
-            {launches.map((launch, i) => {
-              const loan = launch.loanId ? loans.get(launch.loanId) : undefined;
-              const pct = loan && loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
-              const img = launch.image ?? loan?.image ?? null;
-              return (
-                <Link key={launch.pool} href={launch.mint ? `/t/${launch.mint}` : "#"} data-reveal
-                  className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden hover:border-[#276A43] hover:shadow-[0_10px_28px_rgba(34,56,41,0.12)] transition-all">
-                  {img && <img src={img} alt="" className="w-full h-44 object-cover" />}
-                  <div className="p-5">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-[#223829]">
-                        {i === 0 && <span className="text-[#F8CD69] mr-1">★</span>}
-                        {launch.name} <span className="font-mono text-xs text-[#276A43]">${launch.symbol}</span>
-                      </span>
-                      <span className="text-sm font-extrabold text-[#223829]">
-                        ≈ ${(launch.impactShareSol * solPrice).toFixed(0)}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-500 mb-3">
-                      {loan
-                        ? <>for {loan.name} {COUNTRY_FLAGS[loan.country] ?? ""} · {loan.status}</>
-                        : launch.borrowerName
-                          ? <>for {launch.borrowerName}</>
-                          : "independent launch"}
-                    </div>
-                    {loan && (
-                      <>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#2AA967] rounded-full" style={{ width: `${pct}%` }} />
-                        </div>
-                        <div className="text-[11px] text-gray-400 mt-1">{pct}% of ${loan.loanAmount.toFixed(0)} loan funded on Kiva</div>
-                      </>
-                    )}
-                    <div className="flex justify-between text-[11px] text-gray-400 mt-3">
-                      <span>{launch.lifetimeFeesSol.toFixed(3)} SOL lifetime fees</span>
-                      <span className="text-[#276A43] font-bold">View token →</span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <Suspense fallback={<div className="py-16 text-center text-sm text-gray-400">Loading launches...</div>}>
+            <LaunchesBoard items={items} />
+          </Suspense>
         )}
       </div>
     </div>

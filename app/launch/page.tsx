@@ -6,6 +6,7 @@ import { coinMetaUri, DESCRIPTION_MAX } from "@/lib/coin-meta";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import WalletButton from "@/components/WalletButton";
+import ShareCards, { shareIntentUrl } from "@/components/ShareCards";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import Icon from "@/components/icons";
 import {
@@ -326,29 +327,31 @@ export default function LaunchPage() {
   if (result && borrower) {
     return (
       <div className="min-h-screen bg-white">
-        <div className="max-w-xl mx-auto px-6 py-24 text-center">
+        <div className="max-w-3xl mx-auto px-6 pt-16 pb-24 flex flex-col items-center gap-6 text-center">
           <img src="/images/illustrations/watering.png" alt="" aria-hidden="true"
-            className="w-36 mx-auto mb-6 rotate-[-2deg] mix-blend-multiply" />
-          <h1 className="font-serif text-4xl font-medium tracking-tight mb-4">${symbol} is live.</h1>
-          <p className="text-[#223829]/75 leading-relaxed mb-6">
-            Your token is trading on its own bonding curve, and {IMPACT_FEE_PCT}% of every trade is pledged to{" "}
-            {borrower.name}&apos;s loan and future Kiva waves - locked forever.
-          </p>
-          <div className="bg-[#EDF4F1] rounded-2xl p-5 text-left text-sm font-mono break-all mb-8">
-            <div className="text-xs font-sans font-bold uppercase tracking-widest text-[#276A43] mb-1">Mint</div>
-            <div className="mb-3">{result.mint}</div>
-            <div className="text-xs font-sans font-bold uppercase tracking-widest text-[#276A43] mb-1">Transaction</div>
+            className="w-28 rotate-[-2deg] mix-blend-multiply" />
+          <div className="flex flex-col items-center gap-3">
+            <h1 className="font-serif text-4xl font-medium tracking-tight">${symbol} is live.</h1>
+            <p className="text-[#223829]/75 leading-relaxed max-w-lg [text-wrap:balance]">
+              {IMPACT_FEE_PCT}% of every trade&apos;s fees now fund {borrower.name}&apos;s Kiva loan - locked forever.
+            </p>
             <a href={`https://solscan.io/tx/${result.signature}`} target="_blank" rel="noopener noreferrer"
-              className="text-[#276A43] underline">{result.signature.slice(0, 24)}...</a>
+              className="text-xs font-mono text-[#276A43] hover:underline">
+              {result.mint.slice(0, 6)}…{result.mint.slice(-6)} · view transaction ↗
+            </a>
           </div>
+
+          <div className="w-full text-left">
+            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Share it on X</div>
+            <ShareCards mint={result.mint} symbol={symbol} />
+          </div>
+
           <div className="flex flex-wrap justify-center gap-3">
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                `I just launched $${symbol} on @sowfunhq - ${IMPACT_FEE_PCT}% of every trade funds ${borrower.name}'s Kiva microloan. Locked at launch, verifiable forever.`
-              )}&url=${encodeURIComponent(`https://sow.fun/t/${result.mint}`)}`}
+              href={shareIntentUrl(result.mint, symbol, borrower.name)}
               target="_blank" rel="noopener noreferrer"
               className="bg-[#223829] hover:bg-black text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
-              Share on X
+              Post on X
             </a>
             <a href={`https://jup.ag/swap/SOL-${result.mint}`} target="_blank" rel="noopener noreferrer"
               className="bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">

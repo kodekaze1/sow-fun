@@ -100,6 +100,7 @@ export async function GET(request: Request) {
     const rows: {
       pool: string;
       mint: string | null;
+      migrated: boolean;
       name: string;
       symbol: string;
       loanId: number | null;
@@ -130,6 +131,7 @@ export async function GET(request: Request) {
       rows.push({
         pool: poolAddr,
         mint: baseMints[i]?.toBase58() ?? null,
+        migrated: Boolean(poolField<number | boolean>(poolEntries[i].account, "isMigrated")),
         name,
         symbol,
         loanId,

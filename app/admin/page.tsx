@@ -13,6 +13,7 @@ interface ClaimRow {
   pendingSol: number;
   pendingUsd: number;
   state: "fund-now" | "harvest-soon" | "roll-over" | "accruing";
+  migrated?: boolean;
   borrower: {
     id: number;
     name: string;
@@ -40,6 +41,75 @@ const STATE_STYLES: Record<ClaimRow["state"], { label: string; cls: string }> = 
   "roll-over": { label: "Roll to next borrower", cls: "bg-[#F8F2E6] text-[#996210]" },
   accruing: { label: "Accruing", cls: "bg-[#EDF4F1] text-[#276A43]" },
 };
+
+// Ready-to-post images for our own X account (rendered by /api/card/event/*),
+// each with suggested post text to copy.
+function EventCards({ rows }: { rows: ClaimRow[] }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const copy = (key: string, text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(key);
+      setTimeout(() => setCopied((c) => (c === key ? null : c)), 1500);
+    });
+  };
+  const site = "https://sow.fun";
+  const items: { key: string; title: string; href: string; post: string }[] = [
+    {
+      key: "milestone",
+      title: "Milestone - lives funded and total lent",
+      href: "/api/card/event/milestone",
+      post: `Every trade, a real loan. Here's what sow.fun has funded on Kiva so far. ${site}/treasury`,
+    },
+    {
+      key: "harvest",
+      title: "Latest harvest receipt",
+      href: "/api/card/event/harvest",
+      post: `New harvest: trading fees from sow.fun coins just became Kiva microloans - receipts for every loan. ${site}/treasury`,
+    },
+    ...rows.filter((r) => r.mint).flatMap((r) => {
+      const who = r.borrower?.name ?? "their borrower";
+      const coinUrl = `${site}/t/${r.mint}`;
+      const out = [
+        {
+          key: `funded-${r.mint}`,
+          title: `${who} funded - ${r.symbol}`,
+          href: `/api/card/event/funded?mint=${r.mint}`,
+          post: `${who} is fully funded on Kiva - trading fees from ${r.symbol} became a real microloan. ${coinUrl}`,
+        },
+      ];
+      if (r.migrated) {
+        out.push({
+          key: `graduated-${r.mint}`,
+          title: `${r.symbol} graduated`,
+          href: `/api/card/event/graduated?mint=${r.mint}`,
+          post: `${r.symbol} just graduated on @sowfunhq - liquidity locked forever, and it keeps funding ${who}'s Kiva loan. ${coinUrl}`,
+        });
+      }
+      return out;
+    }),
+  ];
+  return (
+    <div className="mt-12">
+      <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-1">Event cards</div>
+      <p className="text-xs text-gray-500 mb-4">
+        Images for our X posts, filled with live data. Open one, save it, copy the post text. Only post Funded once the loan shows funded on Kiva.
+      </p>
+      <div className="flex flex-col divide-y divide-gray-100 bg-white rounded-2xl border border-[#E4EBE7]">
+        {items.map((it) => (
+          <div key={it.key} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+            <span className="text-sm font-bold text-[#223829]">{it.title}</span>
+            <div className="flex items-center gap-4 text-xs font-bold">
+              <a href={it.href} target="_blank" rel="noopener noreferrer" className="text-[#276A43] hover:underline">Open card ↗</a>
+              <button onClick={() => copy(it.key, it.post)} className="text-gray-500 hover:text-[#276A43]">
+                {copied === it.key ? "Copied" : "Copy post"}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const [key, setKey] = useState("");
@@ -258,6 +328,8 @@ export default function AdminPage() {
             );
           })}
         </div>
+
+        {data && <EventCards rows={data.pools} />}
 
         <p className="text-xs text-gray-400 mt-10 leading-relaxed">
           Harvest loop: run the claim script locally → swap to USDC → top up the Impact Card → pay Kiva

@@ -120,13 +120,22 @@ export function validateCoinMeta(input: Record<string, unknown>): { meta: CoinMe
 export async function readCoinMeta(mint: string): Promise<CoinMeta | null> {
   const base = process.env.BLOB_BASE_URL;
   if (!base || !isPubkey(mint)) return null;
-  try {
-    const res = await fetch(`${base}/${COIN_META_PREFIX}${mint}.json`, { next: { revalidate: 3600 } });
-    if (!res.ok) return null;
-    return (await res.json()) as CoinMeta;
-  } catch {
-    return null;
+  const url = `${base}/${COIN_META_PREFIX}${mint}.json`;
+  // A miss must be real before we treat a coin as having no details: a
+  // network blip (or a cached miss from the moment the blob was written)
+  // would otherwise blank the coin's borrower in the index. Cached read
+  // first, then up to two uncached retries.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url, attempt === 0 ? { next: { revalidate: 3600 } } : { cache: "no-store" });
+      if (res.ok) return (await res.json()) as CoinMeta;
+      if (res.status === 404 && attempt > 0) return null; // confirmed missing
+    } catch {
+      /* network error - retry */
+    }
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
   }
+  return null;
 }
 
 function imageUrl(key: string | null): string {
