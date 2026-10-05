@@ -1,4 +1,8 @@
-export const TREASURY_WALLET = "sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2";
+// Launch treasury: feeClaimer of the mainnet DBC config, receives the vault
+// share of every coin's fees. Shown on the site only once SHOW_LIVE_TREASURY
+// (lib/types.ts) is on. The earlier sowSZPr... wallet is TEST-ONLY (devnet
+// rehearsals) and must never appear on the site or in the mainnet config.
+export const TREASURY_WALLET = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
 
 // Kiva's WAF rejects requests without a browser-like User-Agent (403)
 export const KIVA_FETCH_HEADERS = {

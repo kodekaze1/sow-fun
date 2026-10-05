@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { TREASURY_WALLET } from "@/lib/constants";
+import { SHOW_LIVE_TREASURY } from "@/lib/types";
 import { serverRpcUrl } from "@/lib/rpc-server";
 
-const WALLET = process.env.NEXT_PUBLIC_TREASURY_WALLET || TREASURY_WALLET;
+const WALLET = TREASURY_WALLET;
 const RPC    = serverRpcUrl();
 
 async function getSolPrice(): Promise<number> {
@@ -19,6 +20,8 @@ async function getSolPrice(): Promise<number> {
 }
 
 export async function GET() {
+  // Pre-launch: never reveal a treasury address
+  if (!SHOW_LIVE_TREASURY) return NextResponse.json({ prelaunch: true });
   try {
     const [balanceRes, solPrice] = await Promise.all([
       fetch(RPC, {

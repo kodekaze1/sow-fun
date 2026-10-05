@@ -158,11 +158,18 @@ export default async function Home() {
             <h2 className="font-serif text-[1.7rem] sm:text-3xl md:text-4xl font-medium tracking-tight text-[#223829] leading-tight md:leading-none">Watch the treasury work.</h2>
           </div>
         </div>
-        <a href={`https://solscan.io/account/${TREASURY_WALLET}`} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-2 text-xs font-mono text-[#223829]/70 hover:text-[#276A43] bg-[#EDF4F1] border border-[#D9E6DF] rounded-full px-3.5 py-1.5 transition-colors">
-          <span className="w-2 h-2 rounded-full bg-[#2AA967] animate-livepulse" />
-          Treasury {TREASURY_WALLET.slice(0, 5)}…{TREASURY_WALLET.slice(-3)} · updated live ↗
-        </a>
+        {SHOW_LIVE_TREASURY ? (
+          <a href={`https://solscan.io/account/${TREASURY_WALLET}`} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs font-mono text-[#223829]/70 hover:text-[#276A43] bg-[#EDF4F1] border border-[#D9E6DF] rounded-full px-3.5 py-1.5 transition-colors">
+            <span className="w-2 h-2 rounded-full bg-[#2AA967] animate-livepulse" />
+            Treasury {TREASURY_WALLET.slice(0, 5)}…{TREASURY_WALLET.slice(-3)} · updated live ↗
+          </a>
+        ) : (
+          <span className="flex items-center gap-2 text-xs font-mono text-[#996210] bg-[#F8F2E6] border border-[#F8CD69]/40 rounded-full px-3.5 py-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#F8CD69]" />
+            Treasury address published at launch
+          </span>
+        )}
       </div>
 
       {/* MAIN GRID */}

@@ -19,7 +19,7 @@ import fs from "node:fs";
 import { Connection, Keypair, PublicKey, sendAndConfirmTransaction } from "@solana/web3.js";
 import BN from "bn.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
-import { resolveRpc } from "./lib/rpc.mjs";
+import { resolveRpc, NETWORK } from "./lib/rpc.mjs";
 
 const RPC = resolveRpc();
 const { KEYPAIR, MINT_KEYPAIR, CONFIG, LOAN, BORROWER, IMAGE } = process.env;
@@ -34,6 +34,13 @@ if (!KEYPAIR || !MINT_KEYPAIR || !CONFIG) {
 
 const load = (p) => Keypair.fromSecretKey(new Uint8Array(JSON.parse(fs.readFileSync(p, "utf8"))));
 const creator = load(KEYPAIR);
+// $SOW must be launched by the launch treasury on mainnet (it is the
+// feeClaimer AND $SOW's creator). The old sowSZPr... wallet is test-only.
+const LAUNCH_TREASURY = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+if (NETWORK === "mainnet" && creator.publicKey.toBase58() !== LAUNCH_TREASURY) {
+  console.error(`KEYPAIR is ${creator.publicKey.toBase58()} - mainnet genesis must be signed by the launch treasury ${LAUNCH_TREASURY}`);
+  process.exit(1);
+}
 const baseMint = load(MINT_KEYPAIR);
 
 const q = new URLSearchParams({ name: NAME, symbol: SYMBOL });

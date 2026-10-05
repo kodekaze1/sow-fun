@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { KIVA_TEAM_URL, KIVA_LENDER_URL, TREASURY_WALLET, X_LINK } from "@/lib/constants";
+import { SHOW_LIVE_TREASURY } from "@/lib/types";
 
 const COLUMNS: { title: string; links: { href: string; label: string; external?: boolean }[] }[] = [
   {
@@ -26,7 +27,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     links: [
       { href: KIVA_TEAM_URL, label: "Kiva Lending Team", external: true },
       { href: KIVA_LENDER_URL, label: "Lender Profile", external: true },
-      { href: `https://explorer.solana.com/address/${TREASURY_WALLET}`, label: "Treasury on Solana", external: true },
+      ...(SHOW_LIVE_TREASURY ? [{ href: `https://explorer.solana.com/address/${TREASURY_WALLET}`, label: "Treasury on Solana", external: true }] : []),
     ],
   },
 ];
@@ -75,7 +76,7 @@ export default function SiteFooter() {
 
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="font-mono text-xs opacity-60">
-            © {new Date().getFullYear()} SOW FUN LLC · Treasury: sowS...HtD2 · Built on Solana
+            © {new Date().getFullYear()} SOW FUN LLC · {SHOW_LIVE_TREASURY ? `Treasury: ${TREASURY_WALLET.slice(0, 4)}...${TREASURY_WALLET.slice(-4)} · ` : ""}Built on Solana
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
             <Link href="/about" className="opacity-60 hover:opacity-100 transition-opacity">About</Link>

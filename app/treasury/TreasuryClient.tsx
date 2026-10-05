@@ -32,10 +32,11 @@ export default function TreasuryClient({
   }, []);
 
   useEffect(() => {
+    if (!SHOW_LIVE_TREASURY) return; // the address stays private until launch
     fetch("/api/treasury")
       .then((r) => r.json())
-      .then(setTreasury)
-      .catch(() => setTreasury({ balance: 0, usd: 0, wallet: "sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2" }));
+      .then((d) => { if (d?.wallet) setTreasury(d); })
+      .catch(() => {});
   }, []);
 
   const goal = 10;

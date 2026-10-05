@@ -21,7 +21,14 @@ import { buildSowCurve, describeCurve, ECONOMICS } from "./lib/sow-config.mjs";
 const NATIVE_MINT = new PublicKey("So11111111111111111111111111111111111111112");
 // Treasury / impact vault - feeClaimer for the partner share of trading fees,
 // the launch fee, and the partner's locked LP position after migration.
-const TREASURY = new PublicKey("sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2");
+// Mainnet ALWAYS uses the launch treasury. TREASURY=<pubkey> overrides are
+// devnet-only (the old sowSZPr... wallet is the test treasury).
+const LAUNCH_TREASURY = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+if (process.env.TREASURY && NETWORK !== "devnet") {
+  console.error("TREASURY overrides are devnet-only - the mainnet config always uses the launch treasury");
+  process.exit(1);
+}
+const TREASURY = new PublicKey(process.env.TREASURY ?? LAUNCH_TREASURY);
 
 let migrationQuoteSol = ECONOMICS.migrationQuoteSol;
 if (process.env.MIGRATION_SOL) {

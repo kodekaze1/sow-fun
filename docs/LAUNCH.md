@@ -1,5 +1,11 @@
 # Launch day runbook ($SOW + launchpad go-live)
 
+Launch treasury: sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj
+(keypair: vanity-grinder/gpu-grinder/sowMw8eT...json). It is the mainnet
+config's feeClaimer AND $SOW's creator - every <treasury.json> below means
+this keypair. The old sowSZPr... wallet is TEST-ONLY (devnet rehearsals);
+create-dbc-config and launch-genesis refuse to use anything else on mainnet.
+
 Order matters. The DBC config is IMMUTABLE once created, so everything before
 step 4 is a rehearsal and everything after it is permanent. Keep a terminal
 log of every command and signature.
@@ -23,7 +29,7 @@ log of every command and signature.
 
 ## T-0: go-live
 
-1. FUND THE TREASURY: ~0.1 SOL for the config + the $SOW dev buy amount
+1. FUND THE LAUNCH TREASURY (sowMw8eT...): ~0.1 SOL for the config + the $SOW dev buy amount
    (FIRST_BUY_SOL) + ~0.1 SOL buffer for fees and rent.
 
 2. REVIEW THE ECONOMICS (dry run, sends nothing):
