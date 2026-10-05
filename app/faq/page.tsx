@@ -25,7 +25,7 @@ const FAQS = [
       },
       {
         q: "What is the total supply?",
-        a: "1,000,000,000 $SOW (1 billion), fixed forever - the mint authority is revoked at launch. About 80% is sold on the bonding curve: roughly 70% to the public and ~10% as the team buy, which is locked on Streamflow (1-month cliff, then linear over 6 months). The other 20% seeds the Meteora DAMM v2 pool when $SOW graduates at 85 SOL raised, and 100% of that liquidity is permanently locked. No presale, no airdrop reserve, no free team tokens.",
+        a: "1,000,000,000 $SOW (1 billion), fixed forever - the mint authority is revoked at launch. 90% is the public's and ~10% is the team's. The public 90% is everything the team doesn't buy: about 70% sold on the bonding curve plus the 20% that seeds the trading pool when $SOW graduates (that liquidity is permanently locked). The team's ~10% is bought in the launch transaction, locked on Streamflow (1-month cliff, then linear over 6 months), and committed to four uses: 40% bonus Kiva loans, 30% creator grants, 20% milestone burns, 10% operations - every move announced 48 hours ahead and logged with receipts. No presale, no airdrop reserve, no free team tokens.",
       },
     ],
   },
