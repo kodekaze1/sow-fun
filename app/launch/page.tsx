@@ -706,7 +706,7 @@ export default function LaunchPage() {
         {/* STEP 3 */}
         {step === 3 && borrower && (
           <div className="pb-16 max-w-lg mx-auto">
-            <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 mb-6">
+            <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 mb-4">
               <div className="flex items-center gap-4 mb-5">
                 <img src={imageUrl || borrower.image || "/sow-logo.png"} alt=""
                   className="w-16 h-16 rounded-2xl object-cover" />
@@ -715,46 +715,53 @@ export default function LaunchPage() {
                   <div className="font-mono text-sm text-[#276A43] font-bold">${symbol}</div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2.5 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Beneficiary</span>
-                  <a href={`https://www.kiva.org/lend/${borrower.id}`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#276A43] hover:underline">{borrower.name} · Kiva loan #{borrower.id}</a></div>
-                <div className="flex justify-between"><span className="text-gray-500">Pool</span><span className="font-bold">Meteora DBC · {POOL_FEE_BPS / 100}% fee</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Fee split (immutable)</span>
-                  <span className="font-bold">{CREATOR_FEE_PCT}% you · {IMPACT_FEE_PCT}% loans · {OPS_FEE_PCT}% ops</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Excess fees</span>
-                  <span className="font-bold">80% your borrower queue · 20% $SOW</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">If the loan fills first</span>
-                  <span className="font-bold">Fees flow to your borrower queue</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Creator rewards</span>
-                  <span className="font-bold">$SOW per life lifted</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Supply</span><span className="font-bold">1,000,000,000</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Graduation</span>
-                  <span className="font-bold">{MIGRATION_QUOTE_SOL} SOL raised · LP locked forever · {MIGRATED_POOL_FEE_BPS / 100}% fee after</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Borrower claim</span>
-                  <span className="font-bold">Lapses after {CLAIM_WINDOW_HOURS}h if fees stay under {CLAIM_MIN_FEES_SOL} SOL</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Initial buy</span>
-                  <span className="font-bold">{devBuySol > 0 ? `${devBuySol} SOL · ≈ ${devBuyPct.toFixed(2)}% of supply` : "None"}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Launch fee</span>
-                  <span className="font-bold">{LAUNCH_FEE_SOL} SOL + ~0.02 SOL network rent</span></div>
+              <div className="flex flex-col gap-3 text-sm">
+                <div className="flex justify-between gap-4"><span className="text-gray-500">For</span>
+                  <a href={`https://www.kiva.org/lend/${borrower.id}`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#276A43] hover:underline text-right">{borrower.name} · Kiva loan #{borrower.id}</a></div>
+                <div className="flex justify-between gap-4"><span className="text-gray-500">Your share</span>
+                  <span className="font-bold text-right">{CREATOR_FEE_PCT}% of every trade&apos;s fees</span></div>
+                <div className="flex justify-between gap-4"><span className="text-gray-500">Initial buy</span>
+                  <span className="font-bold text-right">{devBuySol > 0 ? `${devBuySol} SOL · ≈ ${devBuyPct.toFixed(2)}% of supply` : "None"}</span></div>
+                <div className="flex justify-between gap-4 pt-3 border-t border-gray-100"><span className="text-gray-500">You&apos;ll pay</span>
+                  <span className="text-right">
+                    <span className="font-black text-[#223829]">≈ {(devBuySol + LAUNCH_FEE_SOL + 0.02).toFixed(3)} SOL</span>
+                    <span className="block text-[11px] text-gray-400">
+                      {LAUNCH_FEE_SOL} launch fee + ~0.02 network rent{devBuySol > 0 ? ` + ${devBuySol} initial buy` : ""}
+                    </span>
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-white border border-[#E4EBE7] rounded-2xl p-4 text-[13px] text-[#223829]/80 leading-relaxed mb-3 flex gap-3">
-              <Icon name="refresh" className="w-5 h-5 flex-shrink-0 text-[#276A43]" />
-              <span>
-                After your borrower is funded, you can line up to 5 more on <a href="/my" className="font-bold text-[#276A43] hover:underline">My coins</a> -
-                80% of extra fees funds them in order, 20% goes to $SOW (half burned, half your creator rewards).
-              </span>
-            </div>
-
-
-            <div className="bg-[#EDF4F1] rounded-2xl p-4 text-[13px] text-[#223829]/80 leading-relaxed mb-6 flex gap-3">
-              <Icon name="lock" className="w-5 h-5 flex-shrink-0 text-[#223829]" />
-              <span>
-                The fee split is enforced by the pool config on-chain and cannot be changed by anyone - including us -
-                after launch. The impact share is claimed by the public sow.fun vault and deployed as Kiva loans with receipts.
-              </span>
-            </div>
+            <details className="group bg-[#EDF4F1] rounded-2xl mb-6 text-[13px] text-[#223829]/80">
+              <summary className="cursor-pointer list-none px-4 py-3 font-bold text-[#223829] flex items-center justify-between">
+                How fees and funding work
+                <span className="text-[#276A43] transition-transform group-open:rotate-180" aria-hidden="true">▾</span>
+              </summary>
+              <ul className="px-4 pb-4 flex flex-col gap-2.5 leading-relaxed">
+                <li>
+                  Every trade pays a {POOL_FEE_BPS / 100}% fee: {CREATOR_FEE_PCT}% to you, {IMPACT_FEE_PCT}% to Kiva loans,
+                  {" "}{OPS_FEE_PCT}% to operations. It&apos;s locked on-chain - nobody can change it, including us.
+                </li>
+                <li>
+                  Once {borrower.name} is funded, you can line up to 5 more borrowers on{" "}
+                  <a href="/my" className="font-bold text-[#276A43] hover:underline">My coins</a>.
+                </li>
+                <li>
+                  Extra fees after that:
+                  <span className="block pl-3 mt-1">80% fund your borrower queue, in order</span>
+                  <span className="block pl-3">20% go to $SOW - half burned, half your creator rewards</span>
+                </li>
+                <li>
+                  At {MIGRATION_QUOTE_SOL} SOL raised your coin graduates: its liquidity is locked forever and the fee
+                  drops to {MIGRATED_POOL_FEE_BPS / 100}%.
+                </li>
+                <li>
+                  If your coin earns under {CLAIM_MIN_FEES_SOL} SOL in fees in its first {CLAIM_WINDOW_HOURS} hours,
+                  {" "}{borrower.name} reopens for someone else to launch.
+                </li>
+              </ul>
+            </details>
 
             {error && (
               <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
@@ -779,7 +786,7 @@ export default function LaunchPage() {
                 {launching ? "Launching..." : configReady ? `Launch $${symbol}` : "Launching opens soon"}
               </button>
               <p className="text-[11px] text-gray-400 text-center leading-relaxed">
-                Memecoins are volatile and can go to zero. Not investment advice. Launching costs {LAUNCH_FEE_SOL} SOL + network rent.
+                Memecoins are volatile and can go to zero. Not investment advice.
               </p>
               <button onClick={() => setStep(2)} className="text-xs font-bold text-gray-400 hover:text-[#276A43]">Back to details</button>
             </div>
