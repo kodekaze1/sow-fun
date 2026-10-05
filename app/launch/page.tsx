@@ -5,7 +5,7 @@ import { buildSowCurve, firstBuySupplyPct } from "@/scripts/lib/sow-config.mjs";
 import { coinMetaUri, DESCRIPTION_MAX } from "@/lib/coin-meta";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import WalletButton from "@/components/WalletButton";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import Icon from "@/components/icons";
 import {
@@ -408,7 +408,7 @@ export default function LaunchPage() {
           {!wallet.connected && (
             <span className="text-sm text-gray-500">Connect your wallet to launch:</span>
           )}
-          <WalletMultiButton style={{
+          <WalletButton style={{
             borderRadius: "9999px",
             background: wallet.connected ? "#EDF4F1" : "#276A43",
             color: wallet.connected ? "#223829" : "#ffffff",
@@ -770,7 +770,7 @@ export default function LaunchPage() {
             )}
 
             <div className="flex flex-col gap-3">
-              {!wallet.connected && <WalletMultiButton style={{ width: "100%", justifyContent: "center", borderRadius: "9999px", background: "#276A43" }} />}
+              {!wallet.connected && <WalletButton style={{ width: "100%", justifyContent: "center", borderRadius: "9999px", background: "#276A43" }} />}
               <button
                 onClick={launch}
                 disabled={!configReady || !wallet.connected || launching}

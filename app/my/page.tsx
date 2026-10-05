@@ -4,7 +4,7 @@ import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js"
 import { Buffer } from "buffer";
 import BN from "bn.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import WalletButton from "@/components/WalletButton";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import Icon from "@/components/icons";
 import { getOwnerPositions, buildClaimPositionFeeTx, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
@@ -251,7 +251,7 @@ export default function MyCoinsPage() {
             </div>
             <p className="text-gray-500 text-sm mb-6">Connect the wallet you launched with.</p>
             <div className="flex justify-center">
-              <WalletMultiButton style={{ borderRadius: "9999px", background: "#276A43" }} />
+              <WalletButton style={{ borderRadius: "9999px", background: "#276A43" }} />
             </div>
           </div>
         ) : (
