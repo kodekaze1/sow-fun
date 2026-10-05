@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { IMPACT_CARD_ADDRESS } from "@/lib/constants";
+import { serverRpcUrl } from "@/lib/rpc-server";
 
-const RPC = process.env.NEXT_PUBLIC_SOLANA_RPC ?? "https://api.mainnet-beta.solana.com";
+const RPC = serverRpcUrl();
 const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 async function rpc(method: string, params: unknown[]) {

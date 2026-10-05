@@ -4,9 +4,11 @@
 
 export const DBC_CONFIG_KEY = process.env.NEXT_PUBLIC_DBC_CONFIG_KEY ?? "";
 
-export const SOLANA_RPC =
-  process.env.NEXT_PUBLIC_SOLANA_RPC ||
-  "https://mainnet.helius-rpc.com/?api-key=76b314db-4dae-4060-b520-966021589251";
+// Browser RPC goes through the same-origin /api/rpc proxy so the Helius key
+// stays server-side (server code uses serverRpcUrl() from lib/rpc-server).
+// Signature subscriptions use the public websocket - no key needed.
+export const CLIENT_RPC_PATH = "/api/rpc";
+export const PUBLIC_WS_ENDPOINT = "wss://api.mainnet-beta.solana.com";
 
 // Trading-fee economics (2% flat pool fee)
 export const POOL_FEE_BPS = 200;
@@ -17,6 +19,19 @@ export const IMPACT_FEE_PCT = 45;
 export const OPS_FEE_PCT = 10;
 
 export const SITE_URL = "https://sow.fun";
+
+// Launch + graduation economics (mirrors scripts/lib/sow-config.mjs - the
+// on-chain config is the source of truth once created).
+export const LAUNCH_FEE_SOL = 0.035; // on-chain anti-bot fee, 90% to treasury, 10% Meteora
+export const MIGRATION_QUOTE_SOL = 85; // SOL raised on the curve before graduation
+export const MIGRATED_POOL_FEE_BPS = 100; // DAMM v2 fee after graduation
+export const METEORA_PROTOCOL_FEE_PCT = 20; // Meteora's cut of every trading fee
+
+// Borrower claim expiry: a coin holds its borrower for CLAIM_WINDOW_HOURS.
+// If by then it has earned less than CLAIM_MIN_FEES_SOL in lifetime trading
+// fees (and has not graduated), the claim lapses and the borrower reopens.
+export const CLAIM_WINDOW_HOURS = 72;
+export const CLAIM_MIN_FEES_SOL = 0.05;
 
 // Kiva's canonical sector ids (verified via API introspection)
 export const KIVA_SECTOR_IDS: Record<string, number> = {

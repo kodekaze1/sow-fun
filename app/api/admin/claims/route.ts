@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { kivaGQL } from "@/lib/kiva-graphql";
-import { DBC_CONFIG_KEY, SOLANA_RPC } from "@/lib/launchpad";
+import { DBC_CONFIG_KEY } from "@/lib/launchpad";
+import { serverRpcUrl } from "@/lib/rpc-server";
+import { TREASURY_WALLET } from "@/lib/constants";
+import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 
 // Operator-only claims console data. Everything returned is public
 // on-chain/Kiva data - the key just keeps the ops view private.
@@ -51,7 +54,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const connection = new Connection(SOLANA_RPC, "confirmed");
+    const connection = new Connection(serverRpcUrl(), "confirmed");
     const client = new DynamicBondingCurveClient(connection, "confirmed");
     const config = new PublicKey(DBC_CONFIG_KEY);
 
@@ -65,6 +68,15 @@ export async function GET(request: Request) {
     const solPrice: number = priceRes?.solana?.usd ?? 130;
 
     const feeByPool = new Map(fees.map((f) => [f.poolAddress.toBase58(), f]));
+
+    // Graduated coins: the treasury's share accrues on its locked DAMM v2 LP position
+    const lpSolByMint = new Map<string, number>();
+    const treasuryPositions = await getOwnerPositions(connection, new PublicKey(TREASURY_WALLET)).catch(() => []);
+    for (const pos of treasuryPositions) {
+      for (const m of [pos.pool.tokenAMint.toBase58(), pos.pool.tokenBMint.toBase58()]) {
+        lpSolByMint.set(m, (lpSolByMint.get(m) ?? 0) + unclaimedSolLamports(pos).toNumber() / 1e9);
+      }
+    }
 
     // ProgramAccount shape differs across SDK versions (address vs publicKey)
     const poolEntries = pools.map((p) => {
@@ -93,7 +105,8 @@ export async function GET(request: Request) {
     for (let i = 0; i < poolEntries.length; i++) {
       const poolAddr = poolEntries[i].address.toBase58();
       const fee = feeByPool.get(poolAddr);
-      const pendingSol = fee ? fee.partnerQuoteFee.toNumber() / 1e9 : 0;
+      const lpSol = baseMints[i] ? lpSolByMint.get(baseMints[i]!.toBase58()) ?? 0 : 0;
+      const pendingSol = (fee ? fee.partnerQuoteFee.toNumber() / 1e9 : 0) + lpSol;
       let name = "Unknown token";
       let symbol = "?";
       let loanId: number | null = null;

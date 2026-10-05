@@ -84,7 +84,10 @@ Per token, per harvest, from the vault's impact share:
 
 claim-fees.mjs now writes data/claims/claim-<timestamp>.json on every real
 run: per pool - mint, name/symbol, Kiva loan id, exact lamports claimed, and
-the claim tx. COMMIT THE FILE with the harvest. It is the public source of
+the claim tx. It sweeps three sources: bonding-curve partner fees, the
+treasury's locked DAMM v2 LP position on every graduated coin (entries with
+source "damm_v2_locked_lp"), and launch fees (launch_fees[] - anti-bot
+revenue, never attributed to a coin's loan pledge). COMMIT THE FILE with the harvest. It is the public source of
 truth for "which coin generated which dollars"; wave records and per-token
 impact counters derive from these snapshots, never from memory.
 
@@ -101,6 +104,50 @@ Two layers keep borrowers from being claimed by junk:
    (we never touch funds, we just stop indexing the coin). Use sparingly;
    log the reason in the commit message. The site index is the canonical
    record of which coin represents which borrower.
+
+## Borrower claim expiry (72h, automatic)
+
+A coin holds its borrower for 72 hours. If by then it has earned less than
+0.05 SOL in lifetime trading fees and has not graduated, the claim LAPSES
+and the borrower reopens - no operator action needed. Rules (code:
+resolveBorrowerClaims in lib/launchpad-onchain.ts; constants
+CLAIM_WINDOW_HOURS / CLAIM_MIN_FEES_SOL in lib/launchpad.ts):
+- First launch wins. A coin minted for a borrower while that claim is still
+  live never inherits it (blocks squatting by direct contract call).
+- If the holder lapses, the next coin launched AFTER the lapse moment takes
+  the borrower. A lapsed holder with no successor leaves the borrower open.
+- Lapsed coins still trade and still exist on-chain; their creators keep
+  claiming fees on /my, and lapsed coins stop counting toward the 3-coin
+  wallet cap. The treasury's share of a lapsed coin's fees goes to the
+  general harvest (next borrower), like any excess.
+- The picker shows "Reopens in Nh unless it trades" on at-risk claims.
+
+## Launch fee (on-chain)
+
+Every pool creation pays 0.035 SOL to the config (enforced by Meteora's DBC
+program, so it applies even to launches that bypass sow.fun). Meteora keeps
+10%; the treasury claims 90% via claim-fees.mjs. Launchers also pay ~0.022
+SOL of account rent + tx fees (measured on devnet). The fee is anti-bot
+friction: squatting 100 borrowers costs ~5.7 SOL and funds the treasury.
+
+## Graduation (migration to DAMM v2)
+
+At 85 SOL raised on the curve (~425 SOL market cap) the pool migrates to a
+Meteora DAMM v2 pool with a 1% fee. 100% of the migrated LP is permanently
+locked: 55% treasury position, 45% creator position (each an NFT). Locked
+liquidity can never be withdrawn but keeps earning its share of fees - the
+treasury's via claim-fees.mjs, the creator's via the Claim button on /my.
+Meteora's keeper performs the migration on mainnet (permissionless; the
+devnet rehearsal calls it directly).
+
+## Devnet rehearsal
+
+  KEYPAIR=<treasury.json> node scripts/devnet-rehearsal.mjs
+
+Runs a coin through launch -> trades -> pre-migration claims -> graduation ->
+DAMM v2 trades -> post-migration claims on devnet with the real economics
+(tiny 1 SOL graduation threshold). Writes a log to .devnet/. First pass
+2026-10-05: PASSED - fee claims exact to the lamport, LP split 55.0/45.0.
 
 ## Borrower adoption (data/successions.json)
 

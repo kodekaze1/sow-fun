@@ -9,11 +9,16 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+    // Dev StrictMode mounts twice; the async import means cleanup can run
+    // before the map exists, so a cancelled flag stops the stale init.
+    let cancelled = false;
 
     (async () => {
       const L = (await import("leaflet")).default;
+      const container = containerRef.current;
+      if (cancelled || !container || (container as HTMLDivElement & { _leaflet_id?: number })._leaflet_id) return;
 
-      const map = L.map(containerRef.current!, {
+      const map = L.map(container, {
         center: [15, 20],
         zoom: 2,
         zoomControl: true,
@@ -36,13 +41,21 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
           popupAnchor: [0, -8],
         });
 
-      loans.forEach((loan) => {
+      const points: [number, number][] = [];
+      const located = loans.filter((l) => COUNTRY_COORDS[l.location.country]);
+      // When pins span more than half the globe (e.g. Kenya + Tonga), shift
+      // western longitudes east by 360 so the map frames them across the
+      // Pacific instead of zooming out to the whole world.
+      const lngs = located.map((l) => COUNTRY_COORDS[l.location.country][1]);
+      const wrap = lngs.length > 1 && Math.max(...lngs) - Math.min(...lngs) > 180;
+
+      located.forEach((loan) => {
         const coords = COUNTRY_COORDS[loan.location.country];
-        if (!coords) return;
 
         // Jitter slightly so pins don't overlap for same country
         const lat = coords[0] + (Math.random() - 0.5) * 2;
-        const lng = coords[1] + (Math.random() - 0.5) * 2;
+        const rawLng = wrap && coords[1] < 0 ? coords[1] + 360 : coords[1];
+        const lng = rawLng + (Math.random() - 0.5) * 2;
 
         const color = SECTOR_COLORS[loan.sector] ?? SECTOR_COLORS.default;
         const flag = COUNTRY_FLAGS[loan.location.country] ?? "";
@@ -68,13 +81,20 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
             </div>
           </div>`;
 
+        points.push([lat, lng]);
         L.marker([lat, lng], { icon: makeIcon(color) })
           .addTo(map)
           .bindPopup(popup, { maxWidth: 290 });
       });
+
+      // Frame every funded loan instead of a fixed world view
+      if (points.length > 0) {
+        map.fitBounds(L.latLngBounds(points), { padding: [48, 48], maxZoom: 4 });
+      }
     })();
 
     return () => {
+      cancelled = true;
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -93,10 +113,6 @@ export default function ImpactMap({ loans }: { loans: KivaLoan[] }) {
             {label}
           </div>
         ))}
-      </div>
-      {/* Counter badge */}
-      <div className="absolute top-3 right-3 bg-[#276A43] text-white text-xs font-bold px-3 py-1 rounded-full z-[400] shadow">
-        {loans.length} {loans.length === 1 ? "life" : "lives"} funded
       </div>
     </div>
   );

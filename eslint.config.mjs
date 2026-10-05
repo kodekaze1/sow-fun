@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Anchor workspace for the furnace program (Rust + its own tests)
+    "programs/**",
   ]),
 ]);
 

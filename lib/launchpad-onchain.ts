@@ -3,7 +3,8 @@
 
 import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
-import { DBC_CONFIG_KEY, SOLANA_RPC, IMPACT_FEE_PCT, OPS_FEE_PCT } from "@/lib/launchpad";
+import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, OPS_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
+import { serverRpcUrl } from "@/lib/rpc-server";
 
 export const METADATA_PROGRAM = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
@@ -49,7 +50,7 @@ export function parseLaunchUri(uri: string): { loanId: number | null; borrower: 
 }
 
 export function getDbcClient(): { connection: Connection; client: DynamicBondingCurveClient } {
-  const connection = new Connection(SOLANA_RPC, "confirmed");
+  const connection = new Connection(serverRpcUrl(), "confirmed");
   return { connection, client: new DynamicBondingCurveClient(connection, "confirmed") };
 }
 
@@ -66,6 +67,51 @@ export interface LaunchSummary {
   impactShareSol: number; // vault share (impact + ops) of lifetime fees
   quoteReserveSol: number; // SOL raised on the bonding curve so far
   curvePct: number | null; // progress toward graduation (null if threshold unknown)
+  launchedAt: number | null; // unix seconds (pool activation point)
+  migrated: boolean;
+}
+
+// The SDK has returned pool fields both flat and nested under poolState
+// across versions - read either shape.
+type BNLike = { toNumber: () => number };
+function poolField<T>(account: unknown, name: string): T | undefined {
+  const a = account as Record<string, unknown> & { poolState?: Record<string, unknown> };
+  return (a?.[name] ?? a?.poolState?.[name]) as T | undefined;
+}
+
+// A coin's claim on its borrower has lapsed if it is past the claim window,
+// never graduated, and earned less than the minimum lifetime fees.
+export function isClaimLapsed(l: LaunchSummary, nowSec = Date.now() / 1000): boolean {
+  if (l.migrated || !l.launchedAt) return false;
+  return nowSec - l.launchedAt >= CLAIM_WINDOW_HOURS * 3600 && l.lifetimeFeesSol < CLAIM_MIN_FEES_SOL;
+}
+
+// Which coin holds each borrower. First launch wins; if the holder lapses,
+// the next coin launched AFTER the lapse moment takes over (coins minted
+// while the claim was live never win - that blocks squatting by contract
+// call). A lapsed holder with no successor leaves the borrower open.
+export function resolveBorrowerClaims(launches: LaunchSummary[], nowSec = Date.now() / 1000) {
+  const byLoan = new Map<number, LaunchSummary[]>();
+  for (const l of launches) {
+    if (!l.loanId) continue;
+    const list = byLoan.get(l.loanId) ?? [];
+    list.push(l);
+    byLoan.set(l.loanId, list);
+  }
+  const holders = new Map<number, LaunchSummary>();
+  const lapsed = new Set<string>();
+  for (const [loanId, list] of byLoan) {
+    list.sort((a, b) => (a.launchedAt ?? 0) - (b.launchedAt ?? 0));
+    let holder: LaunchSummary | null = list[0];
+    while (holder && isClaimLapsed(holder, nowSec)) {
+      if (holder.mint) lapsed.add(holder.mint);
+      const lapseAt: number = (holder.launchedAt ?? 0) + CLAIM_WINDOW_HOURS * 3600;
+      const prev: LaunchSummary = holder;
+      holder = list.find((l) => (l.launchedAt ?? 0) >= lapseAt && l !== prev) ?? null;
+    }
+    if (holder) holders.set(loanId, holder);
+  }
+  return { holders, lapsed };
 }
 
 // Migration threshold (lamports) from the config account, cached per process
@@ -110,13 +156,16 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
   const entries = pools.map((p) => {
     const pa = p as unknown as {
       address?: PublicKey; publicKey?: PublicKey;
-      account: { baseMint?: PublicKey; poolState?: { quoteReserve?: { toNumber: () => number } } };
+      account: { baseMint?: PublicKey };
     };
     let quoteReserveLamports = 0;
+    let launchedAt: number | null = null;
     try {
-      quoteReserveLamports = pa.account.poolState?.quoteReserve?.toNumber() ?? 0;
+      quoteReserveLamports = poolField<BNLike>(pa.account, "quoteReserve")?.toNumber() ?? 0;
+      launchedAt = poolField<BNLike>(pa.account, "activationPoint")?.toNumber() ?? null;
     } catch { /* shape drift */ }
-    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: pa.account.baseMint ?? null, quoteReserveLamports };
+    const migrated = Boolean(poolField<number | boolean>(pa.account, "isMigrated"));
+    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: pa.account.baseMint ?? null, quoteReserveLamports, launchedAt, migrated };
   }).filter((e) => !e.baseMint || !DELISTED.has(e.baseMint.toBase58()));
 
   const pdas = entries.filter((e) => e.baseMint).map((e) => metadataPda(e.baseMint as PublicKey));
@@ -166,6 +215,8 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
       curvePct: thresholdLamports
         ? Math.min(100, Math.round((entry.quoteReserveLamports / thresholdLamports) * 100))
         : null,
+      launchedAt: entry.launchedAt,
+      migrated: entry.migrated,
     });
   }
 
@@ -190,7 +241,7 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
     .map((p) => {
       const pa = p as unknown as {
         address?: PublicKey; publicKey?: PublicKey;
-        account: { baseMint?: PublicKey; config?: PublicKey; poolState?: { quoteReserve?: { toNumber: () => number } } };
+        account: { baseMint?: PublicKey; config?: PublicKey };
       };
       return { address: (pa.address ?? pa.publicKey) as PublicKey, account: pa.account };
     })
@@ -227,9 +278,12 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
     } catch { /* metrics unavailable */ }
 
     let quoteReserveLamports = 0;
+    let launchedAt: number | null = null;
     try {
-      quoteReserveLamports = entry.account.poolState?.quoteReserve?.toNumber() ?? 0;
+      quoteReserveLamports = poolField<BNLike>(entry.account, "quoteReserve")?.toNumber() ?? 0;
+      launchedAt = poolField<BNLike>(entry.account, "activationPoint")?.toNumber() ?? null;
     } catch { /* shape drift */ }
+    const migrated = Boolean(poolField<number | boolean>(entry.account, "isMigrated"));
 
     results.push({
       pool: entry.address.toBase58(),
@@ -246,6 +300,8 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
       curvePct: thresholdLamports
         ? Math.min(100, Math.round((quoteReserveLamports / thresholdLamports) * 100))
         : null,
+      launchedAt,
+      migrated,
       creatorPendingSol: Number(creatorPendingLamports) / 1e9,
       creatorPendingLamports,
     });

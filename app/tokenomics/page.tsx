@@ -48,7 +48,7 @@ export default function TokenomicsPage() {
         {/* FEE STRUCTURE */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">Fee Structure</h2>
-          <p className="text-gray-400 text-sm mb-6">Every coin launched here (including $SOW itself) trades with a 2% pool fee, split three ways and locked at launch:</p>
+          <p className="text-gray-400 text-sm mb-6">Every coin launched here (including $SOW itself) trades with a 2% pool fee on its bonding curve (1% after graduation), split three ways and locked at launch:</p>
           <div className="flex flex-col gap-4">
             {[
               { pct: "45%", label: "Kiva Loans (Impact Vault)", color: "#276A43", icon: "globe", desc: "Claimed by the public sow.fun vault and deployed as microloans for the coin's pledged borrower - receipts at every hop." },
@@ -91,8 +91,11 @@ export default function TokenomicsPage() {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-4 leading-relaxed">
-            All 1,000,000,000 tokens start on the Meteora bonding curve. At graduation the liquidity
-            position is permanently locked - it can never be pulled.
+            All 1,000,000,000 tokens start on the Meteora bonding curve. At graduation (85 SOL raised)
+            about 20% of supply seeds a Meteora DAMM v2 pool and 100% of that liquidity is permanently
+            locked - 55% held by the sow.fun vault, 45% by the creator - so it can never be pulled and
+            keeps paying the same 45/45/10 split at a 1% fee. Launching a coin costs a 0.035 SOL
+            launch fee, enforced on-chain, which funds the vault and makes bot squatting expensive.
           </p>
         </div>
 

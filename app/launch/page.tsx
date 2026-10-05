@@ -16,6 +16,11 @@ import {
   LOAN_SORTS,
   tokenMetadataUri,
   type FundraisingLoan,
+  LAUNCH_FEE_SOL,
+  MIGRATION_QUOTE_SOL,
+  MIGRATED_POOL_FEE_BPS,
+  CLAIM_WINDOW_HOURS,
+  CLAIM_MIN_FEES_SOL,
 } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 
@@ -78,7 +83,7 @@ export default function LaunchPage() {
   const [result, setResult] = useState<{ mint: string; signature: string } | null>(null);
 
   // One coin per borrower: loans that already have a coin link to it instead
-  const [taken, setTaken] = useState<Record<number, { mint: string | null; symbol: string }>>({});
+  const [taken, setTaken] = useState<Record<number, { mint: string | null; symbol: string; claimEndsAt?: number | null }>>({});
   useEffect(() => {
     fetch("/api/launched-loans")
       .then((r) => r.json())
@@ -177,8 +182,9 @@ export default function LaunchPage() {
       // completion to open another slot (anti-squatting, pro-serial-impact)
       const mine = await fetch(`/api/creator?address=${wallet.publicKey.toBase58()}`)
         .then((r) => r.json()).catch(() => ({ launches: [] }));
+      // Lapsed claims (72h with negligible fees) no longer hold a slot
       const activeClaims = (mine.launches ?? []).filter(
-        (l: { loanStatus?: string | null }) => l.loanStatus === "fundraising"
+        (l: { loanStatus?: string | null; claimLapsed?: boolean }) => l.loanStatus === "fundraising" && !l.claimLapsed
       ).length;
       if (activeClaims >= 3) {
         throw new Error("You already have 3 coins with loans still fundraising. Help one fill to claim your next borrower.");
@@ -392,6 +398,11 @@ export default function LaunchPage() {
                         <span className="absolute top-2 right-2 z-10 bg-[#223829]/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
                           🌱 Already sown · ${claimed.symbol}
                         </span>
+                        {claimed.claimEndsAt && claimed.claimEndsAt * 1000 > Date.now() && (
+                          <span className="absolute top-9 right-2 z-10 bg-[#F8F2E6] text-[#996210] text-[10px] font-bold px-2.5 py-1 rounded-full">
+                            Reopens in {Math.max(1, Math.ceil((claimed.claimEndsAt * 1000 - Date.now()) / 3600000))}h unless it trades
+                          </span>
+                        )}
                         {loan.image && (
                           <img src={loan.image} alt={loan.name} className="w-full h-40 object-cover" />
                         )}
@@ -572,6 +583,12 @@ export default function LaunchPage() {
                 <div className="flex justify-between"><span className="text-gray-500">Creator rewards</span>
                   <span className="font-bold">$SOW per life lifted</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Supply</span><span className="font-bold">1,000,000,000</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Graduation</span>
+                  <span className="font-bold">{MIGRATION_QUOTE_SOL} SOL raised · LP locked forever · {MIGRATED_POOL_FEE_BPS / 100}% fee after</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Borrower claim</span>
+                  <span className="font-bold">Lapses after {CLAIM_WINDOW_HOURS}h if fees stay under {CLAIM_MIN_FEES_SOL} SOL</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Launch fee</span>
+                  <span className="font-bold">{LAUNCH_FEE_SOL} SOL + ~0.02 SOL network rent</span></div>
               </div>
             </div>
 

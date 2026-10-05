@@ -34,7 +34,7 @@ const FAQS = [
     items: [
       {
         q: "What percentage of trades goes to Kiva loans?",
-        a: "Every coin on sow.fun trades with a 2% pool fee, split three ways and locked at launch: 45% to the coin's pledged Kiva loan, 45% to the coin's creator (claimed directly from the pool), and 10% to operations. Nobody - including us - can change a coin's split after launch; it is enforced by the pool config on-chain.",
+        a: "Every coin on sow.fun trades with a 2% pool fee, split three ways and locked at launch: 45% to the coin's pledged Kiva loan, 45% to the coin's creator (claimed directly from the pool), and 10% to operations. Nobody - including us - can change a coin's split after launch; it is enforced by the pool config on-chain. When a coin graduates (85 SOL raised on its curve) it moves to a Meteora DAMM v2 pool with a 1% fee, and 100% of its liquidity is permanently locked - 55% held by the sow.fun vault, 45% by the creator - so the same 45/45/10 split keeps flowing after graduation.",
       },
       {
         q: "How do I know the treasury is real?",
@@ -50,11 +50,11 @@ const FAQS = [
       },
       {
         q: "Can two coins be launched for the same borrower?",
-        a: "No - one coin per borrower. The first coin launched for a Kiva loan claims that borrower, and the launch picker then shows their card as 'Already sown' with a link to the existing token instead. This keeps the story clean: one coin, one borrower, one lives-lifted count - and it means the best way to support a claimed borrower is to trade their existing coin. When a coin's loan fills and it adopts a successor, the new borrower is claimed by that same coin.",
+        a: "No - one coin per borrower. The first coin launched for a Kiva loan claims that borrower, and the launch picker then shows their card as 'Already sown' with a link to the existing token instead. This keeps the story clean: one coin, one borrower, one lives-lifted count - and it means the best way to support a claimed borrower is to trade their existing coin. When a coin's loan fills and it adopts a successor, the new borrower is claimed by that same coin. Claims are earned, not parked: if a coin has earned less than 0.05 SOL in trading fees 72 hours after launch (and hasn't graduated), its claim lapses and the borrower reopens for someone who will actually trade them up.",
       },
       {
         q: "Can one wallet claim lots of borrowers at once?",
-        a: "A wallet can hold up to 3 coins whose loans are still fundraising. Once one of your borrowers' loans fills, a slot opens and you can claim your next - so prolific launchers are the ones actually funding people, not just collecting claims. Like the one-coin-per-borrower rule, this is enforced at the interface level; the deeper protections are that launching costs real money, abusive or squatted coins can be de-indexed (which reopens the borrower), and rewards only flow for verified funded loans.",
+        a: "A wallet can hold up to 3 coins whose loans are still fundraising. Once one of your borrowers' loans fills, a slot opens and you can claim your next - so prolific launchers are the ones actually funding people, not just collecting claims. Like the one-coin-per-borrower rule, this is enforced at the interface level; the deeper protections are that every launch pays a 0.035 SOL launch fee enforced on-chain by the pool program (it funds the treasury, so squatting is expensive and pays for loans), dead coins lose their borrower after 72 hours, abusive coins can be de-indexed (which reopens the borrower), and rewards only flow for verified funded loans. Coins whose claim has lapsed stop counting toward your 3.",
       },
       {
         q: "What if the borrower's loan fills up before my coin's fees are harvested?",

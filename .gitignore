@@ -11,3 +11,12 @@ node_modules/
 public/brand/video/*.mp4
 public/brand/video/*.wav
 public/brand/video/*.png
+
+# furnace program (Anchor) build output
+programs/furnace/target/
+programs/furnace/test-ledger/
+programs/furnace/.anchor/
+
+# devnet rehearsal wallets and logs
+.devnet/
+*.tsbuildinfo

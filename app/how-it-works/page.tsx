@@ -14,7 +14,7 @@ const STEPS = [
     icon: "lock",
     title: "Launch With the Split Locked",
     color: "#276A43",
-    body: "Your coin launches on its own Meteora bonding curve with a 2% trading fee, split 45% to you, 45% to your borrower's loan, 10% to operations. The split is enforced by the pool config on-chain - nobody, including us, can change it after launch.",
+    body: "Your coin launches on its own Meteora bonding curve with a 2% trading fee, split 45% to you, 45% to your borrower's loan, 10% to operations. The split is enforced by the pool config on-chain - nobody, including us, can change it after launch. If it graduates at 85 SOL raised, the fee drops to 1% and the split carries on through permanently locked liquidity.",
   },
   {
     num: "03",

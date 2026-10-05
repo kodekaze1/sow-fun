@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { KIVA_LENDER_URL } from "@/lib/constants";
 
 const LINKS = [
@@ -13,18 +13,28 @@ const LINKS = [
   { href: "/faq", label: "FAQ" },
 ];
 
+function subscribeStorage(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
+}
+
+function readHasWallet(): boolean {
+  try {
+    return !!localStorage.getItem("walletName");
+  } catch {
+    return false; // storage unavailable
+  }
+}
+
 export default function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   // "My coins" only appears once a wallet has connected on this device
   // (the wallet adapter persists walletName in localStorage on connect).
-  const [hasWallet, setHasWallet] = useState(false);
-  useEffect(() => {
-    try {
-      setHasWallet(!!localStorage.getItem("walletName"));
-    } catch { /* storage unavailable */ }
-  }, [pathname]);
+  // Read straight from storage on every render (navigation re-renders the
+  // nav), and re-read when another tab connects or disconnects a wallet.
+  const hasWallet = useSyncExternalStore(subscribeStorage, readHasWallet, () => false);
   const links = LINKS.filter((l) => l.href !== "/my" || hasWallet || pathname === "/my");
 
   return (

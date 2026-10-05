@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
-import { getLaunchesByCreator, getSolPrice } from "@/lib/launchpad-onchain";
+import BN from "bn.js";
+import { getLaunchesByCreator, getSolPrice, getDbcClient, isClaimLapsed } from "@/lib/launchpad-onchain";
+import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { getLoansById } from "@/lib/kiva-graphql";
 import { getActiveSuccession, getRewardsForCreator } from "@/lib/impact-ledger";
 
@@ -14,6 +16,22 @@ export async function GET(request: Request) {
   }
   try {
     const [launches, solPrice] = await Promise.all([getLaunchesByCreator(address), getSolPrice()]);
+
+    // Graduated coins earn through the creator's permanently locked DAMM v2
+    // LP position instead of the bonding curve - surface those fees too.
+    const lpByMint = new Map<string, { pool: string; lamports: string; sol: number }>();
+    const coinMints = new Set(launches.map((l) => l.mint).filter(Boolean) as string[]);
+    if (coinMints.size) {
+      const { connection } = getDbcClient();
+      const positions = await getOwnerPositions(connection, new PublicKey(address)).catch(() => []);
+      for (const p of positions) {
+        const mint = [p.pool.tokenAMint.toBase58(), p.pool.tokenBMint.toBase58()].find((m) => coinMints.has(m));
+        if (!mint) continue;
+        const prev = lpByMint.get(mint);
+        const total = unclaimedSolLamports(p).add(new BN(prev?.lamports ?? "0"));
+        lpByMint.set(mint, { pool: p.poolAddress.toBase58(), lamports: total.toString(), sol: total.toNumber() / 1e9 });
+      }
+    }
 
     // Resolve each coin's ACTIVE loan (after any adoptions) and its live
     // Kiva status, so the dashboard can prompt adoption when a loan closes.
@@ -31,6 +49,10 @@ export async function GET(request: Request) {
         loanStatus: loan?.status ?? null,
         loanRemaining: loan?.remaining ?? null,
         activeBorrowerName: loan?.name ?? l.succession?.borrower ?? l.borrowerName,
+        claimLapsed: isClaimLapsed(l),
+        dammPool: (l.mint && lpByMint.get(l.mint)?.pool) || null,
+        lpPendingLamports: (l.mint && lpByMint.get(l.mint)?.lamports) || "0",
+        lpPendingSol: (l.mint && lpByMint.get(l.mint)?.sol) || 0,
       };
     });
 

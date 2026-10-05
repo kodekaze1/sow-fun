@@ -5,7 +5,7 @@ import Icon from "@/components/icons";
 import { getLaunchByMint, getSolPrice } from "@/lib/launchpad-onchain";
 import { getLoansById } from "@/lib/kiva-graphql";
 import { getActiveSuccession } from "@/lib/impact-ledger";
-import { CREATOR_FEE_PCT, IMPACT_FEE_PCT, OPS_FEE_PCT, POOL_FEE_BPS, SITE_URL } from "@/lib/launchpad";
+import { CREATOR_FEE_PCT, IMPACT_FEE_PCT, OPS_FEE_PCT, POOL_FEE_BPS, SITE_URL, MIGRATION_QUOTE_SOL, MIGRATED_POOL_FEE_BPS } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 
 export const revalidate = 60;
@@ -241,7 +241,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
               </div>
               <div className="flex justify-between text-[11px] text-gray-400 mt-1.5">
                 <span>{launch.curvePct}% of the way to graduation</span>
-                <span>graduates to a full AMM pool at 100%</span>
+                <span>graduates at {MIGRATION_QUOTE_SOL} SOL · LP locked forever · {MIGRATED_POOL_FEE_BPS / 100}% fee after</span>
               </div>
             </>
           )}

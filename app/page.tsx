@@ -5,10 +5,10 @@ import MapWrapper from "@/components/MapWrapper";
 import Icon from "@/components/icons";
 import CountUp from "@/components/CountUp";
 import ScrollReveal from "@/components/ScrollReveal";
-import { KivaLoan, MOCK_STATS, MOCK_BATCHES, SECTOR_TAGS, SECTOR_COLORS, COUNTRY_FLAGS, ALL_KIVA_SECTORS, TOTAL_KIVA_COUNTRIES } from "@/lib/types";
+import { KivaLoan, MOCK_STATS, MOCK_BATCHES, COUNTRY_FLAGS, ALL_KIVA_SECTORS, TOTAL_KIVA_COUNTRIES } from "@/lib/types";
 import { getKivaImpactStats } from "@/lib/kiva-stats";
 import { getAllWaves } from "@/lib/waves";
-import { KIVA_FETCH_HEADERS, KIVA_TEAM_URL } from "@/lib/constants";
+import { KIVA_FETCH_HEADERS, KIVA_TEAM_URL, TREASURY_WALLET } from "@/lib/constants";
 import badges from "@/data/badges.json";
 
 async function getLoans(): Promise<KivaLoan[]> {
@@ -42,30 +42,6 @@ export default async function Home() {
     repaymentRate:    MOCK_STATS.repaymentRate, 
     recycledCapital:  MOCK_STATS.recycledCapital,
   };
-
-  // Compute sectors from waves
-  const sectorMap: Record<string, { count: number; cents: number }> = {};
-  waves.forEach(wave => {
-    if (wave.status === "draft") return;
-    wave.display.sectors.forEach(sector => {
-      if (!sectorMap[sector]) sectorMap[sector] = { count: 0, cents: 0 };
-      sectorMap[sector].count += 1;
-    });
-    wave.loans.forEach(loan => {
-      const primarySector = wave.display.sectors[0] || "General";
-      if (!sectorMap[primarySector]) sectorMap[primarySector] = { count: 0, cents: 0 };
-      sectorMap[primarySector].cents += loan.uplift_cents;
-    });
-  });
-
-  const totalCents = Object.values(sectorMap).reduce((sum, s) => sum + s.cents, 0);
-  const impactSectors = Object.entries(sectorMap).map(([label, data]) => ({
-    label,
-    count: data.count,
-    pct: totalCents > 0 ? Math.round((data.cents / totalCents) * 100) : 0,
-    icon: SECTOR_TAGS[label] || "💼",
-    color: SECTOR_COLORS[label] || SECTOR_COLORS.default,
-  })).sort((a, b) => b.pct - a.pct);
 
   // The map shows ONLY harvest-funded loans - never browse listings,
   // so the marker count always matches lives actually funded.
@@ -106,12 +82,12 @@ export default async function Home() {
           className="absolute inset-0 w-full h-full object-cover object-[50%_25%] kenburns" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#16261c]/95 via-[#16261c]/70 to-[#16261c]/20" />
         <div className="absolute inset-0" style={{ background: "radial-gradient(120% 95% at 50% 40%, transparent 55%, rgba(10,20,14,0.5) 100%)" }} />
-        <div className="relative max-w-[1280px] mx-auto px-6 py-24 md:py-32">
+        <div className="relative max-w-[1280px] mx-auto px-6 py-16 md:py-32">
           <div className="max-w-xl text-[#EDF4F1]">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider sm:tracking-widest mb-6">
               The launchpad where fees fund real loans
             </div>
-            <h1 className="text-5xl md:text-6xl font-medium leading-[1.12] tracking-tight mb-6"
+            <h1 className="text-[2.6rem] sm:text-5xl md:text-6xl font-medium leading-[1.12] tracking-tight mb-6"
               style={{ fontFamily: "var(--font-serif)" }}>
               Sow a coin,{" "}
               <span className="italic relative inline-block whitespace-nowrap">
@@ -147,7 +123,8 @@ export default async function Home() {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-5 bg-[#EDF4F1] border-b border-[#D9E6DF]">
+      <div className="bg-[#EDF4F1] border-b border-[#D9E6DF]">
+      <div className="max-w-[1280px] mx-auto grid grid-cols-2 md:grid-cols-5 gap-px bg-[#D9E6DF] md:border-x border-[#D9E6DF]">
         {[
           { icon: "coins", value: `$${stats.feesCollected.toLocaleString()}`, label: "Impact Deployed", delta: "founder seed" },
           { icon: "heart", value: stats.loansFunded === 0 ? "-" : String(stats.loansFunded), label: "Loans Funded", delta: "post-harvest" },
@@ -155,7 +132,7 @@ export default async function Home() {
           { icon: "check", value: stats.repaymentRate === 0 ? "-" : `${stats.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
           { icon: "refresh", value: `$${stats.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
-          <div key={label} className="text-center py-6 px-3 border-r border-[#D9E6DF] last:border-0">
+          <div key={label} className="text-center py-5 md:py-6 px-3 bg-[#EDF4F1] last:col-span-2 md:last:col-span-1">
             <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-white flex items-center justify-center text-[#223829] shadow-sm">
               <Icon name={icon} className="w-6 h-6" />
             </div>
@@ -165,20 +142,30 @@ export default async function Home() {
           </div>
         ))}
       </div>
+      </div>
 
-      {/* SECTION INTRO */}
-      <div className="max-w-[1440px] mx-auto px-6 pt-14 pb-2 text-center" data-reveal>
-        <img src="/images/illustrations/lock-sprout.png" alt="" aria-hidden="true"
-          className="w-24 mx-auto mb-4 rotate-[2deg] mix-blend-multiply" />
-        <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2.5">Live transparency</div>
-        <h2 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-[#223829]">Watch the treasury work.</h2>
+      {/* SECTION HEADER */}
+      <div className="max-w-[1280px] mx-auto px-6 pt-10 md:pt-12 pb-6 flex flex-wrap items-end justify-between gap-4" data-reveal>
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
+          <img src="/images/illustrations/lock-sprout.png" alt="" aria-hidden="true"
+            className="w-11 md:w-14 rotate-[2deg] mix-blend-multiply flex-shrink-0" />
+          <div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-1.5">Live transparency</div>
+            <h2 className="font-serif text-[1.7rem] sm:text-3xl md:text-4xl font-medium tracking-tight text-[#223829] leading-tight md:leading-none">Watch the treasury work.</h2>
+          </div>
+        </div>
+        <a href={`https://solscan.io/account/${TREASURY_WALLET}`} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-2 text-xs font-mono text-[#223829]/70 hover:text-[#276A43] bg-[#EDF4F1] border border-[#D9E6DF] rounded-full px-3.5 py-1.5 transition-colors">
+          <span className="w-2 h-2 rounded-full bg-[#2AA967] animate-livepulse" />
+          Treasury {TREASURY_WALLET.slice(0, 5)}…{TREASURY_WALLET.slice(-3)} · updated live ↗
+        </a>
       </div>
 
       {/* MAIN GRID */}
-      <div className="max-w-[1440px] mx-auto grid grid-cols-[1fr_360px] gap-6 p-6">
+      <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 px-4 sm:px-6 pb-6">
 
         {/* LEFT */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0">
 
           {/* MAP */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
@@ -252,52 +239,31 @@ export default async function Home() {
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="vault" className="w-4 h-4" /></span>Impact Treasury</h2>
-              <span className="text-xs font-bold bg-red-50 text-red-700 px-3 py-1 rounded-full animate-livepulse">Live</span>
+              <span className="flex items-center gap-1.5 text-xs font-bold bg-[#EDF4F1] text-[#276A43] px-3 py-1 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-[#2AA967] animate-livepulse" />Live</span>
             </div>
             <TreasuryCard />
           </div>
 
-          {/* RECYCLING */}
+          {/* UNLOCKS AFTER HARVEST */}
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="refresh" className="w-4 h-4" /></span>The Ripple Effect</h2>
-              <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">post-harvest</span>
+              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="hourglass" className="w-4 h-4" /></span>Unlocks after harvest</h2>
+              <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">pending</span>
             </div>
-            <div className="px-5 py-8 text-center text-gray-400 text-sm">
-              <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
-                <Icon name="hourglass" className="w-5 h-5" />
+            {[
+              { icon: "refresh", title: "The Ripple Effect", detail: "Repayments recycled to the next borrower - Kiva loans repay over 6-18 months." },
+              { icon: "chart", title: "Impact Sectors", detail: "Sector breakdown fills in as more harvests are funded." },
+            ].map(({ icon, title, detail }) => (
+              <div key={title} className="px-5 py-3.5 flex items-start gap-3 border-b border-gray-50 last:border-0">
+                <div className="w-8 h-8 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829] flex-shrink-0">
+                  <Icon name={icon} className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-[13px] font-bold text-[#223829]">{title}</div>
+                  <div className="text-xs text-gray-400 leading-relaxed">{detail}</div>
+                </div>
               </div>
-              Repayments from active loans will appear here.<br />
-              <span className="text-xs">Kiva loans typically repay over 6-18 months.</span>
-            </div>
-          </div>
-
-          {/* SECTORS */}
-          <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
-              <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="chart" className="w-4 h-4" /></span>Impact Sectors</h2>
-              <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">post-harvest</span>
-            </div>
-            <div className="p-5 flex flex-col gap-3.5">
-              {impactSectors.length > 0 ? impactSectors.map(({ label, pct, count }) => (
-                <div key={label}>
-                  <div className="flex justify-between items-center mb-1.5 text-sm">
-                    <span className="font-bold">{label}</span>
-                    <span className="text-xs text-gray-400">{pct}% · {count} harvest{count > 1 ? 's' : ''}</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-[#2AA967]" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              )) : (
-                <div className="py-4 text-center text-gray-400 text-sm">
-                  <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
-                    <Icon name="chart" className="w-5 h-5" />
-                  </div>
-                  Sector breakdown will populate as more loans are funded.
-                </div>
-              )}
-            </div>
+            ))}
           </div>
 
           {/* LEND WITH US */}

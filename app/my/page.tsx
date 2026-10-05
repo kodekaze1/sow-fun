@@ -7,6 +7,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import Icon from "@/components/icons";
+import { getOwnerPositions, buildClaimPositionFeeTx, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { IMPACT_FEE_PCT, CREATOR_FEE_PCT, type FundraisingLoan } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 
@@ -24,6 +25,10 @@ interface CreatorLaunch {
   impactShareSol: number;
   creatorPendingSol: number;
   creatorPendingLamports: string;
+  // Post-migration: fees on the creator's locked DAMM v2 LP position
+  dammPool: string | null;
+  lpPendingSol: number;
+  lpPendingLamports: string;
   activeLoanId: number | null;
   activeBorrowerName: string | null;
   loanStatus: string | null;
@@ -108,17 +113,30 @@ export default function MyCoinsPage() {
     setClaiming(row.pool);
     setMessage(null);
     try {
-      const client = new DynamicBondingCurveClient(connection, "confirmed");
-      const tx: Transaction = await client.creator.claimCreatorTradingFee({
-        creator: wallet.publicKey,
-        payer: wallet.publicKey,
-        pool: new PublicKey(row.pool),
-        maxBaseAmount: new BN(0),
-        maxQuoteAmount: new BN(row.creatorPendingLamports),
-      });
-      const signature = await wallet.sendTransaction(tx, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-      setMessage(`Claimed ${row.creatorPendingSol.toFixed(4)} SOL from $${row.symbol}.`);
+      // Bonding-curve fees (pre-migration)
+      if (row.creatorPendingSol > 0) {
+        const client = new DynamicBondingCurveClient(connection, "confirmed");
+        const tx: Transaction = await client.creator.claimCreatorTradingFee({
+          creator: wallet.publicKey,
+          payer: wallet.publicKey,
+          pool: new PublicKey(row.pool),
+          maxBaseAmount: new BN(0),
+          maxQuoteAmount: new BN(row.creatorPendingLamports),
+        });
+        const signature = await wallet.sendTransaction(tx, connection);
+        await connection.confirmTransaction(signature, "confirmed");
+      }
+      // Locked LP fees (post-migration)
+      if (row.lpPendingSol > 0 && row.dammPool) {
+        const positions = await getOwnerPositions(connection, wallet.publicKey, new Set([row.dammPool]));
+        for (const entry of positions) {
+          if (unclaimedSolLamports(entry).isZero()) continue;
+          const tx = await buildClaimPositionFeeTx(connection, wallet.publicKey, entry);
+          const signature = await wallet.sendTransaction(tx, connection);
+          await connection.confirmTransaction(signature, "confirmed");
+        }
+      }
+      setMessage(`Claimed ${(row.creatorPendingSol + row.lpPendingSol).toFixed(4)} SOL from $${row.symbol}.`);
       load();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Claim failed - try again.");
@@ -157,7 +175,7 @@ export default function MyCoinsPage() {
     }
   };
 
-  const totalPending = (launches ?? []).reduce((s, l) => s + l.creatorPendingSol, 0);
+  const totalPending = (launches ?? []).reduce((s, l) => s + l.creatorPendingSol + l.lpPendingSol, 0);
   const accruingSow = rewards.filter((r) => r.status === "accruing").reduce((s, r) => s + r.sow_amount, 0);
   const paidSow = rewards.filter((r) => r.status === "paid").reduce((s, r) => s + r.sow_amount, 0);
 
@@ -304,10 +322,15 @@ export default function MyCoinsPage() {
 
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Your share pending</div>
+                        <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                          Your share pending
+                          {row.dammPool && (
+                            <span className="normal-case tracking-normal text-[10px] font-bold bg-[#EDF4F1] text-[#276A43] px-1.5 py-0.5 rounded-full">graduated · locked LP</span>
+                          )}
+                        </div>
                         <div className="font-black text-[#223829]">
-                          {row.creatorPendingSol.toFixed(4)} SOL
-                          <span className="text-xs font-semibold text-gray-400"> (≈ ${(row.creatorPendingSol * solPrice).toFixed(2)})</span>
+                          {(row.creatorPendingSol + row.lpPendingSol).toFixed(4)} SOL
+                          <span className="text-xs font-semibold text-gray-400"> (≈ ${((row.creatorPendingSol + row.lpPendingSol) * solPrice).toFixed(2)})</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -316,7 +339,7 @@ export default function MyCoinsPage() {
                         )}
                         <button
                           onClick={() => claim(row)}
-                          disabled={claiming === row.pool || row.creatorPendingSol <= 0}
+                          disabled={claiming === row.pool || row.creatorPendingSol + row.lpPendingSol <= 0}
                           className="bg-[#276A43] hover:bg-[#223829] disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-full px-5 py-2 text-sm font-bold transition-colors">
                           {claiming === row.pool ? "Claiming..." : "Claim fees"}
                         </button>
