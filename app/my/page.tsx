@@ -7,6 +7,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import WalletButton from "@/components/WalletButton";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import Icon from "@/components/icons";
+import { markCreator } from "@/lib/creator-flag";
 import { getOwnerPositions, buildClaimPositionFeeTx, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { IMPACT_FEE_PCT, CREATOR_FEE_PCT, type FundraisingLoan } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
@@ -91,6 +92,7 @@ export default function MyCoinsPage() {
       const data = await res.json();
       if (res.ok) {
         setLaunches(data.launches ?? []);
+        if ((data.launches ?? []).length > 0) markCreator();
         setRewards(data.rewards ?? []);
         setSolPrice(data.solPrice ?? 130);
       } else {

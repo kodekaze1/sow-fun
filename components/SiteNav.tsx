@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { KIVA_LENDER_URL } from "@/lib/constants";
+import { readIsCreator, subscribeCreator } from "@/lib/creator-flag";
 
 const LINKS = [
   { href: "/launches", label: "Launches" },
@@ -13,29 +14,14 @@ const LINKS = [
   { href: "/faq", label: "FAQ" },
 ];
 
-function subscribeStorage(onChange: () => void) {
-  window.addEventListener("storage", onChange);
-  return () => window.removeEventListener("storage", onChange);
-}
-
-function readHasWallet(): boolean {
-  try {
-    return !!localStorage.getItem("walletName");
-  } catch {
-    return false; // storage unavailable
-  }
-}
-
 export default function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // "My coins" only appears once a wallet has connected on this device
-  // (the wallet adapter persists walletName in localStorage on connect).
-  // Read straight from storage on every render (navigation re-renders the
-  // nav), and re-read when another tab connects or disconnects a wallet.
-  const hasWallet = useSyncExternalStore(subscribeStorage, readHasWallet, () => false);
-  const links = LINKS.filter((l) => l.href !== "/my" || hasWallet || pathname === "/my");
+  // "My coins" only appears for creators - once this device has launched a
+  // coin, or /my has found coins for the connected wallet (lib/creator-flag).
+  const isCreator = useSyncExternalStore(subscribeCreator, readIsCreator, () => false);
+  const links = LINKS.filter((l) => l.href !== "/my" || isCreator || pathname === "/my");
 
   return (
     <nav className="bg-white/95 backdrop-blur border-b border-[#EDF4F1] sticky top-0 z-[500] shadow-[0_2px_12px_rgba(34,56,41,0.05)]">

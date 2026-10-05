@@ -26,6 +26,7 @@ import {
 } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 import { confirmTx } from "@/lib/confirm-tx";
+import { markCreator } from "@/lib/creator-flag";
 
 type Step = 1 | 2 | 3;
 
@@ -297,12 +298,14 @@ export default function LaunchPage() {
       const signature = await wallet.sendTransaction(tx, connection, { signers: [baseMint] });
       const outcome = await confirmTx(connection, signature, latest);
       if (outcome.status === "confirmed") {
+        markCreator();
         setResult({ mint: baseMint.publicKey.toBase58(), signature });
         return;
       }
       // Never show a plain failure if the pool might exist - a retry would mint a duplicate
       const minted = await connection.getAccountInfo(baseMint.publicKey).catch(() => null);
       if (minted) {
+        markCreator();
         setResult({ mint: baseMint.publicKey.toBase58(), signature });
         return;
       }
