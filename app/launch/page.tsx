@@ -389,7 +389,10 @@ export default function LaunchPage() {
 
       {/* STEPPER */}
       <div className="max-w-6xl mx-auto px-6 pt-8">
-        <div className="flex items-center justify-center gap-2 text-xs font-bold mb-8">
+        {/* Steps centered, wallet on the same row at the right (stacks on phones) */}
+        <div className="flex flex-col md:grid md:grid-cols-[1fr_auto_1fr] items-center gap-4 mb-8">
+        <div className="hidden md:block" />
+        <div className="flex items-center justify-center gap-2 text-xs font-bold">
           {[
             [1, "Pick a borrower"],
             [2, "Token details"],
@@ -407,19 +410,22 @@ export default function LaunchPage() {
           ))}
         </div>
 
-        {/* WALLET BAR - visible on every step */}
-        <div className="flex items-center justify-center gap-3 mb-8">
+        {/* WALLET - visible on every step */}
+        <div className="flex items-center gap-2 md:justify-self-end">
           {!wallet.connected && (
-            <span className="text-sm text-gray-500">Connect your wallet to launch:</span>
+            <span className="text-xs text-gray-500">Connect to launch</span>
           )}
           <WalletButton style={{
             borderRadius: "9999px",
             background: wallet.connected ? "#EDF4F1" : "#276A43",
             color: wallet.connected ? "#223829" : "#ffffff",
-            fontSize: "13px",
+            fontSize: "12px",
             fontWeight: 700,
-            height: "40px",
+            height: "34px",
+            padding: "0 14px",
+            lineHeight: "34px",
           }} />
+        </div>
         </div>
 
         {!configReady && (
