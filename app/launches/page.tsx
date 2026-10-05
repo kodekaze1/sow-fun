@@ -23,15 +23,15 @@ export default async function LaunchesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* HERO */}
-      <div className="bg-[#223829] text-[#EDF4F1] py-14 px-6 text-center">
-        <div className="max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-5">
+      <div className="bg-[#223829] text-[#EDF4F1] pt-12 pb-10 px-6 text-center">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest">
             {launches.length} launch{launches.length === 1 ? "" : "es"} · ≈ ${totalImpactUsd.toFixed(0)} impact generated
           </div>
-          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight mb-3">
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
             Live launches, <span className="italic text-[#F8CD69]">real beneficiaries.</span>
           </h1>
-          <p className="opacity-80 max-w-lg mx-auto">
+          <p className="opacity-85 max-w-lg leading-relaxed [text-wrap:balance]">
             Every token here carries an immutable pledge to a real borrower on Kiva.
             The leaderboard is simple: who lifted the most lives.
           </p>

@@ -82,18 +82,17 @@ export default function RoadmapPage() {
     <div className="min-h-screen bg-white">
 
       {/* HERO */}
-      <div className="relative overflow-hidden bg-[#223829] text-white py-20 px-6 text-center">
+      <div className="relative overflow-hidden bg-[#223829] text-white pt-16 pb-14 px-6 text-center">
         <img src="/images/hands-seedling.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
-        <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+        <div className="relative max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest">
             Where We&apos;re Going
           </div>
-          <h1 className="text-5xl font-extrabold mb-4"
-            style={{ fontFamily: "var(--font-serif)" }}>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
             Roadmap
           </h1>
-          <p className="text-lg opacity-80 leading-relaxed">
+          <p className="text-base md:text-lg opacity-85 leading-relaxed max-w-lg [text-wrap:balance]">
             From concept to $1M in capital deployed - here&apos;s the plan.
           </p>
         </div>

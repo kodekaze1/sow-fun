@@ -234,12 +234,12 @@ export default function MyCoinsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="bg-[#223829] text-[#EDF4F1] py-12 px-6 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="font-serif text-4xl font-medium tracking-tight mb-3">
+      <div className="bg-[#223829] text-[#EDF4F1] pt-12 pb-10 px-6 text-center">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
             My <span className="italic text-[#F8CD69]">coins.</span>
           </h1>
-          <p className="opacity-80 max-w-md mx-auto leading-relaxed">
+          <p className="opacity-85 max-w-lg leading-relaxed [text-wrap:balance]">
             Every coin you&apos;ve sown, its borrower, and your {CREATOR_FEE_PCT}% of the fees - claimable straight from the pool.
           </p>
         </div>

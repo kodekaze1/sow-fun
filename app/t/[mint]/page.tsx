@@ -91,8 +91,8 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
       <div className="max-w-3xl mx-auto px-6 py-12">
         {isDemo && (
           <div className="mb-8 bg-[#F8F2E6] border border-[#F8CD69]/50 rounded-2xl p-4 text-sm text-[#996210] text-center">
-            <span className="font-bold">Preview.</span>{" "}This is what a launched coin&apos;s page looks like -
-            live fees, its borrower, and the curve. <a href="/launch" className="underline font-bold">Sow a real one →</a>
+            <span className="font-bold">Preview.</span>{" "}This is what a launched coin&apos;s page looks like.{" "}
+            <a href="/launch" className="underline font-bold whitespace-nowrap">Sow a real one →</a>
           </div>
         )}
         {/* TOKEN HEAD */}
@@ -259,10 +259,11 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2.5 text-[12px] text-gray-500 leading-relaxed">
               <Icon name="lock" className="w-4 h-4 flex-shrink-0 text-[#223829] mt-0.5" />
-              <span>
-                The split is enforced by the pool config on-chain. Excess beyond the loan: 80% funds the
-                creator&apos;s borrower queue in order, 20% buys $SOW (half burned, half rewards the creator).
-              </span>
+              <div className="flex flex-col gap-1">
+                <span>The split is enforced by the pool config on-chain. Excess beyond the loan:</span>
+                <span>80% funds the creator&apos;s borrower queue, in order</span>
+                <span>20% buys $SOW - half burned, half rewards the creator</span>
+              </div>
             </div>
           </div>
         </div>

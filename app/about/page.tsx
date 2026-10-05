@@ -12,17 +12,17 @@ export default function AboutPage() {
     <div className="min-h-screen bg-white">
 
       {/* HERO */}
-      <div className="relative overflow-hidden bg-[#223829] text-white py-20 px-6 text-center">
+      <div className="relative overflow-hidden bg-[#223829] text-white pt-16 pb-14 px-6 text-center">
         <img src="/images/hands-wide.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
-        <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+        <div className="relative max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest">
             About sow.fun
           </div>
-          <h1 className="text-5xl font-extrabold mb-4" style={{ fontFamily: "var(--font-serif)" }}>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
             Memecoin energy, <span className="italic text-[#F8CD69]">pointed at people.</span>
           </h1>
-          <p className="text-lg opacity-80 leading-relaxed">
+          <p className="text-base md:text-lg opacity-85 leading-relaxed max-w-lg [text-wrap:balance]">
             We watched crypto route millions in trading fees to celebrities and insiders,
             and asked a simpler question: what if a coin worked for someone who needs $500?
           </p>
@@ -78,11 +78,11 @@ export default function AboutPage() {
               { icon: "ledger", title: "Receipts, not promises", body: "Every harvest publishes its claim transactions, conversions, and Kiva loan links. If a hop has no receipt, it did not happen." },
               { icon: "heart", title: "Honest accounting", body: "Kiva loans and Kiva donations are different things, and we never conflate them. Loan dollars are tracked separately, to the cent." },
             ].map(({ icon, title, body }) => (
-              <div key={title} className="text-center p-4">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
-                  <Icon name={icon} className="w-6 h-6" />
+              <div key={title} className="flex flex-col gap-2 p-1">
+                <div className="w-10 h-10 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
+                  <Icon name={icon} className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-2">{title}</h3>
+                <h3 className="text-base font-extrabold text-gray-900">{title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{body}</p>
               </div>
             ))}

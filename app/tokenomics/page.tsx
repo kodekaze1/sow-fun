@@ -14,18 +14,17 @@ export default function TokenomicsPage() {
     <div className="min-h-screen bg-white">
 
       {/* HERO */}
-      <div className="relative overflow-hidden bg-[#223829] text-white py-20 px-6 text-center">
+      <div className="relative overflow-hidden bg-[#223829] text-white pt-16 pb-14 px-6 text-center">
         <img src="/images/hero-market.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
-        <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+        <div className="relative max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest">
             $SOW on Solana
           </div>
-          <h1 className="text-5xl font-extrabold mb-4"
-            style={{ fontFamily: "var(--font-serif)" }}>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
             Tokenomics
           </h1>
-          <p className="text-lg opacity-80 leading-relaxed">
+          <p className="text-base md:text-lg opacity-85 leading-relaxed max-w-lg [text-wrap:balance]">
             One 2% fee, split for impact, locked at launch - every trade does good.
           </p>
         </div>
@@ -56,7 +55,7 @@ export default function TokenomicsPage() {
         {/* FEE STRUCTURE */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">Fee Structure</h2>
-          <p className="text-gray-400 text-sm mb-6">Every coin launched here (including $SOW itself) trades with a 2% pool fee on its bonding curve (1% after graduation), split three ways and locked at launch:</p>
+          <p className="text-gray-500 text-sm mb-6 max-w-xl [text-wrap:balance]">Every coin here, $SOW included, pays a 2% fee on its bonding curve (1% after graduation), split three ways and locked at launch:</p>
           <div className="flex flex-col gap-4">
             {[
               { pct: "45%", label: "Kiva Loans (Impact Vault)", color: "#276A43", icon: "globe", desc: "Claimed by the public sow.fun vault and deployed as microloans for the coin's pledged borrower - receipts at every hop." },
@@ -156,17 +155,17 @@ export default function TokenomicsPage() {
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">The Recycling Model</h2>
           <p className="text-gray-400 text-sm mb-6">Unlike charity tokens where funds disappear, $SOW runs a recycling model:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { icon: "coins", title: "Fees → Treasury", body: "Trading fees accumulate in the public Solana treasury wallet." },
               { icon: "heart", title: "Treasury → Kiva", body: "Funds are deployed as Kiva microloans to vetted entrepreneurs." },
               { icon: "refresh", title: "Repayments → New Loans", body: "When borrowers repay, capital gets reinvested - not withdrawn. One dollar, many lives." },
             ].map(({ icon, title, body }) => (
-              <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-[#223829]">
-                  <Icon name={icon} className="w-6 h-6" />
+              <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl flex flex-col gap-2">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#223829]">
+                  <Icon name={icon} className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-2">{title}</h3>
+                <h3 className="text-base font-extrabold text-gray-900">{title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{body}</p>
               </div>
             ))}
@@ -176,52 +175,59 @@ export default function TokenomicsPage() {
         {/* WAVE POLICY */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">Excess Fees & Creator Rewards</h2>
-          <p className="text-gray-400 text-sm mb-6">
-            Launchpad tokens usually raise more than their borrower needs. Once the launch borrower is funded, every extra dollar follows one public rule:
+          <p className="text-gray-500 text-sm mb-6 max-w-xl [text-wrap:balance]">
+            Coins usually raise more than their borrower needs. Once the launch borrower is funded, every extra dollar follows one public rule:
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { icon: "heart", title: "80% - The borrower queue", body: "Funds the creator's borrower queue: up to 5 borrowers they line up, funded in order. Queued borrowers who close or belong to another coin are skipped. The lives-lifted counter keeps climbing, harvest after harvest." },
-              { icon: "refresh", title: "10% - $SOW burned", body: "Half of the $SOW bought back with excess fees is burned - every successful launch makes $SOW scarcer." },
-              { icon: "sparkle", title: "10% - Creator rewards", body: "The other half pays the token's creator in $SOW for every borrower their token fully funds. Rewards follow real loans, not volume." },
+              { icon: "heart", title: "80% - The borrower queue", body: "Funds up to 5 borrowers the creator lines up, in order. Borrowers who close or belong to another coin are skipped." },
+              { icon: "refresh", title: "10% - $SOW burned", body: "Half of the $SOW bought back with excess fees is burned. Every successful launch makes $SOW scarcer." },
+              { icon: "sparkle", title: "10% - Creator rewards", body: "The other half pays the creator in $SOW for every borrower their coin fully funds. Real loans, not volume." },
             ].map(({ icon, title, body }) => (
-              <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-[#223829]">
-                  <Icon name={icon} className="w-6 h-6" />
+              <div key={title} className="p-5 bg-[#EDF4F1] rounded-xl flex flex-col gap-2">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#223829]">
+                  <Icon name={icon} className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-2">{title}</h3>
+                <h3 className="text-base font-extrabold text-gray-900">{title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{body}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-400 text-center mt-5 leading-relaxed">
-            If a beneficiary&apos;s loan fills or expires before a harvest executes, the harvest flows down the queue instead. If the queue
-            is empty for 72 hours while money waits, sow.fun funds a borrower in the same category. Creator rewards are paid only
-            when loans verifiably fund on Kiva.
-          </p>
+          <ul className="mt-5 flex flex-col gap-1.5 text-[13px] text-gray-500 leading-relaxed">
+            <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>If the borrower&apos;s loan fills or expires before a harvest, the money flows down the queue instead.</li>
+            <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>If the queue is empty for 72 hours while money waits, sow.fun funds a borrower in the same category.</li>
+            <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>Creator rewards are paid only when loans verifiably fund on Kiva.</li>
+          </ul>
         </div>
 
         {/* GENESIS VAULT */}
         <div className="bg-[#FBF6EA]/80 rounded-2xl border border-[#F8CD69]/30 p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">$SOW is a launchpad coin too</h2>
-          <p className="text-gray-400 text-sm mb-5">
-            The genesis coin gets no special treatment - it launched through the same pool config as every other coin.
+          <p className="text-gray-500 text-sm mb-5 max-w-xl [text-wrap:balance]">
+            No special treatment: $SOW launched through the same pool config as every other coin.
           </p>
-          <p className="text-gray-600 leading-relaxed mb-4">
-            That means $SOW&apos;s fees follow the same locked split: 45% to its pledged Kiva borrowers,
-            10% to operations - and the 45% creator share, which for $SOW belongs to the project itself,
-            accrues to the <span className="font-bold text-[#223829]">Genesis Vault</span>.
-          </p>
-          <p className="text-gray-600 leading-relaxed mb-4">
-            The Genesis Vault is committed back to the garden. Depending on what $SOW needs as it grows,
-            deployments can fund bonus borrower loans beyond the pledge, buy back and burn $SOW, or
-            reward the community. We keep the mix flexible on purpose - but never quiet: every Genesis
-            Vault deployment is published in the ledger with transaction receipts, and the vault&apos;s
-            address is public. It is never sold off silently.
-          </p>
-          <p className="text-xs text-gray-400 leading-relaxed">
-            In short: 55% of every $SOW trade is pre-committed (45 loans, 10 ops), and the remaining 45%
-            works for the ecosystem in whichever form does the most good at the time - with receipts.
+          <div className="flex flex-col gap-4 text-gray-600 leading-relaxed max-w-[65ch]">
+            <p>
+              Its fees follow the same locked split: 45% to its pledged Kiva borrowers and 10% to operations.
+              The 45% creator share belongs to the project and goes to the{" "}
+              <span className="font-bold text-[#223829]">Genesis Vault</span>.
+            </p>
+            <div>
+              <p className="mb-2">The Genesis Vault goes back into the garden, as $SOW needs it:</p>
+              <ul className="flex flex-col gap-1">
+                <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>bonus borrower loans beyond the pledge</li>
+                <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>buying back and burning $SOW</li>
+                <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>community rewards</li>
+              </ul>
+            </div>
+            <p>
+              The mix stays flexible on purpose, but never quiet: every deployment is published in the ledger with
+              transaction receipts, the vault&apos;s address is public, and it is never sold off silently.
+            </p>
+          </div>
+          <p className="text-xs text-gray-400 leading-relaxed mt-5 max-w-[65ch]">
+            In short: 55% of every $SOW trade is pre-committed (45 loans, 10 ops), and the remaining 45% works for the
+            ecosystem in whichever form does the most good - with receipts.
           </p>
         </div>
 

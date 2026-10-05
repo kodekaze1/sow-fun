@@ -46,18 +46,17 @@ export default function TreasuryClient({
     <div className="min-h-screen bg-white">
 
       {/* HERO */}
-      <div className="relative overflow-hidden bg-[#223829] text-white py-20 px-6 text-center">
+      <div className="relative overflow-hidden bg-[#223829] text-white pt-16 pb-14 px-6 text-center">
         <img src="/images/fruit-man.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
-        <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+        <div className="relative max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest">
             On-Chain · Public · Verifiable
           </div>
-          <h1 className="text-5xl font-extrabold mb-4"
-            style={{ fontFamily: "var(--font-serif)" }}>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
             Impact Treasury
           </h1>
-          <p className="text-lg opacity-80 leading-relaxed">
+          <p className="text-base md:text-lg opacity-85 leading-relaxed max-w-lg [text-wrap:balance]">
             Every SOL in this wallet came from $SOW trading fees. Every spend funds a real microloan.
           </p>
         </div>
@@ -68,9 +67,9 @@ export default function TreasuryClient({
         {!SHOW_LIVE_TREASURY && (
           <div className="bg-[#FBF6EA]/80 border border-[#F8CD69]/30 rounded-2xl p-6 text-center">
             <div className="text-xs font-black uppercase tracking-widest text-[#996210] mb-2">Pre-launch</div>
-            <p className="text-sm text-[#223829]/80 leading-relaxed max-w-lg mx-auto">
-              The live treasury balance and funding-card address appear here the moment $SOW goes live.
-              Until then, the genesis harvest below is the record - founder-seeded and fully receipted.
+            <p className="text-sm text-[#223829]/80 leading-relaxed max-w-md mx-auto [text-wrap:balance]">
+              The live balance and funding-card address appear here when $SOW goes live.
+              Until then, the genesis harvest below is the record.
             </p>
           </div>
         )}
@@ -190,14 +189,15 @@ export default function TreasuryClient({
             { icon: "coins", value: money(ledger.deployedCents), label: "Total Deployed" },
             { icon: "heart", value: String(ledger.loansFunded), label: "Loans Funded" },
             { icon: "refresh", value: money(ledger.recycledCents), label: "Capital Recycled" },
-            { icon: "check", value: "-", label: "Repayment Rate (after first repayments)" },
-          ].map(({ icon, value, label }) => (
+            { icon: "check", value: "-", label: "Repayment Rate", note: "after first repayments" },
+          ].map(({ icon, value, label, note }: { icon: string; value: string; label: string; note?: string }) => (
             <div key={label} className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-5 text-center hover:bg-[#F8F2E6] transition-colors">
               <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
                 <Icon name={icon} className="w-5 h-5" />
               </div>
               <div className="text-2xl font-black text-[#223829] leading-none mb-1">{value}</div>
               <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{label}</div>
+              {note && <div className="text-[11px] text-gray-400 mt-0.5">{note}</div>}
             </div>
           ))}
         </div>
@@ -273,11 +273,11 @@ export default function TreasuryClient({
               )
             ))}
           </div>
-          <p className="text-sm text-gray-400 text-center mt-4 leading-relaxed">
-            Every launch carries a 2% trading fee, split at the pool level: 45% to the coin&apos;s creator,
-            45% to Kiva loans, 10% to operations - locked at launch and enforced on-chain.
-            Repayments are reinvested - not withdrawn.
-          </p>
+          <ul className="mt-5 mx-auto max-w-md flex flex-col gap-1.5 text-sm text-gray-500 leading-relaxed">
+            <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>Every launch carries a 2% trading fee, locked on-chain at launch</li>
+            <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>45% to the coin&apos;s creator, 45% to Kiva loans, 10% to operations</li>
+            <li className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>Repayments are reinvested, never withdrawn</li>
+          </ul>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
             {[
               { state: "On-chain", cls: "bg-[#EDF4F1] text-[#276A43]", body: "Fees sit in the public treasury wallet on Solana. Anyone can check the balance." },

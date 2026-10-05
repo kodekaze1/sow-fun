@@ -50,7 +50,13 @@ const STEPS = [
     icon: "refresh",
     title: "The Cycle Continues",
     color: "#276A43",
-    body: "When a loan fills, excess fees follow one public rule: 80% funds the creator's borrower queue: up to 5 borrowers they line up, funded in order; 10% burns $SOW; 10% rewards the creator for every life their coin lifted. Repayments recycle into new loans. Sow, grow, harvest, repeat.",
+    body: "When a loan fills, extra fees follow one public rule:",
+    points: [
+      "80% funds the creator's borrower queue - up to 5 borrowers, funded in order",
+      "10% burns $SOW",
+      "10% rewards the creator for every life their coin lifted",
+    ],
+    after: "Repayments recycle into new loans. Sow, grow, harvest, repeat.",
   },
 ];
 
@@ -59,18 +65,17 @@ export default function HowItWorksPage() {
     <div className="min-h-screen bg-white">
 
       {/* HERO */}
-      <div className="relative overflow-hidden bg-[#223829] text-white py-20 px-6 text-center">
+      <div className="relative overflow-hidden bg-[#223829] text-white pt-16 pb-14 px-6 text-center">
         <img src="/images/hands-wide.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
-        <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+        <div className="relative max-w-2xl mx-auto flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest">
             Transparent by Design
           </div>
-          <h1 className="text-5xl font-extrabold mb-4"
-            style={{ fontFamily: "var(--font-serif)" }}>
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1] [text-wrap:balance]">
             How It Works
           </h1>
-          <p className="text-lg opacity-80 leading-relaxed">
+          <p className="text-base md:text-lg opacity-85 leading-relaxed max-w-lg [text-wrap:balance]">
             From launching a coin to a borrower&apos;s funded dream - here&apos;s the full journey, step by step.
           </p>
         </div>
@@ -94,6 +99,14 @@ export default function HowItWorksPage() {
                   </div>
                   <h2 className="text-xl font-extrabold text-gray-900 mb-2">{step.title}</h2>
                   <p className="text-gray-500 leading-relaxed">{step.body}</p>
+                  {"points" in step && step.points && (
+                    <ul className="mt-2 flex flex-col gap-1 text-gray-500 leading-relaxed">
+                      {step.points.map((pt) => (
+                        <li key={pt} className="flex gap-2"><span className="text-[#276A43] font-bold">·</span>{pt}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {"after" in step && step.after && <p className="mt-2 text-gray-500 leading-relaxed">{step.after}</p>}
                 </div>
               </div>
             ))}
@@ -118,11 +131,11 @@ export default function HowItWorksPage() {
               { icon: "ledger", title: "Public Harvest Ledger", body: "Every harvest is published with per-coin claim snapshots, borrower names, and the transaction hashes proving each hop from pool to loan." },
               { icon: "globe", title: "Kiva Verification", body: `Loans are funded through Kiva.org - a non-profit with 96%+ repayment rates and nearly two decades of verified impact across ${TOTAL_KIVA_COUNTRIES} countries.` },
             ].map(({ icon, title, body }) => (
-              <div key={title} className="text-center p-4">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
-                  <Icon name={icon} className="w-6 h-6" />
+              <div key={title} className="flex flex-col gap-2 p-1">
+                <div className="w-10 h-10 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
+                  <Icon name={icon} className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-extrabold text-gray-900 mb-2">{title}</h3>
+                <h3 className="text-base font-extrabold text-gray-900">{title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{body}</p>
               </div>
             ))}

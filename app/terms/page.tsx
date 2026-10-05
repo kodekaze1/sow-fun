@@ -107,9 +107,9 @@ export default function TermsPage() {
     <div className="min-h-screen bg-white">
 
       {/* HERO */}
-      <div className="bg-[#223829] text-[#EDF4F1] py-14 px-6 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight mb-3">Terms of Service</h1>
+      <div className="bg-[#223829] text-[#EDF4F1] pt-12 pb-10 px-6 text-center">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-3">
+          <h1 className="font-serif text-4xl md:text-5xl font-medium tracking-tight leading-[1.1]">Terms of Service</h1>
           <p className="opacity-70 text-sm">Effective date: September 30, 2026</p>
         </div>
       </div>
