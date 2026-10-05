@@ -1,5 +1,7 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import BN from "bn.js";
+import { buildSowCurve, firstBuySupplyPct } from "@/scripts/lib/sow-config.mjs";
 import { coinMetaUri, DESCRIPTION_MAX } from "@/lib/coin-meta";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
@@ -60,6 +62,11 @@ export default function LaunchPage() {
   const [imageKey, setImageKey] = useState(""); // short blob key for metadata
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  // Optional initial buy, executed in the launch transaction itself
+  const [devBuy, setDevBuy] = useState("");
+  const devBuySol = Math.max(0, Number(devBuy) || 0);
+  const curve = useMemo(() => buildSowCurve(), []);
+  const devBuyPct = devBuySol > 0 ? firstBuySupplyPct(curve, devBuySol) : 0;
   // Optional creator details - blank fields fall back to sow.fun defaults
   const [description, setDescription] = useState("");
   const [xLink, setXLink] = useState("");
@@ -228,6 +235,13 @@ export default function LaunchPage() {
         throw new Error(`${borrower.name} already has a coin ($${existing.symbol}) - trade it instead, or pick another borrower.`);
       }
       const client = new DynamicBondingCurveClient(connection, "confirmed");
+      // Enough SOL for the launch (fee + rent + tx) plus the initial buy?
+      const balance = await connection.getBalance(wallet.publicKey).catch(() => null);
+      const needed = (devBuySol + LAUNCH_FEE_SOL + 0.03) * 1e9;
+      if (balance !== null && balance < needed) {
+        throw new Error(`You need about ${(needed / 1e9).toFixed(3)} SOL for this launch${devBuySol > 0 ? " and initial buy" : ""} - your wallet has ${(balance / 1e9).toFixed(3)}.`);
+      }
+
       const baseMint = Keypair.generate();
 
       // Save the coin's details (write-once) - its on-chain URI serves them
@@ -253,7 +267,7 @@ export default function LaunchPage() {
         throw new Error(reason ? `Couldn't save your coin details: ${reason}` : "We couldn't save your coin details - try again.");
       }
 
-      const tx: Transaction = await client.creator.createPool({
+      const createPoolParam = {
         baseMint: baseMint.publicKey,
         config: new PublicKey(DBC_CONFIG_KEY),
         name,
@@ -261,7 +275,21 @@ export default function LaunchPage() {
         uri: coinMetaUri(baseMint.publicKey.toBase58()),
         payer: wallet.publicKey,
         poolCreator: wallet.publicKey,
-      });
+      };
+      // With an initial buy, the buy rides in the same transaction as pool
+      // creation - nobody can trade before it.
+      const tx: Transaction = devBuySol > 0
+        ? await client.creator.createPoolWithFirstBuy({
+            createPoolParam,
+            firstBuyParam: {
+              buyer: wallet.publicKey,
+              receiver: wallet.publicKey,
+              buyAmount: new BN(Math.round(devBuySol * 1e9)),
+              minimumAmountOut: new BN(1),
+              referralTokenAccount: null,
+            },
+          })
+        : await client.creator.createPool(createPoolParam);
       // Pin the blockhash so confirmation knows exactly when the tx expires
       const latest = await connection.getLatestBlockhash("confirmed");
       tx.recentBlockhash = latest.blockhash;
@@ -620,6 +648,24 @@ export default function LaunchPage() {
               placeholder="...or paste an image URL"
               className="w-full rounded-xl border border-[#D9E6DF] px-4 py-2.5 text-xs mb-6 focus:outline-none focus:border-[#276A43]" />
 
+            <label htmlFor="dev-buy" className="block text-xs font-black uppercase tracking-widest text-[#276A43] mb-1.5">
+              Initial buy <span className="text-gray-400 normal-case font-semibold">(optional, in SOL)</span>
+            </label>
+            <div className="flex items-center gap-3 mb-1.5">
+              <input id="dev-buy" inputMode="decimal" value={devBuy}
+                onChange={(e) => setDevBuy(e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1"))}
+                placeholder="0"
+                className="w-32 rounded-xl border border-[#D9E6DF] px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-[#276A43]" />
+              <span className="text-sm text-gray-500">
+                {devBuySol > 0 ? <>≈ <b className="text-[#223829]">{devBuyPct.toFixed(2)}%</b> of supply</> : "No initial buy"}
+              </span>
+            </div>
+            <p className={`text-[12px] leading-relaxed mb-6 ${devBuyPct > 10 ? "text-[#996210]" : "text-gray-500"}`}>
+              {devBuyPct > 10
+                ? "That's a big share - large creator bags make traders nervous. Consider a smaller buy."
+                : "Bought in the same transaction that creates your coin, so no sniper can get in first. Pays the normal 2% fee."}
+            </p>
+
             <div className="rounded-2xl border border-[#E4EBE7] p-4 mb-8">
               <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-1">
                 Description and links <span className="text-gray-400 normal-case font-semibold">(optional)</span>
@@ -686,6 +732,8 @@ export default function LaunchPage() {
                   <span className="font-bold">{MIGRATION_QUOTE_SOL} SOL raised · LP locked forever · {MIGRATED_POOL_FEE_BPS / 100}% fee after</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Borrower claim</span>
                   <span className="font-bold">Lapses after {CLAIM_WINDOW_HOURS}h if fees stay under {CLAIM_MIN_FEES_SOL} SOL</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Initial buy</span>
+                  <span className="font-bold">{devBuySol > 0 ? `${devBuySol} SOL · ≈ ${devBuyPct.toFixed(2)}% of supply` : "None"}</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Launch fee</span>
                   <span className="font-bold">{LAUNCH_FEE_SOL} SOL + ~0.02 SOL network rent</span></div>
               </div>
