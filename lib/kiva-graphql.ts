@@ -43,7 +43,7 @@ type FundraisingSearchData = {
         geocode?: { country?: { name?: string } } | null;
         borrowerCount?: number | null;
         plannedExpirationDate?: string | null;
-        loanFundraisingInfo?: { fundedAmount?: string } | null;
+        loanFundraisingInfo?: { fundedAmount?: string; reservedAmount?: string } | null;
       }[];
     };
   };
@@ -80,12 +80,15 @@ export async function searchFundraisingLoans(params: LoanSearchParams = {}, limi
   const validSorts = ["popularity", "newest", "expiringSoon", "amountLeft", "loanAmount", "loanAmountDesc"];
   const sort = validSorts.includes(params.sort ?? "") ? params.sort : "popularity";
   const data = await kivaGQL<FundraisingSearchData>(
-    `{lend{loans(filters:{${filters.join(",")}}${q},limit:${limit},sortBy:${sort}){totalCount values{id name loanAmount use image{url(customSize:"w480h360")} activity{name} sector{name} geocode{country{name}} borrowerCount plannedExpirationDate loanFundraisingInfo{fundedAmount}}}}}`,
+    `{lend{loans(filters:{${filters.join(",")}}${q},limit:${limit},sortBy:${sort}){totalCount values{id name loanAmount use image{url(customSize:"w480h360")} activity{name} sector{name} geocode{country{name}} borrowerCount plannedExpirationDate loanFundraisingInfo{fundedAmount reservedAmount}}}}}`,
     120
   );
   return (data.lend.loans.values ?? []).map((l) => {
     const loanAmount = parseFloat(l.loanAmount) || 0;
     const fundedAmount = parseFloat(l.loanFundraisingInfo?.fundedAmount ?? "0") || 0;
+    // Money sitting in other lenders' checkout baskets is spoken for: Kiva's
+    // own site shows the loan as done, so count it as taken here too.
+    const reservedAmount = parseFloat(l.loanFundraisingInfo?.reservedAmount ?? "0") || 0;
     return {
       id: l.id,
       name: l.name,
@@ -96,11 +99,13 @@ export async function searchFundraisingLoans(params: LoanSearchParams = {}, limi
       image: l.image?.url ?? null,
       loanAmount,
       fundedAmount,
-      remaining: Math.max(0, loanAmount - fundedAmount),
+      reservedAmount,
+      remaining: Math.max(0, loanAmount - fundedAmount - reservedAmount),
       expiresAt: l.plannedExpirationDate ?? null,
       borrowerCount: l.borrowerCount ?? 1,
     };
-  });
+  // A loan fully covered by funding + basket reservations can't take a new coin
+  }).filter((l) => l.remaining > 0);
 }
 
 export interface KivaLoanLive {
@@ -111,7 +116,8 @@ export interface KivaLoanLive {
   use: string;
   loanAmount: number;
   fundedAmount: number;
-  remaining: number;
+  reservedAmount: number; // in lenders' checkout baskets - not funded yet, but spoken for
+  remaining: number; // still open: loanAmount - funded - reserved
   image: string | null;
 }
 
@@ -121,11 +127,11 @@ export async function getLoansById(ids: number[]): Promise<Map<number, KivaLoanL
   const unique = [...new Set(ids)].filter((id) => Number.isFinite(id) && id > 0);
   if (!unique.length) return map;
   const query = `{lend{${unique
-    .map((id, i) => `l${i}: loan(id:${id}){id name status use loanAmount loanFundraisingInfo{fundedAmount} geocode{country{name}} image{url(customSize:"w480h360")}}`)
+    .map((id, i) => `l${i}: loan(id:${id}){id name status use loanAmount loanFundraisingInfo{fundedAmount reservedAmount} geocode{country{name}} image{url(customSize:"w480h360")}}`)
     .join(" ")}}}`;
   type Raw = {
     id: number; name: string; status: string; use?: string | null; loanAmount: string;
-    loanFundraisingInfo?: { fundedAmount?: string } | null;
+    loanFundraisingInfo?: { fundedAmount?: string; reservedAmount?: string } | null;
     geocode?: { country?: { name?: string } } | null;
     image?: { url?: string } | null;
   };
@@ -134,6 +140,7 @@ export async function getLoansById(ids: number[]): Promise<Map<number, KivaLoanL
     if (!loan) continue;
     const loanAmount = parseFloat(loan.loanAmount) || 0;
     const fundedAmount = parseFloat(loan.loanFundraisingInfo?.fundedAmount ?? "0") || 0;
+    const reservedAmount = parseFloat(loan.loanFundraisingInfo?.reservedAmount ?? "0") || 0;
     map.set(loan.id, {
       id: loan.id,
       name: loan.name,
@@ -142,7 +149,8 @@ export async function getLoansById(ids: number[]): Promise<Map<number, KivaLoanL
       use: loan.use ?? "to grow their business",
       loanAmount,
       fundedAmount,
-      remaining: Math.max(0, loanAmount - fundedAmount),
+      reservedAmount,
+      remaining: Math.max(0, loanAmount - fundedAmount - reservedAmount),
       image: loan.image?.url ?? null,
     });
   }

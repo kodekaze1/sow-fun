@@ -189,7 +189,11 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                 </div>
                 <div className="flex justify-between text-[11px] text-gray-500 mt-1.5 mb-4">
                   <span>{pct}% funded on Kiva</span>
-                  <span>${loan.remaining.toFixed(0)} to go</span>
+                  <span>
+                    {loan.remaining > 0
+                      ? `${loan.remaining.toFixed(0)} to go`
+                      : (loan.reservedAmount ?? 0) > 0 ? "rest reserved by lenders" : "fully funded"}
+                  </span>
                 </div>
                 {loan.id > 0 ? (
                   <a href={`https://www.kiva.org/lend/${loan.id}`} target="_blank" rel="noopener noreferrer"
@@ -197,6 +201,14 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                     View the loan on Kiva <Icon name="arrow" className="w-3.5 h-3.5" />
                   </a>
                 ) : null}
+                {loan.status === "fundraising" && loan.remaining <= 0 && (loan.reservedAmount ?? 0) > 0 && (
+                  <div className="mt-4 rounded-xl p-3.5 text-[12px] leading-relaxed bg-white border border-[#2AA967]/30 text-[#223829]/80">
+                    <span className="font-bold text-[#276A43]">Almost there.</span>{" "}
+                    The last ${(loan.reservedAmount ?? 0).toFixed(0)} is in other lenders&apos; checkout baskets, so
+                    Kiva shows this loan as done. If they check out, fees from here on fund the creator&apos;s
+                    borrower queue; if a basket expires, the loan reopens.
+                  </div>
+                )}
                 {loan.status !== "fundraising" && (
                   <div className={`mt-4 rounded-xl p-3.5 text-[12px] leading-relaxed ${
                     loan.status === "funded"
@@ -226,14 +238,17 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
 
           {/* IMPACT */}
           <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6">
-            <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">Impact engine</div>
+            <div className="flex items-baseline justify-between mb-3">
+              <div className="text-xs font-black uppercase tracking-widest text-[#276A43]">Impact engine</div>
+              <span className="text-[11px] text-gray-400">this coin</span>
+            </div>
             <div className="flex flex-col gap-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">Lifetime trading fees</span>
                 <span className="font-black">{launch.lifetimeFeesSol.toFixed(4)} SOL</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Impact share generated</span>
+                <span className="text-gray-500">Earned for Kiva loans</span>
                 <span className="font-black text-[#276A43]">≈ ${(launch.impactShareSol * solPrice).toFixed(2)}</span>
               </div>
               {plan && (
@@ -249,18 +264,14 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                 </>
               )}
               <div className="flex justify-between">
-                <span className="text-gray-500">Awaiting next harvest</span>
-                <span className="font-black">{launch.pendingVaultSol.toFixed(4)} SOL</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Fee split (immutable)</span>
-                <span className="font-black">{CREATOR_FEE_PCT} / {IMPACT_FEE_PCT} / {OPS_FEE_PCT}</span>
+                <span className="text-gray-500">Waiting for the next harvest</span>
+                <span className="font-black">≈ ${(launch.pendingVaultSol * (IMPACT_FEE_PCT / (100 - CREATOR_FEE_PCT)) * solPrice).toFixed(2)}</span>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2.5 text-[12px] text-gray-500 leading-relaxed">
               <Icon name="lock" className="w-4 h-4 flex-shrink-0 text-[#223829] mt-0.5" />
               <div className="flex flex-col gap-1">
-                <span>The split is enforced by the pool config on-chain. Excess beyond the loan:</span>
+                <span>{CREATOR_FEE_PCT}% of fees to the creator, {IMPACT_FEE_PCT}% to loans, {OPS_FEE_PCT}% ops - locked on-chain. Beyond the loan:</span>
                 <span>80% funds the creator&apos;s borrower queue, in order</span>
                 <span>20% buys $SOW - half burned, half rewards the creator</span>
               </div>

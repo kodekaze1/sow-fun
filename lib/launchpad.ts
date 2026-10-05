@@ -96,7 +96,8 @@ export interface FundraisingLoan {
   image: string | null;
   loanAmount: number;
   fundedAmount: number;
-  remaining: number;
+  reservedAmount: number; // in lenders' checkout baskets
+  remaining: number; // still open after funded + reserved
   expiresAt: string | null; // Kiva plannedExpirationDate (ISO)
   borrowerCount: number;
 }

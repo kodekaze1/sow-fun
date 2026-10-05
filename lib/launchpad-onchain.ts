@@ -82,7 +82,7 @@ export interface LaunchSummary {
   borrowerName: string | null;
   pendingVaultSol: number;
   lifetimeFeesSol: number;
-  impactShareSol: number; // vault share (impact + ops) of lifetime fees
+  impactShareSol: number; // Kiva loan share (45%) of lifetime fees
   quoteReserveSol: number; // SOL raised on the bonding curve so far
   curvePct: number | null; // progress toward graduation (null if threshold unknown)
   launchedAt: number | null; // unix seconds (pool activation point)
@@ -151,7 +151,8 @@ async function getMigrationThresholdLamports(client: DynamicBondingCurveClient):
   return lamports;
 }
 
-const VAULT_SHARE = (IMPACT_FEE_PCT + OPS_FEE_PCT) / 100;
+// Share of each coin's (post-Meteora) fees pledged to Kiva loans
+const LOAN_SHARE = IMPACT_FEE_PCT / 100;
 
 // Operator moderation: mints listed in data/delisted.json are removed from
 // the public index (launches board, token pages, borrower claims) - the
@@ -254,7 +255,7 @@ async function loadLaunches(): Promise<LaunchSummary[]> {
       borrowerName,
       pendingVaultSol,
       lifetimeFeesSol,
-      impactShareSol: lifetimeFeesSol * VAULT_SHARE,
+      impactShareSol: lifetimeFeesSol * LOAN_SHARE,
       quoteReserveSol: entry.quoteReserveLamports / 1e9,
       curvePct: thresholdLamports
         ? Math.min(100, Math.round((entry.quoteReserveLamports / thresholdLamports) * 100))
@@ -341,7 +342,7 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
       borrowerName,
       pendingVaultSol: 0,
       lifetimeFeesSol,
-      impactShareSol: lifetimeFeesSol * VAULT_SHARE,
+      impactShareSol: lifetimeFeesSol * LOAN_SHARE,
       quoteReserveSol: quoteReserveLamports / 1e9,
       curvePct: thresholdLamports
         ? Math.min(100, Math.round((quoteReserveLamports / thresholdLamports) * 100))

@@ -41,7 +41,7 @@ type KivaLoanStatus = {
   name: string;
   status: string;
   loanAmount: string;
-  loanFundraisingInfo?: { fundedAmount?: string } | null;
+  loanFundraisingInfo?: { fundedAmount?: string; reservedAmount?: string } | null;
   image?: { url?: string } | null;
 };
 
@@ -143,7 +143,7 @@ export async function GET(request: Request) {
     const loanById = new Map<number, KivaLoanStatus>();
     if (loanIds.length) {
       const query = `{lend{${loanIds
-        .map((id, i) => `l${i}: loan(id:${id}){id name status loanAmount loanFundraisingInfo{fundedAmount} image{url(customSize:"w480h360")}}`)
+        .map((id, i) => `l${i}: loan(id:${id}){id name status loanAmount loanFundraisingInfo{fundedAmount reservedAmount} image{url(customSize:"w480h360")}}`)
         .join(" ")}}}`;
       try {
         const data = await kivaGQL<{ lend: Record<string, KivaLoanStatus | null> }>(query, 120);
@@ -157,7 +157,9 @@ export async function GET(request: Request) {
       const loan = r.loanId ? loanById.get(r.loanId) : undefined;
       const loanAmount = loan ? parseFloat(loan.loanAmount) || 0 : 0;
       const funded = loan ? parseFloat(loan.loanFundraisingInfo?.fundedAmount ?? "0") || 0 : 0;
-      const remaining = Math.max(0, loanAmount - funded);
+      // Basket reservations are spoken for - Kiva shows the loan as done
+      const reserved = loan ? parseFloat(loan.loanFundraisingInfo?.reservedAmount ?? "0") || 0 : 0;
+      const remaining = Math.max(0, loanAmount - funded - reserved);
       const fundraising = loan?.status === "fundraising";
       // Crowd is close to finishing the loan - harvest early (ignore the usual
       // SOL threshold) or this coin's fees will arrive after it closes.
