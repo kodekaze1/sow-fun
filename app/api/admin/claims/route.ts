@@ -5,7 +5,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { kivaGQL } from "@/lib/kiva-graphql";
 import { DBC_CONFIG_KEY } from "@/lib/launchpad";
-import { poolField } from "@/lib/launchpad-onchain";
+import { poolField, resolveLaunchUri } from "@/lib/launchpad-onchain";
 import { serverRpcUrl } from "@/lib/rpc-server";
 import { TREASURY_WALLET } from "@/lib/constants";
 import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
@@ -123,8 +123,7 @@ export async function GET(request: Request) {
             const meta = parseMetadata(info.data as Buffer);
             name = meta.name || name;
             symbol = meta.symbol || symbol;
-            const loanParam = new URL(meta.uri).searchParams.get("loan");
-            if (loanParam) loanId = parseInt(loanParam, 10) || null;
+            loanId = (await resolveLaunchUri(meta.uri)).loanId;
           } catch { /* unparseable metadata - keep placeholders */ }
         }
       }

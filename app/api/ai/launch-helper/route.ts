@@ -58,8 +58,8 @@ const RERANK_SYSTEM = `You are matching a user's wish to real Kiva borrowers. Gi
 [{"id": number, "why": string}]
 "why" is one warm sentence (max 90 chars) explaining the fit, grounded in that loan's actual story. Never invent details.`;
 
-const SCREEN_SYSTEM = `You screen token launches on sow.fun, a launchpad where each coin is pledged to a real Kiva microloan borrower. Judge ONLY the token name and ticker. Respond ONLY with JSON: {"ok": boolean, "reason": string}
-REJECT (ok=false) if the name/ticker: contains slurs, hate, or sexual content; mocks or demeans the borrower; impersonates a well-known brand, person, or token; or is meaningless keyboard-mash gibberish (e.g. "asdfgh", "xK9qz").
+const SCREEN_SYSTEM = `You screen token launches on sow.fun, a launchpad where each coin is pledged to a real Kiva microloan borrower. Judge the token name, ticker and (if given) the creator's description. Respond ONLY with JSON: {"ok": boolean, "reason": string}
+REJECT (ok=false) if the name/ticker/description: contains slurs, hate, or sexual content; mocks or demeans the borrower; impersonates a well-known brand, person, or token; or is meaningless keyboard-mash gibberish (e.g. "asdfgh", "xK9qz"). Also reject a description that promises returns or profits (e.g. "guaranteed 100x"), claims to be official Kiva, or tells people to send funds somewhere.
 ALLOW (ok=true) playful, meme-y, or simple names - this is a memecoin site; creativity and humor are fine. When ok=false, "reason" is one friendly sentence (max 100 chars) telling the creator what to change. When ok=true, reason is "".`;
 
 const CONCIERGE_SYSTEM = `You help someone name a memecoin being launched on sow.fun for a real Kiva borrower. The coin's trading fees will fund the borrower's microloan. Suggest 3 distinct ideas. Respond ONLY with a JSON array:
@@ -155,9 +155,10 @@ export async function POST(request: Request) {
       const name = field(b.tokenName, 40);
       const symbol = field(b.tokenSymbol, 12);
       if (!name || !symbol) return NextResponse.json({ ok: false, reason: "Name and ticker required." });
+      const description = field(b.description, 500);
       const raw = await claude(
         SCREEN_SYSTEM,
-        `Borrower: ${field(b.name)}\nToken name: ${name}\nTicker: ${symbol}`,
+        `Borrower: ${field(b.name)}\nToken name: ${name}\nTicker: ${symbol}${description ? `\nDescription: ${description}` : ""}`,
         150
       );
       const verdict = extractJson<{ ok: boolean; reason: string }>(raw);

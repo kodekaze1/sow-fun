@@ -6,6 +6,7 @@ import { unstable_cache } from "next/cache";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, OPS_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
 import { serverRpcUrl } from "@/lib/rpc-server";
+import { readCoinMeta } from "@/lib/coin-meta";
 import { getMultipleAccountsChunked } from "@/lib/rpc-chunk.mjs";
 
 export const METADATA_PROGRAM = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
@@ -49,6 +50,21 @@ export function parseLaunchUri(uri: string): { loanId: number | null; borrower: 
   } catch {
     return { loanId: null, borrower: null, image: null };
   }
+}
+
+// Current launches use the short URI sow.fun/m/<mint>, with launch details
+// stored in Blob (lib/coin-meta); earlier ones baked them into query params.
+export async function resolveLaunchUri(uri: string): Promise<{ loanId: number | null; borrower: string | null; image: string | null }> {
+  try {
+    const m = /^\/m\/([1-9A-HJ-NP-Za-km-z]{32,44})\/?$/.exec(new URL(uri).pathname);
+    if (m) {
+      const stored = await readCoinMeta(m[1]);
+      if (!stored) return { loanId: null, borrower: null, image: null };
+      const image = stored.image ? (stored.image.startsWith("http") ? stored.image : `${process.env.BLOB_BASE_URL ?? ""}/${stored.image}`) : null;
+      return { loanId: stored.loanId, borrower: stored.borrower, image };
+    }
+  } catch { /* fall through to the legacy query-param form */ }
+  return parseLaunchUri(uri);
 }
 
 export function getDbcClient(): { connection: Connection; client: DynamicBondingCurveClient } {
@@ -220,7 +236,7 @@ async function loadLaunches(): Promise<LaunchSummary[]> {
           const meta = parseMetadata(info.data as Buffer);
           name = meta.name || name;
           symbol = meta.symbol || symbol;
-          const parsed = parseLaunchUri(meta.uri);
+          const parsed = await resolveLaunchUri(meta.uri);
           loanId = parsed.loanId;
           borrowerName = parsed.borrower;
           image = parsed.image;
@@ -292,7 +308,7 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
           const meta = parseMetadata(info.data as Buffer);
           name = meta.name || name;
           symbol = meta.symbol || symbol;
-          const parsed = parseLaunchUri(meta.uri);
+          const parsed = await resolveLaunchUri(meta.uri);
           loanId = parsed.loanId;
           borrowerName = parsed.borrower;
           image = parsed.image;

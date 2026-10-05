@@ -5,6 +5,7 @@ import Icon from "@/components/icons";
 import { getLaunchByMint, getSolPrice } from "@/lib/launchpad-onchain";
 import { getLoansById } from "@/lib/kiva-graphql";
 import { getCoinPlans } from "@/lib/coin-plans";
+import { readCoinMeta } from "@/lib/coin-meta";
 import { CREATOR_FEE_PCT, IMPACT_FEE_PCT, OPS_FEE_PCT, POOL_FEE_BPS, SITE_URL, MIGRATION_QUOTE_SOL, MIGRATED_POOL_FEE_BPS } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 
@@ -64,6 +65,8 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
   // borrower queue (lib/coin-plans). Whoever it is funding now is shown as
   // the active beneficiary; the launch borrower becomes history.
   const solPrice = await getSolPrice();
+  // Creator's own description and links, saved at launch (lib/coin-meta)
+  const details = !isDemo && launch.mint ? await readCoinMeta(launch.mint) : null;
   const plan = !isDemo && launch.mint
     ? (await getCoinPlans({ mints: [launch.mint], solPrice }).catch(() => null))?.get(launch.mint) ?? null
     : null;
@@ -105,6 +108,25 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
             </div>
           </div>
         </div>
+
+        {details && (details.description || details.x || details.telegram || details.website) && (
+          <div className="-mt-4 mb-8">
+            {details.description && (
+              <p className="text-sm text-[#223829]/80 leading-relaxed whitespace-pre-line mb-3 max-w-2xl">{details.description}</p>
+            )}
+            <div className="flex flex-wrap gap-2 text-xs font-bold">
+              {[
+                details.x && { href: details.x, label: "X" },
+                details.telegram && { href: details.telegram, label: "Telegram" },
+                details.website && { href: details.website, label: "Website" },
+              ].filter((l): l is { href: string; label: string } => Boolean(l)).map((l) => (
+                <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer nofollow ugc"
+                  className="bg-[#EDF4F1] hover:bg-[#D9E6DF] text-[#223829] rounded-full px-3 py-1 transition-colors">{l.label} ↗</a>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-400 mt-2">Description and links are set by the coin&apos;s creator, not sow.fun.</p>
+          </div>
+        )}
 
         {/* ACTIONS */}
         <div className="flex flex-wrap gap-3 mb-10">

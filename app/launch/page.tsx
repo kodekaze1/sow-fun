@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { coinMetaUri, DESCRIPTION_MAX } from "@/lib/coin-meta";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -14,8 +15,6 @@ import {
   KIVA_SECTOR_IDS,
   KIVA_REGIONS,
   LOAN_SORTS,
-  fitTokenMetadataUri,
-  MAX_URI_BYTES,
   type FundraisingLoan,
   LAUNCH_FEE_SOL,
   MIGRATION_QUOTE_SOL,
@@ -61,6 +60,11 @@ export default function LaunchPage() {
   const [imageKey, setImageKey] = useState(""); // short blob key for metadata
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  // Optional creator details - blank fields fall back to sow.fun defaults
+  const [description, setDescription] = useState("");
+  const [xLink, setXLink] = useState("");
+  const [telegram, setTelegram] = useState("");
+  const [website, setWebsite] = useState("");
 
   const uploadImage = async (file: File) => {
     setUploading(true);
@@ -182,23 +186,11 @@ export default function LaunchPage() {
       // Every guard below fails CLOSED: if we can't get an answer, we don't
       // mint - a coin minted past a broken guard costs the creator real SOL.
 
-      // Metadata URI must fit Metaplex's 200-byte cap
-      const fitted = fitTokenMetadataUri({
-        name,
-        symbol,
-        image: imageKey || imageUrl || "",
-        loanId: borrower.id,
-        borrower: borrower.name,
-      });
-      if (!fitted.ok) {
-        throw new Error("That token name is too long to store on-chain - shorten the name or ticker and try again.");
-      }
-
       // Name screen - keep borrowers from being claimed by junk or abuse
       const screenRes = await fetch("/api/ai/launch-helper", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: "screen", borrower: { name: borrower.name, tokenName: name, tokenSymbol: symbol } }),
+        body: JSON.stringify({ action: "screen", borrower: { name: borrower.name, tokenName: name, tokenSymbol: symbol, description } }),
       }).catch(() => null);
       const screen = screenRes?.ok ? await screenRes.json().catch(() => null) : null;
       if (!screen) {
@@ -237,12 +229,36 @@ export default function LaunchPage() {
       }
       const client = new DynamicBondingCurveClient(connection, "confirmed");
       const baseMint = Keypair.generate();
+
+      // Save the coin's details (write-once) - its on-chain URI serves them
+      const metaRes = await fetch("/api/launch-meta", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          mint: baseMint.publicKey.toBase58(),
+          name,
+          symbol,
+          image: imageKey || imageUrl || borrower.image || null,
+          loanId: borrower.id,
+          borrower: borrower.name,
+          creator: wallet.publicKey.toBase58(),
+          description,
+          x: xLink,
+          telegram,
+          website,
+        }),
+      }).catch(() => null);
+      if (!metaRes?.ok) {
+        const reason = await metaRes?.json().then((d: { error?: string }) => d.error).catch(() => null);
+        throw new Error(reason ? `Couldn't save your coin details: ${reason}` : "We couldn't save your coin details - try again.");
+      }
+
       const tx: Transaction = await client.creator.createPool({
         baseMint: baseMint.publicKey,
         config: new PublicKey(DBC_CONFIG_KEY),
         name,
         symbol,
-        uri: fitted.uri,
+        uri: coinMetaUri(baseMint.publicKey.toBase58()),
         payer: wallet.publicKey,
         poolCreator: wallet.publicKey,
       });
@@ -602,7 +618,34 @@ export default function LaunchPage() {
             {uploadError && <div className="text-xs text-red-600 mb-2">{uploadError}</div>}
             <input value={imageKey ? "" : imageUrl} onChange={(e) => { setImageUrl(e.target.value); setImageKey(""); }}
               placeholder="...or paste an image URL"
-              className="w-full rounded-xl border border-[#D9E6DF] px-4 py-2.5 text-xs mb-8 focus:outline-none focus:border-[#276A43]" />
+              className="w-full rounded-xl border border-[#D9E6DF] px-4 py-2.5 text-xs mb-6 focus:outline-none focus:border-[#276A43]" />
+
+            <div className="rounded-2xl border border-[#E4EBE7] p-4 mb-8">
+              <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-1">
+                Description and links <span className="text-gray-400 normal-case font-semibold">(optional)</span>
+              </div>
+              <p className="text-[12px] text-gray-500 mb-3 leading-relaxed">
+                Shown in wallets, DEX screeners and your coin page. Leave any blank and we use sow.fun defaults:
+                your coin&apos;s sow.fun page as the website and @sowfunhq on X. Saved once at launch - they can&apos;t be changed later.
+              </p>
+              <label htmlFor="coin-description" className="sr-only">Description</label>
+              <textarea id="coin-description" value={description} onChange={(e) => setDescription(e.target.value)}
+                maxLength={DESCRIPTION_MAX} rows={3}
+                placeholder="What's this coin about? (the Kiva pledge line is added automatically)"
+                className="w-full rounded-xl border border-[#D9E6DF] px-4 py-2.5 text-sm mb-1 focus:outline-none focus:border-[#276A43] resize-y" />
+              <div className="text-[11px] text-gray-400 text-right mb-2">{description.length}/{DESCRIPTION_MAX}</div>
+              <div className="grid sm:grid-cols-3 gap-2">
+                <input id="coin-x" value={xLink} onChange={(e) => setXLink(e.target.value)} maxLength={120}
+                  placeholder="X: @handle or x.com/..." aria-label="X link"
+                  className="rounded-xl border border-[#D9E6DF] px-3 py-2.5 text-xs focus:outline-none focus:border-[#276A43]" />
+                <input id="coin-telegram" value={telegram} onChange={(e) => setTelegram(e.target.value)} maxLength={120}
+                  placeholder="Telegram: t.me/..." aria-label="Telegram link"
+                  className="rounded-xl border border-[#D9E6DF] px-3 py-2.5 text-xs focus:outline-none focus:border-[#276A43]" />
+                <input id="coin-website" value={website} onChange={(e) => setWebsite(e.target.value)} maxLength={200}
+                  placeholder="Website: https://..." aria-label="Website"
+                  className="rounded-xl border border-[#D9E6DF] px-3 py-2.5 text-xs focus:outline-none focus:border-[#276A43]" />
+              </div>
+            </div>
 
             <button
               onClick={() => setStep(3)}
@@ -656,17 +699,6 @@ export default function LaunchPage() {
               </span>
             </div>
 
-            {(() => {
-              const fit = fitTokenMetadataUri({ name, symbol, image: imageKey || imageUrl || "", loanId: borrower.id, borrower: borrower.name });
-              if (fit.bytes <= MAX_URI_BYTES - 20) return null;
-              return (
-                <div className={`mb-3 rounded-xl p-3 text-[12px] ${fit.ok ? "bg-[#F8F2E6] text-[#996210]" : "bg-red-50 text-red-700"}`}>
-                  {fit.ok
-                    ? `On-chain metadata is ${fit.bytes} of ${MAX_URI_BYTES} bytes - close to the limit, but it fits.`
-                    : `On-chain metadata would be ${fit.bytes} of ${MAX_URI_BYTES} bytes - shorten the token name or ticker.`}
-                </div>
-              );
-            })()}
 
             <div className="bg-[#EDF4F1] rounded-2xl p-4 text-[13px] text-[#223829]/80 leading-relaxed mb-6 flex gap-3">
               <Icon name="lock" className="w-5 h-5 flex-shrink-0 text-[#223829]" />

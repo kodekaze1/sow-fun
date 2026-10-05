@@ -46,6 +46,24 @@ function parseMetadata(data) {
 }
 
 const RPC = resolveRpc();
+
+// Kiva loan id from a coin's metadata URI: current coins use sow.fun/m/<mint>
+// (fetch the JSON and read the "Kiva Loan" attribute); older ones put
+// ?loan=<id> in the URI itself.
+async function loanIdFromUri(uri) {
+  try {
+    const u = new URL(uri);
+    if (/^\/m\/[1-9A-HJ-NP-Za-km-z]{32,44}\/?$/.test(u.pathname)) {
+      const json = await (await fetch(uri)).json();
+      const attr = (json.attributes ?? []).find((a) => a.trait_type === "Kiva Loan");
+      return attr ? parseInt(attr.value, 10) || null : null;
+    }
+    const loanParam = u.searchParams.get("loan");
+    return loanParam ? parseInt(loanParam, 10) || null : null;
+  } catch {
+    return null;
+  }
+}
 const KEYPAIR_PATH = process.env.KEYPAIR;
 const CONFIG = process.env.CONFIG ?? process.env.NEXT_PUBLIC_DBC_CONFIG_KEY;
 const DRY = !!process.env.DRY;
@@ -113,8 +131,7 @@ for (const f of fees) {
         const meta = parseMetadata(info.data);
         name = meta.name || null;
         symbol = meta.symbol || null;
-        const loanParam = new URL(meta.uri).searchParams.get("loan");
-        if (loanParam) loanId = parseInt(loanParam, 10) || null;
+        loanId = await loanIdFromUri(meta.uri);
       }
     } catch { /* metadata unreadable - snapshot still records the mint */ }
   }
@@ -216,8 +233,7 @@ for (const p of positions) {
       const meta = parseMetadata(info.data);
       name = meta.name || null;
       symbol = meta.symbol || null;
-      const loanParam = new URL(meta.uri).searchParams.get("loan");
-      if (loanParam) loanId = parseInt(loanParam, 10) || null;
+      loanId = await loanIdFromUri(meta.uri);
     }
   } catch { /* metadata unreadable - snapshot still records the mint */ }
   const tx = await buildClaimPositionFeeTx(connection, feeClaimer.publicKey, p);

@@ -57,9 +57,13 @@ log of every command and signature.
 5. LAUNCH $SOW (vanity mint, atomic dev buy):
    ```
    KEYPAIR=<treasury.json> MINT_KEYPAIR=<sow mint.json> CONFIG=<config> \
-   LOAN=<kiva id> BORROWER="<name>" IMAGE=<blob key> FIRST_BUY_SOL=3 \
+   LOAN=<kiva id> BORROWER="<name>" IMAGE=<blob key or https link> FIRST_BUY_SOL=3 \
+   DESCRIPTION="<one or two lines>" X=@sowfunhq TELEGRAM=<t.me link, optional> \
    node scripts/launch-genesis.mjs
    ```
+   The script saves these details to sow.fun (write-once, seconds before the
+   launch tx) and sets the coin's on-chain URI to sow.fun/m/<mint>. WEBSITE
+   defaults to https://sow.fun. Check https://sow.fun/m/<mint> afterwards.
    Confirm the mint ends in `sow` and the pool shows on /launches and /t/<mint>.
    Record the exact $SOW received (the team buy) from the treasury's token account.
 

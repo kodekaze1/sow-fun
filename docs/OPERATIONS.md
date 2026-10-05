@@ -106,6 +106,17 @@ revenue, never attributed to a coin's loan pledge). COMMIT THE FILE with the har
 truth for "which coin generated which dollars"; wave records and per-token
 impact counters derive from these snapshots, never from memory.
 
+## Coin metadata (sow.fun/m/<mint>)
+
+Every coin's on-chain URI is the fixed https://sow.fun/m/<mint>. At launch the
+creator's details (image, Kiva loan, borrower, optional description, X,
+Telegram, website) are saved write-once to Blob as coin-meta/<mint>.json
+(lib/coin-meta.ts, /api/launch-meta - rejects overwrites and mints that
+already exist). Blank fields fall back to defaults: website = the coin's
+sow.fun page, X = @sowfunhq. The AI screen checks the description. Because
+the URI points at sow.fun, the JSON it serves can be improved later for every
+coin at once. Delisting a mint also strips its creator text and links.
+
 ## Launch moderation (data/delisted.json)
 
 Two layers keep borrowers from being claimed by junk:

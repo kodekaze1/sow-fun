@@ -9,6 +9,9 @@
 //   node scripts/launch-genesis.mjs
 //
 // Optional env: NAME (default "Sow"), SYMBOL (default "SOW"), RPC / HELIUS_API_KEY,
+// DESCRIPTION, X (default @sowfunhq), TELEGRAM, WEBSITE (default https://sow.fun) -
+// saved write-once to sow.fun right before the pool is created and served from
+// the coin's on-chain URI sow.fun/m/<mint>.
 // NETWORK=devnet, FIRST_BUY_SOL (dev buy executed in the SAME transaction as
 // pool creation, so no sniper can buy before it - see the first-buy table
 // printed by create-dbc-config.mjs for the supply % each amount buys).
@@ -43,11 +46,20 @@ if (NETWORK === "mainnet" && creator.publicKey.toBase58() !== LAUNCH_TREASURY) {
 }
 const baseMint = load(MINT_KEYPAIR);
 
-const q = new URLSearchParams({ name: NAME, symbol: SYMBOL });
-if (IMAGE) q.set("image", IMAGE);
-if (LOAN) q.set("loan", LOAN);
-if (BORROWER) q.set("borrower", BORROWER);
-const uri = `${SITE}/api/meta?${q.toString()}`;
+const uri = `${SITE}/m/${baseMint.publicKey.toBase58()}`;
+const details = {
+  mint: baseMint.publicKey.toBase58(),
+  name: NAME,
+  symbol: SYMBOL,
+  image: IMAGE || null,
+  loanId: LOAN ? Number(LOAN) : null,
+  borrower: BORROWER || null,
+  creator: creator.publicKey.toBase58(),
+  description: process.env.DESCRIPTION || "",
+  x: process.env.X ?? "@sowfunhq",
+  telegram: process.env.TELEGRAM || "",
+  website: process.env.WEBSITE ?? SITE,
+};
 
 const connection = new Connection(RPC, "confirmed");
 const client = new DynamicBondingCurveClient(connection, "confirmed");
@@ -56,6 +68,21 @@ console.log("creator: ", creator.publicKey.toBase58());
 console.log("mint:    ", baseMint.publicKey.toBase58());
 console.log("config:  ", CONFIG);
 console.log("uri:     ", uri);
+
+// Save the coin's details first (mainnet only) - its URI serves them. Done
+// seconds before the launch tx, so the vanity mint is never public early.
+if (NETWORK === "mainnet") {
+  const res = await fetch(`${SITE}/api/launch-meta`, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: SITE },
+    body: JSON.stringify(details),
+  });
+  if (!res.ok) {
+    console.error(`saving coin details failed (${res.status}): ${await res.text()}`);
+    process.exit(1);
+  }
+  console.log("details: saved to", uri);
+}
 
 const FIRST_BUY_SOL = Number(process.env.FIRST_BUY_SOL ?? 0);
 const createPoolParam = {
