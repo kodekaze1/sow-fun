@@ -71,13 +71,13 @@ whole harvest rolls to the next adopted borrower per the allocation policy.
 Per token, per harvest, from the vault's impact share:
 1. Fund whatever remains of the beneficiary's Kiva loan (live remaining
    amount from the API - other lenders shrink it).
-2. EXCESS: 80% -> the token's next adopted borrower (creator picks; same
-   category by default). 20% -> market-buy $SOW: half burned (publish the
-   burn tx), half to the Creator Rewards pool.
+2. EXCESS: 20% of EVERY excess dollar -> market-buy $SOW: half burned
+   through the Furnace, half creator rewards. 80% -> the creator's borrower
+   queue in order (up to 5; same-category operator pick after 72h idle).
 3. Creator rewards pay out in $SOW per borrower FULLY funded by their
    token (anti-wash: rewards track verified Kiva loans, never raw volume).
 4. If the beneficiary's loan fills or expires before the wave executes, the
-   entire harvest rolls to the adopted next borrower.
+   entire harvest counts as excess and flows down the queue.
 5. Repayments recycle into the same token's impact counter.
 
 ## Per-coin attribution (data/claims/)
@@ -149,23 +149,28 @@ DAMM v2 trades -> post-migration claims on devnet with the real economics
 (tiny 1 SOL graduation threshold). Writes a log to .devnet/. First pass
 2026-10-05: PASSED - fee claims exact to the lamport, LP split 55.0/45.0.
 
-## Borrower adoption (data/successions.json)
+## Borrower queues (on-chain, automatic)
 
-When a coin's loan closes, its creator adopts the next borrower from /my.
-The dashboard sends a free on-chain memo from the creator wallet:
-  sow-adopt:{"mint":"<mint>","loan":<kivaId>,"name":"<borrower>"}
-Operator loop (run before each harvest, and when a creator pings):
-1. Verify the memo tx on Solscan: signer MUST be the pool's creator wallet,
-   memo names the right mint, and the Kiva loan is still fundraising.
-2. Append to data/successions.json:
-   { "mint": "...", "from_loan_id": <old>, "to_loan_id": <new>,
-     "borrower": "<name>", "memo_tx": "<sig>", "adopted_at": "<ISO date>" }
-   (Chains are fine - the site treats the latest entry per mint as active.)
-3. Commit + push. The token page flips to the adopted borrower with the
-   memo linked as the adoption receipt.
-If a creator never adopts within ~7 days of their loan closing, operator
-assigns the next borrower in the same sector/country (memo_tx stays ""),
-noted as operator-assigned. The pledge never idles.
+Creators line up to 5 next borrowers per coin from /my ("Manage borrower
+queue"). Saving signs a free Memo-program transaction from the creator
+wallet:
+  sow-queue:{"mint":"<mint>","loans":[<kivaId>, ...]}
+The site reads it straight from the chain (lib/borrower-queue.ts): the
+latest memo per mint wins, and it only counts if the coin's creator wallet
+SIGNED the transaction (forged memos sent TO the wallet are ignored - tested
+on devnet 2026-10-05). Legacy sow-adopt memos count as one-entry queues.
+No operator step.
+
+Queues are wish lists, not locks: two coins may queue the same borrower.
+Only a coin's LAUNCH borrower is exclusive. At harvest a queued borrower is
+skipped if their loan closed or another coin holds them as its launch
+borrower; the money moves down the queue.
+
+Fallback (72h): when a coin has claimed excess and no eligible borrower in
+its queue, the creator has 72 hours from that claim to queue one. After
+that, the operator funds a borrower in the same Kiva category and records
+it in data/successions.json (memo_tx "", note "operator fallback") - those
+entries are appended after the creator's queue.
 
 ## Genesis Vault ($SOW creator share)
 
@@ -177,19 +182,28 @@ EVERY deployment is published in the ledger with tx receipts. Never market-
 sold quietly. Record vault deployments as movements in the wave files with
 type and explorer links, same standard as harvests.
 
-## Creator rewards (data/rewards.json)
+## Harvest plan and recording (per coin)
 
-Executed at harvest time, from each coin's EXCESS only (80/10/10 rule):
-1. Compute the coin's excess from the claim snapshot + Kiva remaining.
-2. Market-buy $SOW with 20% of excess (one tx). Burn half (second tx).
-3. Append to data/rewards.json:
-   { "mint","symbol","creator": <pool creator wallet>,
-     "borrower_loan_id","borrower","sow_amount": <creator half>,
-     "buy_tx","burn_tx","payout_tx": "", "harvest": "<wave id>",
-     "date": "<ISO>", "status": "accruing" }
-4. When the coin's borrower shows FUNDED and verified in the wave ledger,
-   send the accrued $SOW to the creator wallet, set payout_tx and
-   status: "paid", commit. /my shows the row flip from Accruing to Paid.
+The admin console (/admin) shows a Harvest plan per coin, computed by
+lib/coin-ledger.ts from CLAIMED funds only:
+  earned   = loan share (45/55) of every claim snapshot for the coin's mint,
+             at that snapshot's SOL price
+  deployed = wave loans tagged with the mint (role "pledge" or "excess")
+             + wave skims[] for the mint
+1. Run claim-fees.mjs and commit the snapshot FIRST - the plan only sees
+   claimed money.
+2. Fund exactly what the plan lists, in order: the launch borrower (pledge)
+   up to their remaining need; then the queue with 80% of every excess
+   dollar.
+3. Skim 20% of every excess dollar to $SOW: buyback-burn.mjs with
+   COIN_MINT set - half burned through the Furnace, half creator rewards
+   (data/rewards.json, status "accruing" until the borrower is verified).
+4. Record the wave with each loan's "mint" and "role", and a skims[] entry
+   { mint, cents, buy_tx, burn_tx }. Untagged loans (founder seed) never
+   count toward any coin.
+The token page and /my show the same numbers: earned, lent on Kiva, lives
+funded, next-harvest plan, and who is up next.
+
 Anti-wash rule is structural: rewards only exist as a fraction of excess
 that already funded a real loan, and only unlock on Kiva-verified loans.
 

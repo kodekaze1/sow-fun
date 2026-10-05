@@ -223,6 +223,7 @@ if (NETWORK === "mainnet") {
     appendJson("burns.json", {
       date,
       sow_mint: mint.toBase58(),
+      coin_mint: env.COIN_MINT ?? null, // whose excess paid for this skim
       sol_spent: SKIP_SWAP ? 0 : Number(env.AMOUNT_SOL),
       sow_bought: Number(bought) / 10 ** decimals,
       sow_burned: Number(burnAmt) / 10 ** decimals,

@@ -39,6 +39,19 @@ export interface UpliftWave {
       source_urls?: string[];
     };
     notes?: string;
+    // Which coin's impact share paid for this loan, and whether it was the
+    // coin's launch pledge or excess (queue / fallback). Drives the per-coin
+    // ledger in lib/coin-ledger.ts; omit for founder-seeded loans.
+    mint?: string;
+    role?: 'pledge' | 'excess';
+  }[];
+  // $SOW skims taken from coins' excess this harvest (20%: half burned via
+  // the Furnace, half creator rewards). cents = USD value of SOL spent.
+  skims?: {
+    mint: string;
+    cents: number;
+    buy_tx?: string;
+    burn_tx?: string;
   }[];
   totals: {
     uplift_deployed_cents: number;

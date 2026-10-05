@@ -5,6 +5,7 @@ import { getLaunchesByCreator, getSolPrice, getDbcClient, isClaimLapsed } from "
 import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { getLoansById } from "@/lib/kiva-graphql";
 import { getActiveSuccession, getRewardsForCreator } from "@/lib/impact-ledger";
+import { getCoinPlans } from "@/lib/coin-plans";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -56,8 +57,30 @@ export async function GET(request: Request) {
       };
     });
 
+    // Borrower queue + impact ledger per coin (on-chain queue memos, claim
+    // snapshots, harvest records, live Kiva status)
+    const mints = enriched.map((l) => l.mint).filter(Boolean) as string[];
+    const plans = mints.length ? await getCoinPlans({ mints, solPrice }).catch(() => new Map()) : new Map();
+    const withPlans = enriched.map((l) => {
+      const plan = l.mint ? plans.get(l.mint) : undefined;
+      // Who the coin funds now: launch borrower, then the on-chain queue
+      const cur = plan?.ledger.currentLoanId ?? null;
+      const curLoan = cur ? plan?.loans[cur] : undefined;
+      const launchLoan = l.loanId ? plan?.loans[l.loanId] : undefined;
+      return {
+        ...l,
+        ...(curLoan ? { activeLoanId: cur, loanStatus: curLoan.status, loanRemaining: curLoan.remaining, activeBorrowerName: curLoan.name } : {}),
+        // The 3-coin wallet cap counts launch-borrower claims only
+        launchLoanStatus: launchLoan?.status ?? (l.activeLoanId === l.loanId ? l.loanStatus : null),
+        queue: plan?.queue ?? [],
+        queueMemoTx: plan?.queueMemoTx ?? null,
+        ledger: plan?.ledger ?? null,
+        queueLoans: plan ? Object.values(plan.loans) : [],
+      };
+    });
+
     return NextResponse.json({
-      launches: enriched,
+      launches: withPlans,
       solPrice,
       rewards: getRewardsForCreator(address),
     });

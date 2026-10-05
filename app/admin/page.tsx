@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Icon from "@/components/icons";
 import { COUNTRY_FLAGS } from "@/lib/types";
+import type { CoinLedger } from "@/lib/coin-ledger";
 
 interface ClaimRow {
   pool: string;
@@ -21,7 +22,10 @@ interface ClaimRow {
     remaining: number;
     image: string | null;
   } | null;
+  plan: (CoinLedger["plan"] & { availableCents: number }) | null;
 }
+
+const usd = (cents: number) => `${(cents / 100).toFixed(2)}`;
 
 interface ClaimsData {
   pools: ClaimRow[];
@@ -194,6 +198,38 @@ export default function AdminPage() {
                     <div className="font-black text-[#223829]">{row.borrower ? `${pct}%` : "-"}</div>
                   </div>
                 </div>
+
+                {row.plan && row.plan.availableCents > 0 && (
+                  <div className="mb-3 rounded-xl border border-[#D9E6DF] bg-[#FBFCFA] p-3 text-[13px]">
+                    <div className="text-[11px] font-black uppercase tracking-widest text-[#276A43] mb-1.5">
+                      Harvest plan · {usd(row.plan.availableCents)} claimed and undeployed
+                    </div>
+                    <ul className="flex flex-col gap-1 text-[#223829]">
+                      {row.plan.pledge && row.plan.pledge.cents > 0 && (
+                        <li>Lend <b>{usd(row.plan.pledge.cents)}</b> to {row.plan.pledge.name} (#{row.plan.pledge.loanId}) - <span className="text-gray-500">wave loan: mint + role &quot;pledge&quot;</span></li>
+                      )}
+                      {row.plan.queue.filter((q) => q.cents > 0).map((q) => (
+                        <li key={q.loanId}>Lend <b>{usd(q.cents)}</b> to {q.name} (#{q.loanId}) - <span className="text-gray-500">role &quot;excess&quot;</span></li>
+                      ))}
+                      {row.plan.queue.filter((q) => q.status === "closed" || q.status === "taken").map((q) => (
+                        <li key={q.loanId} className="text-gray-400">Skip {q.name ?? `#${q.loanId}`} ({q.status === "taken" ? `held by ${q.takenBy}` : "loan closed"})</li>
+                      ))}
+                      {row.plan.skimCents > 0 && (
+                        <li>Buy <b>{usd(row.plan.skimCents)}</b> of $SOW: {usd(row.plan.burnCents)} burn + {usd(row.plan.rewardCents)} creator rewards - <span className="text-gray-500">wave skims[]</span></li>
+                      )}
+                      {row.plan.waitingCents > 0 && (
+                        <li className="text-[#996210]">
+                          {usd(row.plan.waitingCents)} has no eligible borrower
+                          {row.plan.fallbackAt
+                            ? new Date(row.plan.fallbackAt) < new Date()
+                              ? " - creator window passed: pick a same-category borrower (data/successions.json)"
+                              : ` - creator has until ${new Date(row.plan.fallbackAt).toLocaleString()}`
+                            : ""}
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
 
                 {row.borrower && (
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">

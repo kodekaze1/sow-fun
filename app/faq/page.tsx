@@ -58,7 +58,11 @@ const FAQS = [
       },
       {
         q: "What if the borrower's loan fills up before my coin's fees are harvested?",
-        a: "It can happen - Kiva loans are funded by thousands of lenders worldwide, and a popular loan can close in days while your coin's fees are still accruing. Three things protect the pledge: the launch picker shows each loan's remaining amount, days left, and a 'filling fast' warning so you pick with eyes open; our claims console flags any coin whose loan is over 80% funded so we harvest early, before the crowd closes it; and if the loan closes anyway, 100% of the pledged fees roll to the next borrower the coin adopts. Nothing is ever lost, held back, or quietly rerouted - the token page shows exactly which borrower the fees flow to at any moment.",
+        a: "It can happen - Kiva loans are funded by thousands of lenders worldwide, and a popular loan can close in days while your coin's fees are still accruing. Three things protect the pledge: the launch picker shows each loan's remaining amount, days left, and a 'filling fast' warning so you pick with eyes open; our claims console flags any coin whose loan is over 80% funded so we harvest early, before the crowd closes it; and if the loan closes anyway, the fees flow to the borrowers you've lined up in your coin's queue. Nothing is ever lost, held back, or quietly rerouted - the token page shows exactly which borrower the fees flow to at any moment.",
+      },
+      {
+        q: "What happens when my coin earns more than its borrower needs?",
+        a: "That's the goal - most Kiva loans are a few hundred dollars, so a coin that trades well funds many people. From /my you can queue up to 5 next borrowers, signed on-chain from your wallet. Once your launch borrower is funded, 80% of every extra dollar funds your queue in order, and 20% buys $SOW: half is burned, half is paid to you as creator rewards. Queued borrowers whose loans close, or who become another coin's borrower, are skipped automatically. If your queue is empty for 72 hours while money is waiting, sow.fun funds a borrower in the same category so it never sits idle. Your token page shows everything: earned, lent on Kiva, lives funded, and who's up next.",
       },
       {
         q: "How often are loans funded?",

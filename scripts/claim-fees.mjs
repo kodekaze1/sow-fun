@@ -70,7 +70,9 @@ if (!fees.length) {
 const mintByPool = new Map();
 for (const p of pools) {
   const addr = (p.address ?? p.publicKey)?.toBase58();
-  if (addr && p.account?.baseMint) mintByPool.set(addr, p.account.baseMint);
+  // SDK 1.5 nests pool fields under poolState; older versions were flat
+  const baseMint = p.account?.baseMint ?? p.account?.poolState?.baseMint;
+  if (addr && baseMint) mintByPool.set(addr, baseMint);
 }
 
 let solPriceUsd = null;

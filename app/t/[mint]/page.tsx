@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Icon from "@/components/icons";
 import { getLaunchByMint, getSolPrice } from "@/lib/launchpad-onchain";
 import { getLoansById } from "@/lib/kiva-graphql";
-import { getActiveSuccession } from "@/lib/impact-ledger";
+import { getCoinPlans } from "@/lib/coin-plans";
 import { CREATOR_FEE_PCT, IMPACT_FEE_PCT, OPS_FEE_PCT, POOL_FEE_BPS, SITE_URL, MIGRATION_QUOTE_SOL, MIGRATED_POOL_FEE_BPS } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 
@@ -59,20 +59,23 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
   const launch = isDemo ? DEMO_LAUNCH : await getLaunchByMint(mint).catch(() => null);
   if (!launch) notFound();
 
-  // If the original loan closed and the creator adopted a successor (proven
-  // by an on-chain memo, committed to data/successions.json), the successor
-  // is the active beneficiary and the original becomes history.
-  const succession = !isDemo && launch.mint ? getActiveSuccession(launch.mint) : null;
-  const activeLoanId = succession?.to_loan_id ?? launch.loanId;
-  const loanIdsToFetch = [activeLoanId, succession ? launch.loanId : null]
-    .filter((id): id is number => typeof id === "number");
-
-  const [loans, solPrice] = await Promise.all([
-    isDemo ? Promise.resolve(new Map()) : getLoansById(loanIdsToFetch).catch(() => new Map()),
-    getSolPrice(),
-  ]);
-  const loan = isDemo ? DEMO_LOAN : activeLoanId ? loans.get(activeLoanId) : undefined;
-  const originalLoan = succession && launch.loanId ? loans.get(launch.loanId) : undefined;
+  // The coin funds its launch borrower first, then the creator's on-chain
+  // borrower queue (lib/coin-plans). Whoever it is funding now is shown as
+  // the active beneficiary; the launch borrower becomes history.
+  const solPrice = await getSolPrice();
+  const plan = !isDemo && launch.mint
+    ? (await getCoinPlans({ mints: [launch.mint], solPrice }).catch(() => null))?.get(launch.mint) ?? null
+    : null;
+  const activeLoanId = plan?.ledger.currentLoanId ?? launch.loanId;
+  const movedOn = !!plan && activeLoanId !== launch.loanId;
+  const missing = [activeLoanId, launch.loanId].filter(
+    (id): id is number => typeof id === "number" && !plan?.loans[id]
+  );
+  const fetched = isDemo || !missing.length ? new Map() : await getLoansById(missing).catch(() => new Map());
+  const loanById = (id: number | null) => (id ? plan?.loans[id] ?? fetched.get(id) : undefined);
+  const loan = isDemo ? DEMO_LOAN : loanById(activeLoanId);
+  const originalLoan = movedOn ? loanById(launch.loanId) : undefined;
+  const upNext = plan ? plan.ledger.plan.queue.filter((q) => q.loanId !== activeLoanId) : [];
   const pct = loan && loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
   const img = launch.image ?? loan?.image ?? "/sow-logo.png";
 
@@ -127,18 +130,18 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
           {/* BORROWER */}
           <div className="bg-[#EDF4F1] rounded-2xl p-6">
             <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-3">
-              {succession ? "Adopted borrower" : "Beneficiary"}
+              {movedOn ? "Now funding" : "Beneficiary"}
             </div>
-            {succession && (
+            {movedOn && (
               <div className="mb-4 bg-white/70 rounded-xl p-3 text-[12px] text-[#223829]/70 leading-relaxed">
                 Originally pledged to{" "}
                 <span className="font-bold text-[#223829]">{originalLoan?.name ?? launch.borrowerName ?? `loan #${launch.loanId}`}</span>
                 {originalLoan?.status === "funded" ? " - fully funded ✓." : " - that loan closed."}{" "}
-                The creator adopted {succession.borrower} as the next borrower.
-                {succession.memo_tx && (
+                Fees now flow to the next borrower in the creator&apos;s queue.
+                {plan?.queueMemoTx && (
                   <>{" "}
-                    <a href={`https://solscan.io/tx/${succession.memo_tx}`} target="_blank" rel="noopener noreferrer"
-                      className="font-bold text-[#276A43] hover:underline">Adoption receipt ↗</a>
+                    <a href={`https://solscan.io/tx/${plan.queueMemoTx}`} target="_blank" rel="noopener noreferrer"
+                      className="font-bold text-[#276A43] hover:underline">Queue receipt ↗</a>
                   </>
                 )}
               </div>
@@ -207,6 +210,18 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                 <span className="text-gray-500">Impact share generated</span>
                 <span className="font-black text-[#276A43]">≈ ${(launch.impactShareSol * solPrice).toFixed(2)}</span>
               </div>
+              {plan && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Lent on Kiva so far</span>
+                    <span className="font-black text-[#276A43]">${((plan.ledger.deployedPledgeCents + plan.ledger.deployedExcessCents) / 100).toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Lives funded</span>
+                    <span className="font-black">{plan.ledger.livesFunded}</span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between">
                 <span className="text-gray-500">Awaiting next harvest</span>
                 <span className="font-black">{launch.pendingVaultSol.toFixed(4)} SOL</span>
@@ -219,12 +234,44 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
             <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2.5 text-[12px] text-gray-500 leading-relaxed">
               <Icon name="lock" className="w-4 h-4 flex-shrink-0 text-[#223829] mt-0.5" />
               <span>
-                The split is enforced by the pool config on-chain. Excess beyond the loan: 80% adopts the
-                next borrower, 20% buys $SOW (half burned, half rewards the creator).
+                The split is enforced by the pool config on-chain. Excess beyond the loan: 80% funds the
+                creator&apos;s borrower queue in order, 20% buys $SOW (half burned, half rewards the creator).
               </span>
             </div>
           </div>
         </div>
+
+        {/* UP NEXT */}
+        {upNext.length > 0 && (
+          <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 mb-10">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs font-black uppercase tracking-widest text-[#276A43]">Up next</div>
+              <span className="text-[11px] text-gray-400">chosen by the creator, funded in order</span>
+            </div>
+            <div className="flex flex-col divide-y divide-gray-100">
+              {upNext.map((q, i) => (
+                <div key={q.loanId} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                  <div className="min-w-0">
+                    <span className="font-mono text-xs text-gray-400 mr-2">{i + 1}</span>
+                    <a href={`https://www.kiva.org/lend/${q.loanId}`} target="_blank" rel="noopener noreferrer"
+                      className="font-bold text-[#223829] hover:text-[#276A43]">{q.name ?? `Loan #${q.loanId}`}</a>
+                    {q.remainingCents > 0 && <span className="text-xs text-gray-500"> · ${(q.remainingCents / 100).toFixed(0)} to go</span>}
+                  </div>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${
+                    q.status === "fund" ? "bg-[#EDF4F1] text-[#276A43]"
+                      : q.status === "taken" ? "bg-[#F8F2E6] text-[#996210]"
+                      : "bg-gray-100 text-gray-500"
+                  }`}>
+                    {q.status === "fund" ? `$${(q.cents / 100).toFixed(0)} next harvest`
+                      : q.status === "taken" ? "skipped - another coin's borrower"
+                      : q.status === "closed" ? "loan closed - skipped"
+                      : q.status === "waiting" ? "waiting for fees" : "not found"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* THE CURVE */}
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-6 mb-10">

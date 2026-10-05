@@ -184,7 +184,8 @@ export default function LaunchPage() {
         .then((r) => r.json()).catch(() => ({ launches: [] }));
       // Lapsed claims (72h with negligible fees) no longer hold a slot
       const activeClaims = (mine.launches ?? []).filter(
-        (l: { loanStatus?: string | null; claimLapsed?: boolean }) => l.loanStatus === "fundraising" && !l.claimLapsed
+        (l: { loanStatus?: string | null; launchLoanStatus?: string | null; claimLapsed?: boolean }) =>
+          (l.launchLoanStatus ?? l.loanStatus) === "fundraising" && !l.claimLapsed
       ).length;
       if (activeClaims >= 3) {
         throw new Error("You already have 3 coins with loans still fundraising. Help one fill to claim your next borrower.");

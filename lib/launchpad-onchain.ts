@@ -69,12 +69,13 @@ export interface LaunchSummary {
   curvePct: number | null; // progress toward graduation (null if threshold unknown)
   launchedAt: number | null; // unix seconds (pool activation point)
   migrated: boolean;
+  creator: string | null; // pool creator wallet
 }
 
 // The SDK has returned pool fields both flat and nested under poolState
 // across versions - read either shape.
 type BNLike = { toNumber: () => number };
-function poolField<T>(account: unknown, name: string): T | undefined {
+export function poolField<T>(account: unknown, name: string): T | undefined {
   const a = account as Record<string, unknown> & { poolState?: Record<string, unknown> };
   return (a?.[name] ?? a?.poolState?.[name]) as T | undefined;
 }
@@ -165,7 +166,8 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
       launchedAt = poolField<BNLike>(pa.account, "activationPoint")?.toNumber() ?? null;
     } catch { /* shape drift */ }
     const migrated = Boolean(poolField<number | boolean>(pa.account, "isMigrated"));
-    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: pa.account.baseMint ?? null, quoteReserveLamports, launchedAt, migrated };
+    const creator = poolField<PublicKey>(pa.account, "creator")?.toBase58() ?? null;
+    return { address: (pa.address ?? pa.publicKey) as PublicKey, baseMint: poolField<PublicKey>(pa.account, "baseMint") ?? null, quoteReserveLamports, launchedAt, migrated, creator };
   }).filter((e) => !e.baseMint || !DELISTED.has(e.baseMint.toBase58()));
 
   const pdas = entries.filter((e) => e.baseMint).map((e) => metadataPda(e.baseMint as PublicKey));
@@ -217,6 +219,7 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
         : null,
       launchedAt: entry.launchedAt,
       migrated: entry.migrated,
+      creator: entry.creator,
     });
   }
 
@@ -245,7 +248,8 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
       };
       return { address: (pa.address ?? pa.publicKey) as PublicKey, account: pa.account };
     })
-    .filter((e) => e.account.config?.toBase58() === DBC_CONFIG_KEY);
+    .map((e) => ({ ...e, baseMint: poolField<PublicKey>(e.account, "baseMint") ?? null }))
+    .filter((e) => poolField<PublicKey>(e.account, "config")?.toBase58() === DBC_CONFIG_KEY);
 
   const thresholdLamports = await getMigrationThresholdLamports(client);
   const results: CreatorLaunch[] = [];
@@ -255,8 +259,8 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
     let loanId: number | null = null;
     let borrowerName: string | null = null;
     let image: string | null = null;
-    if (entry.account.baseMint) {
-      const info = await connection.getAccountInfo(metadataPda(entry.account.baseMint));
+    if (entry.baseMint) {
+      const info = await connection.getAccountInfo(metadataPda(entry.baseMint));
       if (info?.data) {
         try {
           const meta = parseMetadata(info.data as Buffer);
@@ -287,7 +291,7 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
 
     results.push({
       pool: entry.address.toBase58(),
-      mint: entry.account.baseMint?.toBase58() ?? null,
+      mint: entry.baseMint?.toBase58() ?? null,
       name,
       symbol,
       image,
@@ -302,6 +306,7 @@ export async function getLaunchesByCreator(creator: string): Promise<CreatorLaun
         : null,
       launchedAt,
       migrated,
+      creator,
       creatorPendingSol: Number(creatorPendingLamports) / 1e9,
       creatorPendingLamports,
     });

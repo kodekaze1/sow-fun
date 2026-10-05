@@ -10,6 +10,9 @@ import Icon from "@/components/icons";
 import { getOwnerPositions, buildClaimPositionFeeTx, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { IMPACT_FEE_PCT, CREATOR_FEE_PCT, type FundraisingLoan } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
+import { MAX_QUEUE, buildQueueMemo } from "@/lib/borrower-queue";
+import type { CoinLedger, QueueStatus } from "@/lib/coin-ledger";
+import type { KivaLoanLive } from "@/lib/kiva-graphql";
 
 const MEMO_PROGRAM = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
@@ -34,7 +37,20 @@ interface CreatorLaunch {
   loanStatus: string | null;
   loanRemaining: number | null;
   succession: { to_loan_id: number; borrower: string; memo_tx: string } | null;
+  queue: number[];
+  queueMemoTx: string | null;
+  ledger: CoinLedger | null;
+  queueLoans: KivaLoanLive[];
 }
+
+const usd = (cents: number) => `${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+const STATUS_CHIP: Record<QueueStatus, { label: string; cls: string }> = {
+  fund: { label: "funds next harvest", cls: "bg-[#EDF4F1] text-[#276A43]" },
+  waiting: { label: "waiting for fees", cls: "bg-gray-100 text-gray-500" },
+  closed: { label: "loan closed - skipped", cls: "bg-gray-100 text-gray-400" },
+  taken: { label: "another coin's borrower - skipped", cls: "bg-[#F8F2E6] text-[#996210]" },
+  unknown: { label: "not found on Kiva", cls: "bg-gray-100 text-gray-400" },
+};
 
 interface CreatorReward {
   mint: string;
@@ -57,8 +73,9 @@ export default function MyCoinsPage() {
   const [claiming, setClaiming] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Adopt-next-borrower panel state (one open panel at a time, keyed by pool)
+  // Borrower queue editor (one open panel at a time, keyed by pool)
   const [adoptFor, setAdoptFor] = useState<string | null>(null);
+  const [draft, setDraft] = useState<{ id: number; name: string; remaining: number | null }[]>([]);
   const [adoptSearch, setAdoptSearch] = useState("");
   const [adoptResults, setAdoptResults] = useState<FundraisingLoan[]>([]);
   const [adoptLoading, setAdoptLoading] = useState(false);
@@ -145,31 +162,48 @@ export default function MyCoinsPage() {
     }
   };
 
-  // Adoption is proven on-chain: the creator wallet signs a memo transaction
-  // naming the coin and the successor loan. The operator verifies the memo,
-  // commits it to the public successions ledger, and the token page updates.
-  const adopt = async (row: CreatorLaunch, loan: FundraisingLoan) => {
+  const openQueue = (row: CreatorLaunch) => {
+    if (adoptFor === row.pool) { setAdoptFor(null); return; }
+    const byId = new Map(row.queueLoans.map((l) => [l.id, l]));
+    setDraft(row.queue.map((id) => ({ id, name: byId.get(id)?.name ?? `Loan #${id}`, remaining: byId.get(id)?.remaining ?? null })));
+    setAdoptFor(row.pool);
+    setAdoptSearch("");
+  };
+
+  const moveDraft = (i: number, dir: -1 | 1) => {
+    setDraft((d) => {
+      const j = i + dir;
+      if (j < 0 || j >= d.length) return d;
+      const next = [...d];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  };
+
+  // The queue is proven on-chain: the creator wallet signs one memo naming
+  // the coin and its ordered borrowers. The site reads and verifies it
+  // directly from the chain - no operator step.
+  const saveQueue = async (row: CreatorLaunch) => {
     if (!wallet.publicKey || !wallet.sendTransaction || !row.mint) return;
     setAdopting(true);
     setMessage(null);
     try {
-      const memo = `sow-adopt:${JSON.stringify({ mint: row.mint, loan: loan.id, name: loan.name })}`;
+      const memo = buildQueueMemo(row.mint, draft.map((d) => d.id));
       const ix = new TransactionInstruction({
         keys: [{ pubkey: wallet.publicKey, isSigner: true, isWritable: false }],
         programId: MEMO_PROGRAM,
         data: Buffer.from(memo, "utf8"),
       });
-      const tx = new Transaction().add(ix);
-      const signature = await wallet.sendTransaction(tx, connection);
+      const signature = await wallet.sendTransaction(new Transaction().add(ix), connection);
       await connection.confirmTransaction(signature, "confirmed");
       setMessage(
-        `Adoption signed on-chain for $${row.symbol}: ${loan.name} (Kiva loan #${loan.id}). ` +
-        `Receipt: ${signature.slice(0, 16)}... It appears on the token page once verified (usually within a day).`
+        `Queue saved on-chain for $${row.symbol} (${draft.length} borrower${draft.length === 1 ? "" : "s"}). ` +
+        `Receipt: ${signature.slice(0, 16)}... It shows here and on the token page within a minute.`
       );
       setAdoptFor(null);
-      setAdoptSearch("");
+      setTimeout(load, 65_000);
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Adoption failed - try again.");
+      setMessage(e instanceof Error ? e.message : "Saving the queue failed - try again.");
     } finally {
       setAdopting(false);
     }
@@ -256,26 +290,87 @@ export default function MyCoinsPage() {
                       </div>
                     </div>
 
-                    {loanClosed && (
-                      <div className="mb-4 bg-[#F8F2E6] border border-[#F8CD69]/50 rounded-xl p-3.5 text-[13px] text-[#996210] leading-relaxed">
-                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                          <span>
-                            <span className="font-bold">
-                              {row.loanStatus === "funded" ? "Loan fully funded ✓" : "Loan closed on Kiva."}
-                            </span>{" "}
-                            Adopt the next borrower so your coin&apos;s fees keep flowing to a real person.
-                          </span>
-                          <button onClick={() => { setAdoptFor(adoptFor === row.pool ? null : row.pool); setAdoptSearch(""); }}
-                            className="bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-4 py-1.5 text-xs font-bold transition-colors">
-                            {adoptFor === row.pool ? "Close" : "Adopt next borrower"}
-                          </button>
+                    {row.ledger && (
+                      <div className="mb-4 rounded-xl bg-[#FBFCFA] border border-[#E4EBE7] p-3.5 text-[13px] text-[#223829]/80 leading-relaxed">
+                        <div className="grid grid-cols-3 gap-2 mb-2 text-center">
+                          <div><div className="font-black text-[#223829]">{usd(row.ledger.earnedCents + row.ledger.accruingCents)}</div><div className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">earned for loans</div></div>
+                          <div><div className="font-black text-[#223829]">{usd(row.ledger.deployedPledgeCents + row.ledger.deployedExcessCents)}</div><div className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">lent on Kiva</div></div>
+                          <div><div className="font-black text-[#223829]">{row.ledger.livesFunded}</div><div className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">lives funded</div></div>
                         </div>
+                        {(row.ledger.plan.pledge || row.ledger.plan.skimCents > 0 || row.ledger.plan.queue.some((q) => q.cents > 0)) && (
+                          <div>
+                            <span className="font-bold text-[#223829]">Next harvest:</span>{" "}
+                            {[
+                              row.ledger.plan.pledge && row.ledger.plan.pledge.cents > 0 ? `${usd(row.ledger.plan.pledge.cents)} to ${row.ledger.plan.pledge.name ?? "your borrower"}` : null,
+                              row.ledger.plan.queue.some((q) => q.cents > 0) ? `${usd(row.ledger.plan.queue.reduce((a, q) => a + q.cents, 0))} across your queue` : null,
+                              row.ledger.plan.skimCents > 0 ? `${usd(row.ledger.plan.skimCents)} to $SOW (half burned, half your rewards)` : null,
+                            ].filter(Boolean).join(" · ")}
+                          </div>
+                        )}
+                        {row.ledger.accruingCents > 0 && (
+                          <div className="text-xs text-gray-400 mt-1">≈ {usd(row.ledger.accruingCents)} more is still accruing in the pool until the next claim.</div>
+                        )}
+                        {row.ledger.plan.fallbackAt && (
+                          <div className="mt-2 text-[#996210]">
+                            <span className="font-bold">{usd(row.ledger.plan.waitingCents)} has no borrower to go to.</span> Queue one by{" "}
+                            {new Date(row.ledger.plan.fallbackAt).toLocaleString()} or sow.fun funds a borrower in the same category for you.
+                          </div>
+                        )}
                       </div>
                     )}
 
+                    {loanClosed && !row.queue.length && (
+                      <div className="mb-4 bg-[#F8F2E6] border border-[#F8CD69]/50 rounded-xl p-3.5 text-[13px] text-[#996210] leading-relaxed">
+                        <span className="font-bold">
+                          {row.loanStatus === "funded" ? "Loan fully funded ✓" : "Loan closed on Kiva."}
+                        </span>{" "}
+                        Queue your next borrowers so your coin&apos;s fees keep flowing to real people.
+                      </div>
+                    )}
+
+                    <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+                      <div className="text-xs text-gray-500">
+                        {row.queue.length ? `${row.queue.length} borrower${row.queue.length === 1 ? "" : "s"} queued` : "No borrowers queued yet"}
+                        {row.queueMemoTx && (
+                          <> · <a href={`https://solscan.io/tx/${row.queueMemoTx}`} target="_blank" rel="noopener noreferrer" className="text-[#276A43] hover:underline">on-chain record</a></>
+                        )}
+                      </div>
+                      <button onClick={() => openQueue(row)}
+                        className="border border-[#276A43] text-[#276A43] hover:bg-[#EDF4F1] rounded-full px-4 py-1.5 text-xs font-bold transition-colors">
+                        {adoptFor === row.pool ? "Close" : "Manage borrower queue"}
+                      </button>
+                    </div>
+
                     {adoptFor === row.pool && (
                       <div className="mb-4 border border-[#D9E6DF] rounded-xl p-4">
-                        <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2">Pick the next borrower</div>
+                        <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-1">Borrower queue</div>
+                        <p className="text-[12px] text-gray-500 mb-3 leading-relaxed">
+                          After your coin&apos;s launch borrower is funded, 80% of every extra dollar funds these borrowers in order
+                          (20% goes to $SOW: half burned, half your creator rewards). Up to {MAX_QUEUE}. Borrowers who close or become another
+                          coin&apos;s borrower are skipped automatically.
+                        </p>
+                        <div className="flex flex-col gap-1.5 mb-4">
+                          {draft.length === 0 && <div className="text-sm text-gray-400 py-2">Empty - add borrowers below.</div>}
+                          {draft.map((d, i) => {
+                            const planned = row.ledger?.plan.queue.find((q) => q.loanId === d.id);
+                            const chip = planned ? STATUS_CHIP[planned.status] : null;
+                            return (
+                              <div key={d.id} className="flex items-center gap-2 rounded-lg border border-[#E4EBE7] px-3 py-2">
+                                <span className="font-mono text-xs text-gray-400 w-4">{i + 1}</span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-sm font-bold text-[#223829] truncate">{d.name}</div>
+                                  <div className="text-[11px] text-gray-500 flex flex-wrap gap-x-2">
+                                    {d.remaining !== null && <span>${d.remaining.toFixed(0)} to go</span>}
+                                    {chip && <span className={`px-1.5 rounded-full font-bold ${chip.cls}`}>{chip.label}{planned?.takenBy ? ` ($${planned.takenBy})` : ""}</span>}
+                                  </div>
+                                </div>
+                                <button onClick={() => moveDraft(i, -1)} disabled={i === 0} aria-label="Move up" className="text-gray-400 hover:text-[#276A43] disabled:opacity-30 px-1">↑</button>
+                                <button onClick={() => moveDraft(i, 1)} disabled={i === draft.length - 1} aria-label="Move down" className="text-gray-400 hover:text-[#276A43] disabled:opacity-30 px-1">↓</button>
+                                <button onClick={() => setDraft((q) => q.filter((x) => x.id !== d.id))} aria-label="Remove" className="text-gray-400 hover:text-red-600 px-1">✕</button>
+                              </div>
+                            );
+                          })}
+                        </div>
                         <input
                           value={adoptSearch}
                           onChange={(e) => setAdoptSearch(e.target.value)}
@@ -288,6 +383,7 @@ export default function MyCoinsPage() {
                           <div className="flex flex-col gap-2">
                             {adoptResults.map((loan) => {
                               const pct = loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
+                              const inQueue = draft.some((d) => d.id === loan.id) || loan.id === row.loanId;
                               return (
                                 <div key={loan.id} className="flex items-center gap-3 rounded-xl border border-[#E4EBE7] p-2.5">
                                   {loan.image && <img src={loan.image} alt="" className="w-10 h-10 rounded-lg object-cover" />}
@@ -300,10 +396,10 @@ export default function MyCoinsPage() {
                                     </div>
                                   </div>
                                   <button
-                                    onClick={() => adopt(row, loan)}
-                                    disabled={adopting}
+                                    onClick={() => setDraft((q) => [...q, { id: loan.id, name: loan.name, remaining: loan.remaining }])}
+                                    disabled={inQueue || draft.length >= MAX_QUEUE}
                                     className="bg-[#276A43] hover:bg-[#223829] disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-full px-4 py-1.5 text-xs font-bold transition-colors flex-shrink-0">
-                                    {adopting ? "Signing..." : "Adopt"}
+                                    {inQueue ? "Queued" : "Add"}
                                   </button>
                                 </div>
                               );
@@ -313,10 +409,15 @@ export default function MyCoinsPage() {
                             )}
                           </div>
                         )}
-                        <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
-                          Adopting signs a free on-chain memo from your wallet naming the new borrower - the public,
-                          verifiable record of your choice. The token page updates once it is verified.
-                        </p>
+                        <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
+                          <p className="text-[11px] text-gray-400 leading-relaxed max-w-xs">
+                            Saving signs a free on-chain memo from your wallet - the public record of your queue.
+                          </p>
+                          <button onClick={() => saveQueue(row)} disabled={adopting}
+                            className="bg-[#276A43] hover:bg-[#223829] disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-full px-5 py-2 text-sm font-bold transition-colors">
+                            {adopting ? "Signing..." : "Save queue"}
+                          </button>
+                        </div>
                       </div>
                     )}
 

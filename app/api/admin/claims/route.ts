@@ -3,9 +3,11 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { kivaGQL } from "@/lib/kiva-graphql";
 import { DBC_CONFIG_KEY } from "@/lib/launchpad";
+import { poolField } from "@/lib/launchpad-onchain";
 import { serverRpcUrl } from "@/lib/rpc-server";
 import { TREASURY_WALLET } from "@/lib/constants";
 import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
+import { getCoinPlans } from "@/lib/coin-plans";
 
 // Operator-only claims console data. Everything returned is public
 // on-chain/Kiva data - the key just keeps the ops view private.
@@ -85,7 +87,7 @@ export async function GET(request: Request) {
     });
 
     // Resolve each pool's token metadata (name/symbol/uri holds the Kiva loan id)
-    const baseMints = poolEntries.map((p) => p.account.baseMint ?? null);
+    const baseMints = poolEntries.map((p) => poolField<PublicKey>(p.account, "baseMint") ?? null);
     const pdas = baseMints.map((m) => (m ? metadataPda(m) : null));
     const metaAccounts = pdas.length
       ? await connection.getMultipleAccountsInfo(pdas.filter(Boolean) as PublicKey[])
@@ -174,8 +176,16 @@ export async function GET(request: Request) {
     const order = { "fund-now": 0, "harvest-soon": 1, "roll-over": 2, accruing: 3 };
     enriched.sort((a, b) => order[a.state] - order[b.state] || b.pendingUsd - a.pendingUsd);
 
+    // Harvest plan per coin from CLAIMED funds (claim snapshots minus what
+    // harvest records already deployed) - see lib/coin-ledger.ts
+    const plans = await getCoinPlans({ solPrice }).catch(() => new Map());
+    const withPlans = enriched.map((r) => {
+      const plan = r.mint ? plans.get(r.mint) : undefined;
+      return { ...r, plan: plan ? { ...plan.ledger.plan, availableCents: plan.ledger.availableCents } : null };
+    });
+
     return NextResponse.json({
-      pools: enriched,
+      pools: withPlans,
       solPrice,
       totals: {
         pendingSol: enriched.reduce((s, r) => s + r.pendingSol, 0),
