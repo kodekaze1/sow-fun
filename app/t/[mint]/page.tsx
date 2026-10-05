@@ -5,6 +5,7 @@ import Icon from "@/components/icons";
 import { getLaunchByMint, getSolPrice } from "@/lib/launchpad-onchain";
 import { getLoansById } from "@/lib/kiva-graphql";
 import { getCoinPlans } from "@/lib/coin-plans";
+import ShareCoinButton from "@/components/ShareCoinButton";
 import { readCoinMeta } from "@/lib/coin-meta";
 import { CREATOR_FEE_PCT, IMPACT_FEE_PCT, OPS_FEE_PCT, POOL_FEE_BPS, SITE_URL, MIGRATION_QUOTE_SOL, MIGRATED_POOL_FEE_BPS } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
@@ -135,10 +136,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
             {isDemo ? "Launch a real one" : "Trade on Jupiter"} <Icon name="arrow" className="w-4 h-4" />
           </a>
           {!isDemo && (
-            <a href={shareUrl} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-[#D9E6DF] hover:border-[#276A43] rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
-              Share on X
-            </a>
+            <ShareCoinButton mint={launch.mint!} symbol={launch.symbol} intentUrl={shareUrl} />
           )}
         </div>
 

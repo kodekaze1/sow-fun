@@ -10,7 +10,7 @@ import type { ReactElement } from "react";
 import { getLaunchByMint, type LaunchSummary } from "@/lib/launchpad-onchain";
 import { readCoinMeta, type CoinMeta } from "@/lib/coin-meta";
 import { getLoansById, type KivaLoanLive } from "@/lib/kiva-graphql";
-import { IMPACT_FEE_PCT } from "@/lib/launchpad";
+import { IMPACT_FEE_PCT, SITE_URL } from "@/lib/launchpad";
 
 export const CARD = { width: 1200, height: 675 };
 
@@ -29,11 +29,11 @@ export const C = {
 
 // ---------------------------------------------------------------- fonts
 
-type FontDef = { name: string; data: ArrayBuffer; weight: 500 | 600 | 700; style: "normal" | "italic" };
+type FontDef = { name: string; data: ArrayBuffer; weight: 400 | 500 | 600 | 700; style: "normal" | "italic" };
 let fontsPromise: Promise<FontDef[]> | null = null;
 
 const FONT_CSS =
-  "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,600&family=Figtree:wght@500;700";
+  "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;1,600&family=Figtree:wght@500;700&family=Caveat+Brush";
 
 async function fetchFonts(): Promise<FontDef[]> {
   // A plain request (no browser UA) gets TTF URLs, which Satori can parse
@@ -43,7 +43,7 @@ async function fetchFonts(): Promise<FontDef[]> {
     faces.map(async ([, name, style, weight, url]) => ({
       name,
       style: style as "normal" | "italic",
-      weight: Number(weight) as 500 | 600 | 700,
+      weight: Number(weight) as 400 | 500 | 600 | 700,
       data: await (await fetch(url, { next: { revalidate: 86400 } })).arrayBuffer(),
     }))
   );
@@ -443,6 +443,165 @@ export function HarvestCard({ h }: { h: HarvestCardData }) {
   );
 }
 
+// ------------------------------------------------- illustrated cards
+
+// Hand-drawn look to match the brand videos: cream paper, ink type, flat
+// green fills, gold accents, our own illustrations.
+const PAPER = "#F8F2E6";
+const INK = "#1C2B21";
+const BRUSH = "Caveat Brush";
+
+const illustrationCache = new Map<string, Promise<string | null>>();
+
+/** One of /public/images/illustrations as a downscaled PNG data URI. */
+export function illustration(name: string, size: number): Promise<string | null> {
+  const key = `${name}@${size}`;
+  if (!illustrationCache.has(key)) {
+    const p = (async () => {
+      try {
+        const res = await fetch(`${SITE_URL}/images/illustrations/${name}.png`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8000) });
+        if (!res.ok) return null;
+        const sharp = (await import("sharp")).default;
+        const png = await sharp(Buffer.from(await res.arrayBuffer())).resize(size, size, { fit: "inside" }).png().toBuffer();
+        return `data:image/png;base64,${png.toString("base64")}`;
+      } catch {
+        illustrationCache.delete(key); // retry on the next render
+        return null;
+      }
+    })();
+    illustrationCache.set(key, p);
+  }
+  return illustrationCache.get(key)!;
+}
+
+export interface IllustratedArt {
+  sprout: string | null;
+  cycle: string | null;
+  watering: string | null;
+}
+
+export async function loadIllustratedArt(): Promise<IllustratedArt> {
+  const [sprout, cycle, watering] = await Promise.all([
+    illustration("plant-coin", 520),
+    illustration("cycle", 560),
+    illustration("watering", 520),
+  ]);
+  return { sprout, cycle, watering };
+}
+
+/** A wobbly hand-drawn underline, like the hero's marker stroke. */
+function Squiggle({ width, color = C.sprout }: { width: number; color?: string }) {
+  return (
+    <svg width={width} height={22} viewBox="0 0 200 22" preserveAspectRatio="none" style={{ display: "flex" }}>
+      <path d="M3 15 C 40 6, 80 19, 120 10 S 180 8, 197 12" stroke={color} strokeWidth={7} strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function InkPhoto({ src, size, label }: { src: string | null; size: number; label: string }) {
+  return (
+    <div style={{ display: "flex", padding: 6, borderRadius: 999, backgroundColor: PAPER, border: `4px solid ${INK}` }}>
+      <Photo src={src} size={size} radius={999} label={label} />
+    </div>
+  );
+}
+
+function PaperMark() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ display: "flex", width: 20, height: 20, borderRadius: 999, backgroundColor: C.sprout, border: `3px solid ${INK}` }} />
+      <div style={{ display: "flex", fontFamily: BRUSH, fontSize: 40, color: INK }}>sow.fun</div>
+    </div>
+  );
+}
+
+function Art({ src, size, rotate = 0 }: { src: string | null; size: number; rotate?: number }) {
+  if (!src) return <div style={{ display: "flex", width: size, height: size }} />;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} width={size} height={size} style={{ width: size, height: size, objectFit: "contain", transform: `rotate(${rotate}deg)` }} alt="" />;
+}
+
+/** v4 Sprout: ticker in brush type beside the plant-coin illustration. */
+export function CoinSprout({ d, art }: { d: CoinCardData; art: IllustratedArt }) {
+  const who = d.borrower ?? "a real borrower";
+  return (
+    <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: PAPER, fontFamily: "Figtree", padding: "52px 64px" }}>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1 }}>
+        <PaperMark />
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", fontFamily: BRUSH, fontSize: tickerSize(d.symbol, 150), color: INK, lineHeight: 1 }}>
+            ${fit(d.symbol, 10)}
+          </div>
+          <Squiggle width={Math.min(520, 70 + d.symbol.length * 70)} />
+          <div style={{ display: "flex", fontFamily: BRUSH, fontSize: 52, color: C.leaf, lineHeight: 1.1, marginTop: 14 }}>
+            {fit(`sowing a seed for ${who}`, 34)}
+          </div>
+          <div style={{ display: "flex", fontSize: 26, fontWeight: 500, color: C.muted, marginTop: 10, maxWidth: 560, lineHeight: 1.35 }}>
+            {`${IMPACT_FEE_PCT}% of every trade's fees fund their Kiva loan${d.country ? ` in ${d.country}` : ""}.`}
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <InkPhoto src={d.borrowerImage} size={64} label={who} />
+          <div style={{ display: "flex", fontFamily: BRUSH, fontSize: 32, color: INK }}>{fit(who, 26)}</div>
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 470 }}>
+        <Art src={art.sprout} size={460} rotate={-4} />
+      </div>
+    </div>
+  );
+}
+
+/** v5 Cycle: sow / grow / harvest / repeat wheel with the pledge. */
+export function CoinCycle({ d, art }: { d: CoinCardData; art: IllustratedArt }) {
+  const who = d.borrower ?? "a real borrower";
+  return (
+    <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: PAPER, fontFamily: "Figtree", padding: "48px 64px", alignItems: "center", gap: 40 }}>
+      <div style={{ display: "flex", width: 520, alignItems: "center", justifyContent: "center" }}>
+        <Art src={art.cycle} size={520} />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 18 }}>
+        <PaperMark />
+        <div style={{ display: "flex", flexDirection: "column", fontFamily: BRUSH, fontSize: 64, color: INK, lineHeight: 1.05 }}>
+          <div style={{ display: "flex" }}>{`Every $${fit(d.symbol, 10)} trade`}</div>
+          <div style={{ display: "flex", color: C.leaf }}>{fit(`waters ${who}'s loan.`, 24)}</div>
+        </div>
+        <Squiggle width={260} color={C.gold} />
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 8 }}>
+          <InkPhoto src={d.coinImage} size={56} label={d.symbol} />
+          <div style={{ display: "flex", fontSize: 24, fontWeight: 700, color: C.muted }}>{`sow.fun/t/${d.mint.slice(0, 4)}…${d.mint.slice(-4)}`}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** v6 Watering: big brush 45% with the watering-can illustration and progress. */
+export function CoinWatering({ d, art }: { d: CoinCardData; art: IllustratedArt }) {
+  const who = d.borrower ?? "a real borrower";
+  return (
+    <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: PAPER, fontFamily: "Figtree", padding: "52px 64px" }}>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <PaperMark />
+        </div>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 24 }}>
+          <div style={{ display: "flex", fontFamily: BRUSH, fontSize: 200, color: C.sprout, lineHeight: 0.85 }}>{`${IMPACT_FEE_PCT}%`}</div>
+          <div style={{ display: "flex", flexDirection: "column", fontFamily: BRUSH, fontSize: 46, color: INK, lineHeight: 1.05, paddingBottom: 14 }}>
+            <div style={{ display: "flex" }}>{`of every $${fit(d.symbol, 10)} fee`}</div>
+            <div style={{ display: "flex", color: C.leaf }}>{fit(`grows ${who}'s loan`, 26)}</div>
+          </div>
+        </div>
+        <ProgressBar loan={d.loan} dark={false} width={560} />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: 420, gap: 10 }}>
+        <Art src={art.watering} size={400} rotate={3} />
+        <InkPhoto src={d.borrowerImage} size={86} label={who} />
+      </div>
+    </div>
+  );
+}
+
 // ------------------------------------------------------------ rendering
 
 export async function renderCard(
@@ -464,6 +623,7 @@ export function cardNotFound(message = "unknown coin"): Response {
 }
 
 export const COIN_VARIANTS = { 1: CoinPortrait, 2: CoinTicker, 3: CoinImpact } as const;
+export const ILLUSTRATED_VARIANTS = { 4: CoinSprout, 5: CoinCycle, 6: CoinWatering } as const;
 
 export function coinShareText(d: { symbol: string; borrower: string | null }): string {
   return `I just launched $${d.symbol} on @sowfunhq - ${IMPACT_FEE_PCT}% of every trade's fees fund ${d.borrower ? `${d.borrower}'s` : "a real"} Kiva loan.`;

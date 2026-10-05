@@ -6,10 +6,9 @@ import { IMPACT_FEE_PCT, SITE_URL } from "@/lib/launchpad";
 // /api/card/coin/<mint>?v=N. A brand-new coin can take ~30s to reach the
 // coin index, so each preview retries until its card exists.
 
-const VARIANTS = [
-  { v: 1, label: "Portrait" },
-  { v: 2, label: "Ticker" },
-  { v: 3, label: "Impact" },
+const GROUPS = [
+  { title: "Illustrated", variants: [{ v: 4, label: "Sprout" }, { v: 5, label: "Cycle" }, { v: 6, label: "Watering" }] },
+  { title: "Clean", variants: [{ v: 1, label: "Portrait" }, { v: 2, label: "Ticker" }, { v: 3, label: "Impact" }] },
 ];
 const RETRY_MS = 5000;
 const MAX_TRIES = 12;
@@ -72,11 +71,16 @@ function CardPreview({ mint, symbol, v, label }: { mint: string; symbol: string;
 export default function ShareCards({ mint, symbol }: { mint: string; symbol: string }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {VARIANTS.map(({ v, label }) => (
-          <CardPreview key={v} mint={mint} symbol={symbol} v={v} label={label} />
-        ))}
-      </div>
+      {GROUPS.map((g) => (
+        <div key={g.title} className="flex flex-col gap-2">
+          <div className="text-[11px] font-black uppercase tracking-widest text-[#276A43]">{g.title}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {g.variants.map(({ v, label }) => (
+              <CardPreview key={v} mint={mint} symbol={symbol} v={v} label={label} />
+            ))}
+          </div>
+        </div>
+      ))}
       <p className="text-[12px] text-gray-500 leading-relaxed">
         Post on X and your link unfurls with the Portrait card automatically - or download any card and attach it yourself.
       </p>
