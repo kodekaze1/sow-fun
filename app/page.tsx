@@ -5,10 +5,12 @@ import MapWrapper from "@/components/MapWrapper";
 import Icon from "@/components/icons";
 import CountUp from "@/components/CountUp";
 import ScrollReveal from "@/components/ScrollReveal";
-import { KivaLoan, MOCK_STATS, MOCK_BATCHES, COUNTRY_FLAGS, ALL_KIVA_SECTORS, TOTAL_KIVA_COUNTRIES } from "@/lib/types";
+import TeamRank from "@/components/TeamRank";
+import SowTokenBlock from "@/components/SowTokenBlock";
+import { KivaLoan, COUNTRY_FLAGS, ALL_KIVA_SECTORS, TOTAL_KIVA_COUNTRIES, SHOW_LIVE_TREASURY } from "@/lib/types";
 import { getKivaImpactStats } from "@/lib/kiva-stats";
-import { getAllWaves } from "@/lib/waves";
-import { KIVA_FETCH_HEADERS, KIVA_TEAM_URL, TREASURY_WALLET } from "@/lib/constants";
+import { getAllWaves, summarizeLedger } from "@/lib/waves";
+import { KIVA_FETCH_HEADERS, KIVA_LENDER_URL, TREASURY_WALLET } from "@/lib/constants";
 import badges from "@/data/badges.json";
 
 async function getLoans(): Promise<KivaLoan[]> {
@@ -31,21 +33,19 @@ export default async function Home() {
     getKivaImpactStats().catch(() => null),
     getAllWaves(),
   ]);
-  const lenderStats = kivaData?.lender?.lenderStats;
   const impactLoans = kivaData?.lender?.loans ?? [];
 
-  // Use real Kiva stats if available, otherwise fallback to MOCK_STATS
-  const stats = {
-    feesCollected:    MOCK_STATS.feesCollected,
-    loansFunded:      lenderStats?.loanCount    ?? MOCK_STATS.loansFunded,
-    countriesReached: lenderStats?.numCountries ?? MOCK_STATS.countriesReached,
-    repaymentRate:    MOCK_STATS.repaymentRate, 
-    recycledCapital:  MOCK_STATS.recycledCapital,
-  };
+  // Every figure below comes from the published harvest records (data/waves),
+  // never typed in by hand. Draft waves are never shown.
+  const ledger = summarizeLedger(waves);
+  const latest = ledger.harvests[0] ?? null;
+  const money = (cents: number) => `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  const nameList = (names: string[]) =>
+    names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 
   // The map shows ONLY harvest-funded loans - never browse listings,
   // so the marker count always matches lives actually funded.
-  const allMapLoans = waves.flatMap(wave =>
+  const allMapLoans = waves.filter((wave) => wave.status !== "draft").flatMap(wave =>
     wave.loans.map(loan => ({
       id: parseInt(loan.kiva_id) || 1001,
       name: loan.borrower,
@@ -107,7 +107,7 @@ export default async function Home() {
                 className="bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
                 Launch a coin for a borrower
               </a>
-              <a href="https://www.kiva.org/lender/sowfun" target="_blank" rel="noopener noreferrer"
+              <a href={KIVA_LENDER_URL} target="_blank" rel="noopener noreferrer"
                 className="border border-[#EDF4F1]/40 hover:border-[#EDF4F1] rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
                 See the funded loans
               </a>
@@ -117,7 +117,11 @@ export default async function Home() {
               <span className="flex items-center gap-1.5"><Icon name="vault" className="w-4 h-4 text-[#7FC79E]" />Public treasury on Solana</span>
               <span className="flex items-center gap-1.5"><Icon name="refresh" className="w-4 h-4 text-[#7FC79E]" />Repayments recycled</span>
             </div>
-            <p className="text-sm opacity-70">Harvest #001 is live - Valeti in Tonga and Monica in Kenya are already funded</p>
+            {latest && (
+              <p className="text-sm opacity-70">
+                Harvest #{String(latest.number).padStart(3, "0")} funded {nameList(latest.loans.map((l) => `${l.borrower} in ${l.location}`))} - verified on Kiva
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -126,19 +130,19 @@ export default async function Home() {
       <div className="bg-[#EDF4F1] border-b border-[#D9E6DF]">
       <div className="max-w-[1280px] mx-auto grid grid-cols-2 md:grid-cols-5 gap-px bg-[#D9E6DF] md:border-x border-[#D9E6DF]">
         {[
-          { icon: "coins", value: `$${stats.feesCollected.toLocaleString()}`, label: "Impact Deployed", delta: "founder seed" },
-          { icon: "heart", value: stats.loansFunded === 0 ? "-" : String(stats.loansFunded), label: "Loans Funded", delta: "post-harvest" },
-          { icon: "globe", value: stats.countriesReached === 0 ? "-" : String(stats.countriesReached), label: "Countries Reached", delta: "post-harvest" },
-          { icon: "check", value: stats.repaymentRate === 0 ? "-" : `${stats.repaymentRate}%`, label: "Repayment Rate", delta: "Kiva average" },
-          { icon: "refresh", value: `$${stats.recycledCapital.toLocaleString()}`, label: "Recycled Capital", delta: "re-deployed" },
+          { icon: "coins", value: money(ledger.deployedCents), label: "Impact Deployed", delta: "verified on Kiva" },
+          { icon: "heart", value: ledger.loansFunded === 0 ? "-" : String(ledger.loansFunded), label: "Loans Funded", delta: "verified on Kiva" },
+          { icon: "globe", value: ledger.countries.length === 0 ? "-" : String(ledger.countries.length), label: "Countries Reached", delta: `of ${TOTAL_KIVA_COUNTRIES} on Kiva` },
+          { icon: "check", value: "-", label: "Repayment Rate", delta: "after first repayments" },
+          { icon: "refresh", value: money(ledger.recycledCents), label: "Recycled Capital", delta: "re-deployed" },
         ].map(({ icon, value, label, delta }) => (
           <div key={label} className="text-center py-5 md:py-6 px-3 bg-[#EDF4F1] last:col-span-2 md:last:col-span-1">
             <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-white flex items-center justify-center text-[#223829] shadow-sm">
               <Icon name={icon} className="w-6 h-6" />
             </div>
             <div className="text-2xl font-black text-[#223829] leading-none mb-1"><CountUp value={value} /></div>
-            <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">{label}</div>
-            <div className="mt-1.5 text-[10px] font-bold text-[#276A43] bg-white rounded-full px-2 py-0.5 inline-block">{delta}</div>
+            <div className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">{label}</div>
+            <div className="mt-1.5 text-[11px] font-bold text-[#276A43] bg-white rounded-full px-2 py-0.5 inline-block">{delta}</div>
           </div>
         ))}
       </div>
@@ -206,25 +210,28 @@ export default async function Home() {
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-4 h-4" /></span>Harvest Ledger</h2>
               <a href="/treasury" className="text-xs font-bold text-[#276A43] hover:underline">View all</a>
             </div>
-            {MOCK_BATCHES.map((batch) => (
-              <div key={batch.id} className="px-5 py-4 border-b border-gray-50 last:border-0 hover:bg-[#F8F2E6] transition-colors cursor-pointer">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-extrabold">Harvest #{batch.id} - {batch.date}</span>
-                  <span className="text-sm font-extrabold text-[#276A43]">${batch.amount} deployed</span>
+            {ledger.harvests.length === 0 && (
+              <div className="px-5 py-6 text-sm text-gray-400">The first harvest will appear here once it is verified on Kiva.</div>
+            )}
+            {ledger.harvests.slice(0, 3).map((h) => (
+              <div key={h.id} className="px-5 py-4 border-b border-gray-50 last:border-0">
+                <div className="flex justify-between items-center gap-3 mb-1">
+                  <span className="text-sm font-extrabold">
+                    Harvest #{String(h.number).padStart(3, "0")} - {new Date(h.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}
+                  </span>
+                  <span className="text-sm font-extrabold text-[#276A43] whitespace-nowrap">{money(h.deployedCents)} deployed</span>
                 </div>
                 <div className="text-xs text-gray-400 mb-2">
-                  Proof: <a href={batch.txHash} target="_blank" rel="noopener noreferrer" className="font-mono bg-[#EDF4F1] text-[#276A43] px-1.5 py-0.5 rounded hover:bg-[#D9E6DF] transition-colors">
-                    {batch.txHash.includes("kiva.org") ? "Kiva Receipt ↗" : `${batch.txHash.slice(0, 8)}...`}
-                  </a>
-                  {" "}{batch.loans} {batch.loans === 1 ? "life" : "lives"} touched · Founder Seed
+                  Proof: <a href={h.proofUrl} target="_blank" rel="noopener noreferrer" className="font-mono bg-[#EDF4F1] text-[#276A43] px-1.5 py-0.5 rounded hover:bg-[#D9E6DF] transition-colors">Kiva Receipt ↗</a>
+                  {" "}{h.loans.length} {h.loans.length === 1 ? "life" : "lives"} touched · {h.headline}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDF4F1] text-[#223829]">
-                    🇹🇴 Valeti $25
-                  </span>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDF4F1] text-[#223829]">
-                    🇰🇪 Monica $25
-                  </span>
+                  {h.loans.map((l) => (
+                    <a key={l.kivaId} href={`https://www.kiva.org/lend/${l.kivaId}`} target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDF4F1] text-[#223829] hover:bg-[#D9E6DF] transition-colors">
+                      {COUNTRY_FLAGS[l.location] ?? "🌍"} {l.borrower} {money(l.cents)}
+                    </a>
+                  ))}
                 </div>
               </div>
             ))}
@@ -239,9 +246,17 @@ export default async function Home() {
           <div data-reveal className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
               <h2 className="flex items-center gap-2.5 text-sm font-bold"><span className="w-7 h-7 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="vault" className="w-4 h-4" /></span>Impact Treasury</h2>
-              <span className="flex items-center gap-1.5 text-xs font-bold bg-[#EDF4F1] text-[#276A43] px-3 py-1 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-[#2AA967] animate-livepulse" />Live</span>
+              {SHOW_LIVE_TREASURY ? (
+                <span className="flex items-center gap-1.5 text-xs font-bold bg-[#EDF4F1] text-[#276A43] px-3 py-1 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-[#2AA967] animate-livepulse" />Live</span>
+              ) : (
+                <span className="text-xs font-bold bg-[#F8F2E6] text-[#996210] px-3 py-1 rounded-full">Pre-launch</span>
+              )}
             </div>
-            <TreasuryCard />
+            <TreasuryCard
+              deployedCents={ledger.deployedCents}
+              recycledCents={ledger.recycledCents}
+              latest={latest ? { number: latest.number, status: latest.status, deployedCents: latest.deployedCents, loanCount: latest.loans.length } : null}
+            />
           </div>
 
           {/* UNLOCKS AFTER HARVEST */}
@@ -266,25 +281,13 @@ export default async function Home() {
             ))}
           </div>
 
-          {/* LEND WITH US */}
-          <div data-reveal className="bg-[#223829] rounded-2xl overflow-hidden text-[#EDF4F1] p-6 relative">
-            <div className="absolute right-4 top-4 w-14 h-14 rounded-2xl bg-white p-1.5 shadow-lg rotate-[4deg]">
-              <img src="/images/illustrations/heart-radiate.png" alt="" aria-hidden="true" className="w-full h-full object-contain" />
-            </div>
-            <div className="text-xs font-black uppercase tracking-widest text-[#7FC79E] mb-2 pr-16">Kiva Lending Team</div>
-            <h2 className="font-serif text-xl font-semibold mb-2">Lend alongside the treasury</h2>
-            <p className="text-sm opacity-75 leading-relaxed mb-4">
-              Join the sow.fun team on Kiva - every loan you make under the team banner counts toward our shared impact.
-            </p>
-            <div className="flex items-center gap-5 text-sm mb-5">
-              <div><span className="font-black">{kivaData?.team?.memberCount ?? 1}</span> <span className="opacity-60">member{(kivaData?.team?.memberCount ?? 1) === 1 ? "" : "s"}</span></div>
-              <div><span className="font-black">{kivaData?.team?.loanCount ?? 0}</span> <span className="opacity-60">team loans</span></div>
-            </div>
-            <a href={KIVA_TEAM_URL} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-5 py-2 text-sm font-bold transition-colors">
-              Join the team on Kiva
-              <Icon name="arrow" className="w-4 h-4" />
-            </a>
+          {/* KIVA TEAM LEADERBOARD */}
+          <div data-reveal>
+            <TeamRank
+              memberCount={kivaData?.team?.memberCount ?? 1}
+              loanCount={kivaData?.team?.loanCount ?? 0}
+              loanedAmount={kivaData?.team?.loanedAmount ?? 0}
+            />
           </div>
 
         </div>
@@ -382,6 +385,9 @@ export default async function Home() {
       </div>
       </div>
 
+      {/* $SOW */}
+      <SowTokenBlock />
+
       {/* STORY: WAVE #001 */}
       <div className="bg-[#EDF4F1] mt-6">
         <div data-reveal className="max-w-[1100px] mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
@@ -429,7 +435,7 @@ export default async function Home() {
             Trading fees become microloans. Repayments fund the next borrower.
             One treasury, many lives - all of it public, all of it verifiable.
           </p>
-          <a href="https://www.kiva.org/lender/upliftifyfun" target="_blank" rel="noopener noreferrer"
+          <a href={KIVA_LENDER_URL} target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#EDF4F1] text-[#223829] hover:bg-white rounded-full px-7 py-3 text-sm font-bold transition-colors">
             See the proof on Kiva
             <Icon name="arrow" className="w-4 h-4" />

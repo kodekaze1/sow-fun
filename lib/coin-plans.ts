@@ -22,16 +22,27 @@ export interface CoinPlan {
  * Plans for the given coins (default: every listed coin). `launches` is the
  * full index, needed to know which borrowers other coins hold.
  */
-export async function getCoinPlans(opts: { mints?: string[]; solPrice: number }): Promise<Map<string, CoinPlan>> {
-  const launches = await getLaunches();
+export async function getCoinPlans(opts: {
+  mints?: string[];
+  solPrice: number;
+  launches?: LaunchSummary[]; // pass an index you already fetched to avoid a second scan
+}): Promise<Map<string, CoinPlan>> {
+  const launches = opts.launches ?? (await getLaunches());
   const targets = launches.filter((l) => l.mint && (!opts.mints || opts.mints.includes(l.mint)));
   const plans = new Map<string, CoinPlan>();
   if (!targets.length) return plans;
 
   const { connection } = getDbcClient();
-  const creators = [...new Set(targets.map((l) => l.creator).filter(Boolean) as string[])];
+  // Each creator's history is scanned only until their listed coins' queues are found
+  const mintsByCreator = new Map<string, string[]>();
+  for (const l of targets) {
+    if (!l.creator) continue;
+    mintsByCreator.set(l.creator, [...(mintsByCreator.get(l.creator) ?? []), l.mint!]);
+  }
   const queueMaps = await Promise.all(
-    creators.map((c) => getCreatorQueues(connection, c).catch(() => new Map<string, CoinQueue>()))
+    [...mintsByCreator].map(([c, mints]) =>
+      getCreatorQueues(connection, c, mints).catch(() => new Map<string, CoinQueue>())
+    )
   );
   const queueByMint = new Map<string, CoinQueue>();
   queueMaps.forEach((m) => m.forEach((q, mint) => queueByMint.set(mint, q)));

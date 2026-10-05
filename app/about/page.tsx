@@ -41,8 +41,8 @@ export default function AboutPage() {
             Nobody can change that split afterward - not the creator, not us.
           </p>
           <p className="text-gray-600 leading-relaxed">
-            Fees fund the loan from the very first trade. When a loan fills, excess fees adopt
-            the next borrower, and repayments recycle into new loans. One coin, many lives,
+            Fees fund the loan from the very first trade. When a loan fills, excess fees fund
+            the borrowers its creator lined up, and repayments recycle into new loans. One coin, many lives,
             every hop published with a receipt.
           </p>
         </div>

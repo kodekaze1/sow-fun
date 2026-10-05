@@ -117,18 +117,9 @@ export function getAvatarFallback(name: string, color: string): string {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${color.replace("#", "")}&color=fff&size=96`;
 }
 
-// Real stats - updated manually as harvests are executed and verified.
-// Last updated: 2026-09-28 (Harvest #001 Genesis: Valeti/Tonga + Monica/Kenya, $25 each,
-// founder-seeded via the KAST card bridge test on lender `sowfun`)
-export const MOCK_STATS = {
-  feesCollected: 50,
-  loansFunded: 2,
-  countriesReached: 2,
-  repaymentRate: 0,       // no repayments yet
-  recycledCapital: 0,
-};
+// Launch switch: reveals the live treasury balance and wallet on the homepage
+// card and /treasury. Flip to true once $SOW is live (one place for the site).
+export const SHOW_LIVE_TREASURY = false;
 
-// Harvest ledger - real entries only, with verifiable Kiva links.
-export const MOCK_BATCHES: { id: string; date: string; amount: number; loans: number; txHash: string; rate: number }[] = [
-  { id: "001", date: "Sep 28, 2026", amount: 50, loans: 2, txHash: "https://www.kiva.org/lender/sowfun", rate: 0 },
-];
+// Site stats (deployed, loans, countries, harvest ledger) are derived from the
+// wave records in data/waves via summarizeLedger() in lib/waves.ts.

@@ -13,6 +13,7 @@ import { COUNTRY_FLAGS } from "@/lib/types";
 import { MAX_QUEUE, buildQueueMemo } from "@/lib/borrower-queue";
 import type { CoinLedger, QueueStatus } from "@/lib/coin-ledger";
 import type { KivaLoanLive } from "@/lib/kiva-graphql";
+import { confirmTx } from "@/lib/confirm-tx";
 
 const MEMO_PROGRAM = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
@@ -125,10 +126,24 @@ export default function MyCoinsPage() {
     return () => clearTimeout(t);
   }, [adoptFor, adoptSearch]);
 
+  // Send with a pinned blockhash and confirm robustly. "unknown" is not a
+  // failure: the tx may still land, so we say so instead of inviting a retry.
+  const sendAndConfirm = async (tx: Transaction): Promise<{ signature: string; pending: boolean }> => {
+    if (!wallet.publicKey || !wallet.sendTransaction) throw new Error("Connect your wallet first.");
+    const latest = await connection.getLatestBlockhash("confirmed");
+    tx.recentBlockhash = latest.blockhash;
+    tx.feePayer = wallet.publicKey;
+    const signature = await wallet.sendTransaction(tx, connection);
+    const outcome = await confirmTx(connection, signature, latest);
+    if (outcome.status === "failed") throw new Error(`Transaction failed on-chain (${outcome.error ?? "unknown error"}). Nothing changed - you can try again.`);
+    return { signature, pending: outcome.status === "unknown" };
+  };
+
   const claim = async (row: CreatorLaunch) => {
     if (!wallet.publicKey || !wallet.sendTransaction) return;
     setClaiming(row.pool);
     setMessage(null);
+    const pending: string[] = [];
     try {
       // Bonding-curve fees (pre-migration)
       if (row.creatorPendingSol > 0) {
@@ -140,8 +155,8 @@ export default function MyCoinsPage() {
           maxBaseAmount: new BN(0),
           maxQuoteAmount: new BN(row.creatorPendingLamports),
         });
-        const signature = await wallet.sendTransaction(tx, connection);
-        await connection.confirmTransaction(signature, "confirmed");
+        const r = await sendAndConfirm(tx);
+        if (r.pending) pending.push(r.signature);
       }
       // Locked LP fees (post-migration)
       if (row.lpPendingSol > 0 && row.dammPool) {
@@ -149,11 +164,13 @@ export default function MyCoinsPage() {
         for (const entry of positions) {
           if (unclaimedSolLamports(entry).isZero()) continue;
           const tx = await buildClaimPositionFeeTx(connection, wallet.publicKey, entry);
-          const signature = await wallet.sendTransaction(tx, connection);
-          await connection.confirmTransaction(signature, "confirmed");
+          const r = await sendAndConfirm(tx);
+          if (r.pending) pending.push(r.signature);
         }
       }
-      setMessage(`Claimed ${(row.creatorPendingSol + row.lpPendingSol).toFixed(4)} SOL from $${row.symbol}.`);
+      setMessage(pending.length
+        ? `Claim sent for ${row.symbol} but not confirmed yet - check ${pending.map((sig) => `solscan.io/tx/${sig.slice(0, 12)}...`).join(", ")} before claiming again.`
+        : `Claimed ${(row.creatorPendingSol + row.lpPendingSol).toFixed(4)} SOL from ${row.symbol}.`);
       load();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Claim failed - try again.");
@@ -194,9 +211,9 @@ export default function MyCoinsPage() {
         programId: MEMO_PROGRAM,
         data: Buffer.from(memo, "utf8"),
       });
-      const signature = await wallet.sendTransaction(new Transaction().add(ix), connection);
-      await connection.confirmTransaction(signature, "confirmed");
+      const { signature, pending } = await sendAndConfirm(new Transaction().add(ix));
       setMessage(
+        (pending ? "Queue sent, still confirming - " : "") +
         `Queue saved on-chain for $${row.symbol} (${draft.length} borrower${draft.length === 1 ? "" : "s"}). ` +
         `Receipt: ${signature.slice(0, 16)}... It shows here and on the token page within a minute.`
       );
@@ -284,7 +301,7 @@ export default function MyCoinsPage() {
                         </div>
                         <div className="text-xs text-gray-500 truncate">
                           {row.activeBorrowerName ? `for ${row.activeBorrowerName}` : "independent"}
-                          {row.succession ? " (adopted)" : ""} · {row.lifetimeFeesSol.toFixed(4)} SOL lifetime fees
+                          {row.activeLoanId && row.activeLoanId !== row.loanId ? " (from your queue)" : ""} · {row.lifetimeFeesSol.toFixed(4)} SOL lifetime fees
                           {row.activeLoanId ? ` · ≈ $${(row.impactShareSol * solPrice).toFixed(0)} to the loan` : ""}
                         </div>
                       </div>

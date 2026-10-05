@@ -1,4 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { TOTAL_KIVA_COUNTRIES } from "@/lib/types";
+
+export const metadata: Metadata = {
+  title: "How it works | sow.fun",
+  description: "Pick a real Kiva borrower, launch a coin, and 45% of its trading fees fund their microloan. Every step from blockchain to loan is public.",
+  openGraph: { title: "How it works | sow.fun", description: "Sow a coin. Grow a life. Every step from trade to microloan, explained." },
+};
 import Icon from "@/components/icons";
 
 const STEPS = [
@@ -42,7 +50,7 @@ const STEPS = [
     icon: "refresh",
     title: "The Cycle Continues",
     color: "#276A43",
-    body: "When a loan fills, excess fees follow one public rule: 80% adopts the creator's next borrower, 10% burns $SOW, 10% rewards the creator for every life their coin lifted. Repayments recycle into new loans. Sow, grow, harvest, repeat.",
+    body: "When a loan fills, excess fees follow one public rule: 80% funds the creator's borrower queue: up to 5 borrowers they line up, funded in order; 10% burns $SOW; 10% rewards the creator for every life their coin lifted. Repayments recycle into new loans. Sow, grow, harvest, repeat.",
   },
 ];
 
@@ -108,7 +116,7 @@ export default function HowItWorksPage() {
             {[
               { icon: "lock", title: "Immutable Splits", body: "The 45/45/10 fee split is enforced by each pool's on-chain config, set once at launch. Liquidity is permanently locked at graduation - no rug, no rewrite." },
               { icon: "ledger", title: "Public Harvest Ledger", body: "Every harvest is published with per-coin claim snapshots, borrower names, and the transaction hashes proving each hop from pool to loan." },
-              { icon: "globe", title: "Kiva Verification", body: "Loans are funded through Kiva.org - a non-profit with 96%+ repayment rates and nearly two decades of verified impact across 80 countries." },
+              { icon: "globe", title: "Kiva Verification", body: `Loans are funded through Kiva.org - a non-profit with 96%+ repayment rates and nearly two decades of verified impact across ${TOTAL_KIVA_COUNTRIES} countries.` },
             ].map(({ icon, title, body }) => (
               <div key={title} className="text-center p-4">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">

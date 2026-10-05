@@ -1,4 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Tokenomics | sow.fun",
+  description: "One 2% fee split 45/45/10 and locked at launch. 85 SOL graduation, permanently locked liquidity, and a public rule for excess fees.",
+  openGraph: { title: "Tokenomics | sow.fun", description: "One 2% fee, split for impact, locked at launch." },
+};
 import Icon from "@/components/icons";
 
 export default function TokenomicsPage() {
@@ -124,11 +131,11 @@ export default function TokenomicsPage() {
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-2">Excess Fees & Creator Rewards</h2>
           <p className="text-gray-400 text-sm mb-6">
-            Launchpad tokens usually raise more than their borrower needs. The excess follows one public rule:
+            Launchpad tokens usually raise more than their borrower needs. Once the launch borrower is funded, every extra dollar follows one public rule:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             {[
-              { icon: "heart", title: "80% - The next borrower", body: "The token adopts a new fundraising borrower, picked by its creator. The lives-lifted counter keeps climbing, harvest after harvest." },
+              { icon: "heart", title: "80% - The borrower queue", body: "Funds the creator's borrower queue: up to 5 borrowers they line up, funded in order. Queued borrowers who close or belong to another coin are skipped. The lives-lifted counter keeps climbing, harvest after harvest." },
               { icon: "refresh", title: "10% - $SOW burned", body: "Half of the $SOW bought back with excess fees is burned - every successful launch makes $SOW scarcer." },
               { icon: "sparkle", title: "10% - Creator rewards", body: "The other half pays the token's creator in $SOW for every borrower their token fully funds. Rewards follow real loans, not volume." },
             ].map(({ icon, title, body }) => (
@@ -142,8 +149,9 @@ export default function TokenomicsPage() {
             ))}
           </div>
           <p className="text-xs text-gray-400 text-center mt-5 leading-relaxed">
-            If a beneficiary&apos;s loan fills or expires before a harvest executes, the full harvest rolls to the adopted next borrower.
-            Creator rewards are paid only when loans verifiably fund on Kiva.
+            If a beneficiary&apos;s loan fills or expires before a harvest executes, the harvest flows down the queue instead. If the queue
+            is empty for 72 hours while money waits, sow.fun funds a borrower in the same category. Creator rewards are paid only
+            when loans verifiably fund on Kiva.
           </p>
         </div>
 

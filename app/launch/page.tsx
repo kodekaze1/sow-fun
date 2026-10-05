@@ -14,7 +14,8 @@ import {
   KIVA_SECTOR_IDS,
   KIVA_REGIONS,
   LOAN_SORTS,
-  tokenMetadataUri,
+  fitTokenMetadataUri,
+  MAX_URI_BYTES,
   type FundraisingLoan,
   LAUNCH_FEE_SOL,
   MIGRATION_QUOTE_SOL,
@@ -23,6 +24,7 @@ import {
   CLAIM_MIN_FEES_SOL,
 } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
+import { confirmTx } from "@/lib/confirm-tx";
 
 type Step = 1 | 2 | 3;
 
@@ -80,15 +82,23 @@ export default function LaunchPage() {
 
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Signature of a launch we couldn't confirm either way - shown so the creator checks before retrying
+  const [pendingSig, setPendingSig] = useState<string | null>(null);
   const [result, setResult] = useState<{ mint: string; signature: string } | null>(null);
 
   // One coin per borrower: loans that already have a coin link to it instead
   const [taken, setTaken] = useState<Record<number, { mint: string | null; symbol: string; claimEndsAt?: number | null }>>({});
+  // If claim data is unavailable, say so instead of showing every borrower as open
+  // (the pre-mint freshness check still blocks a duplicate launch)
+  const [claimsUnknown, setClaimsUnknown] = useState(false);
   useEffect(() => {
     fetch("/api/launched-loans")
-      .then((r) => r.json())
-      .then((d) => setTaken(d.taken ?? {}))
-      .catch(() => {});
+      .then(async (r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        const d = await r.json();
+        setTaken(d.taken ?? {});
+      })
+      .catch(() => setClaimsUnknown(true));
   }, []);
 
   // AI helpers
@@ -166,22 +176,45 @@ export default function LaunchPage() {
   const launch = async () => {
     if (!wallet.publicKey || !wallet.sendTransaction || !borrower) return;
     setError(null);
+    setPendingSig(null);
     setLaunching(true);
     try {
+      // Every guard below fails CLOSED: if we can't get an answer, we don't
+      // mint - a coin minted past a broken guard costs the creator real SOL.
+
+      // Metadata URI must fit Metaplex's 200-byte cap
+      const fitted = fitTokenMetadataUri({
+        name,
+        symbol,
+        image: imageKey || imageUrl || "",
+        loanId: borrower.id,
+        borrower: borrower.name,
+      });
+      if (!fitted.ok) {
+        throw new Error("That token name is too long to store on-chain - shorten the name or ticker and try again.");
+      }
+
       // Name screen - keep borrowers from being claimed by junk or abuse
-      const screen = await fetch("/api/ai/launch-helper", {
+      const screenRes = await fetch("/api/ai/launch-helper", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ action: "screen", borrower: { name: borrower.name, tokenName: name, tokenSymbol: symbol } }),
-      }).then((r) => r.json()).catch(() => ({ ok: true }));
-      if (screen.ok === false) {
+      }).catch(() => null);
+      const screen = screenRes?.ok ? await screenRes.json().catch(() => null) : null;
+      if (!screen) {
+        throw new Error("We couldn't run the name check just now - wait a moment and try again.");
+      }
+      if (screen.ok !== true) {
         throw new Error(screen.reason || "That name doesn't pass our launch guidelines - try another.");
       }
 
       // Max 3 coins with still-fundraising loans per wallet - fund one to
       // completion to open another slot (anti-squatting, pro-serial-impact)
-      const mine = await fetch(`/api/creator?address=${wallet.publicKey.toBase58()}`)
-        .then((r) => r.json()).catch(() => ({ launches: [] }));
+      const mineRes = await fetch(`/api/creator?address=${wallet.publicKey.toBase58()}`, { cache: "no-store" }).catch(() => null);
+      const mine = mineRes?.ok ? await mineRes.json().catch(() => null) : null;
+      if (!mine || !Array.isArray(mine.launches)) {
+        throw new Error("We couldn't verify your wallet's active coins - try again.");
+      }
       // Lapsed claims (72h with negligible fees) no longer hold a slot
       const activeClaims = (mine.launches ?? []).filter(
         (l: { loanStatus?: string | null; launchLoanStatus?: string | null; claimLapsed?: boolean }) =>
@@ -192,7 +225,11 @@ export default function LaunchPage() {
       }
 
       // One coin per borrower - final freshness check before minting
-      const fresh = await fetch("/api/launched-loans").then((r) => r.json()).catch(() => ({ taken: {} }));
+      const freshRes = await fetch("/api/launched-loans?fresh=1", { cache: "no-store" }).catch(() => null);
+      const fresh = freshRes?.ok ? await freshRes.json().catch(() => null) : null;
+      if (!fresh || typeof fresh.taken !== "object") {
+        throw new Error("We couldn't confirm this borrower is still unclaimed - try again in a moment.");
+      }
       const existing = fresh.taken?.[borrower.id];
       if (existing) {
         setTaken(fresh.taken);
@@ -200,25 +237,36 @@ export default function LaunchPage() {
       }
       const client = new DynamicBondingCurveClient(connection, "confirmed");
       const baseMint = Keypair.generate();
-      const uri = tokenMetadataUri({
-        name,
-        symbol,
-        image: imageKey || imageUrl || borrower.image || "",
-        loanId: borrower.id,
-        borrower: borrower.name,
-      });
       const tx: Transaction = await client.creator.createPool({
         baseMint: baseMint.publicKey,
         config: new PublicKey(DBC_CONFIG_KEY),
         name,
         symbol,
-        uri,
+        uri: fitted.uri,
         payer: wallet.publicKey,
         poolCreator: wallet.publicKey,
       });
+      // Pin the blockhash so confirmation knows exactly when the tx expires
+      const latest = await connection.getLatestBlockhash("confirmed");
+      tx.recentBlockhash = latest.blockhash;
+      tx.feePayer = wallet.publicKey;
       const signature = await wallet.sendTransaction(tx, connection, { signers: [baseMint] });
-      await connection.confirmTransaction(signature, "confirmed");
-      setResult({ mint: baseMint.publicKey.toBase58(), signature });
+      const outcome = await confirmTx(connection, signature, latest);
+      if (outcome.status === "confirmed") {
+        setResult({ mint: baseMint.publicKey.toBase58(), signature });
+        return;
+      }
+      // Never show a plain failure if the pool might exist - a retry would mint a duplicate
+      const minted = await connection.getAccountInfo(baseMint.publicKey).catch(() => null);
+      if (minted) {
+        setResult({ mint: baseMint.publicKey.toBase58(), signature });
+        return;
+      }
+      if (outcome.status === "failed") {
+        throw new Error(`The launch transaction failed on-chain and nothing was created (${outcome.error ?? "unknown error"}). You can try again.`);
+      }
+      setPendingSig(signature);
+      throw new Error("We couldn't confirm the launch yet. Check the transaction on Solscan before retrying, so you don't launch twice.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Launch failed - please try again.");
     } finally {
@@ -384,6 +432,12 @@ export default function LaunchPage() {
             {loadingLoans ? (
               <div className="py-16 text-center text-gray-400 text-sm">Finding live borrowers on Kiva...</div>
             ) : (
+              <>
+              {claimsUnknown && (
+                <div className="mb-4 bg-[#F8F2E6] border border-[#F8CD69]/50 rounded-xl p-3 text-[13px] text-[#996210]">
+                  We couldn&apos;t load which borrowers already have a coin. You can still browse - we check again right before you launch.
+                </div>
+              )}
               <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {loans.map((loan) => {
                   const pct = loan.loanAmount > 0 ? Math.round((loan.fundedAmount / loan.loanAmount) * 100) : 0;
@@ -468,6 +522,7 @@ export default function LaunchPage() {
                   );
                 })}
               </div>
+              </>
             )}
           </div>
         )}
@@ -489,8 +544,8 @@ export default function LaunchPage() {
                 <span className="font-bold">Heads up:</span> {borrower.name}&apos;s loan is{" "}
                 {borrower.loanAmount > 0 ? Math.round((borrower.fundedAmount / borrower.loanAmount) * 100) : 0}% funded
                 (${borrower.remaining.toFixed(0)} to go) and other Kiva lenders may finish it before your coin&apos;s
-                first fee harvest. If that happens nothing is lost - every pledged cent rolls to the next borrower
-                your coin adopts. Prefer a bigger runway? <button onClick={() => setStep(1)} className="underline font-bold">Pick a loan with more to go</button>.
+                first fee harvest. If that happens nothing is lost - every pledged cent flows to the borrowers
+                you queue for your coin. Prefer a bigger runway? <button onClick={() => setStep(1)} className="underline font-bold">Pick a loan with more to go</button>.
               </div>
             )}
 
@@ -578,9 +633,9 @@ export default function LaunchPage() {
                 <div className="flex justify-between"><span className="text-gray-500">Fee split (immutable)</span>
                   <span className="font-bold">{CREATOR_FEE_PCT}% you · {IMPACT_FEE_PCT}% loans · {OPS_FEE_PCT}% ops</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Excess fees</span>
-                  <span className="font-bold">80% next borrower · 20% $SOW</span></div>
+                  <span className="font-bold">80% your borrower queue · 20% $SOW</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">If the loan fills first</span>
-                  <span className="font-bold">Fees roll to your next borrower</span></div>
+                  <span className="font-bold">Fees flow to your borrower queue</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Creator rewards</span>
                   <span className="font-bold">$SOW per life lifted</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Supply</span><span className="font-bold">1,000,000,000</span></div>
@@ -593,6 +648,26 @@ export default function LaunchPage() {
               </div>
             </div>
 
+            <div className="bg-white border border-[#E4EBE7] rounded-2xl p-4 text-[13px] text-[#223829]/80 leading-relaxed mb-3 flex gap-3">
+              <Icon name="refresh" className="w-5 h-5 flex-shrink-0 text-[#276A43]" />
+              <span>
+                After your borrower is funded, you can line up to 5 more on <a href="/my" className="font-bold text-[#276A43] hover:underline">My coins</a> -
+                80% of extra fees funds them in order, 20% goes to $SOW (half burned, half your creator rewards).
+              </span>
+            </div>
+
+            {(() => {
+              const fit = fitTokenMetadataUri({ name, symbol, image: imageKey || imageUrl || "", loanId: borrower.id, borrower: borrower.name });
+              if (fit.bytes <= MAX_URI_BYTES - 20) return null;
+              return (
+                <div className={`mb-3 rounded-xl p-3 text-[12px] ${fit.ok ? "bg-[#F8F2E6] text-[#996210]" : "bg-red-50 text-red-700"}`}>
+                  {fit.ok
+                    ? `On-chain metadata is ${fit.bytes} of ${MAX_URI_BYTES} bytes - close to the limit, but it fits.`
+                    : `On-chain metadata would be ${fit.bytes} of ${MAX_URI_BYTES} bytes - shorten the token name or ticker.`}
+                </div>
+              );
+            })()}
+
             <div className="bg-[#EDF4F1] rounded-2xl p-4 text-[13px] text-[#223829]/80 leading-relaxed mb-6 flex gap-3">
               <Icon name="lock" className="w-5 h-5 flex-shrink-0 text-[#223829]" />
               <span>
@@ -602,7 +677,16 @@ export default function LaunchPage() {
             </div>
 
             {error && (
-              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">{error}</div>
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
+                {error}
+                {pendingSig && (
+                  <>{" "}
+                    <a href={`https://solscan.io/tx/${pendingSig}`} target="_blank" rel="noopener noreferrer" className="font-bold underline">
+                      View on Solscan
+                    </a>
+                  </>
+                )}
+              </div>
             )}
 
             <div className="flex flex-col gap-3">
@@ -614,6 +698,9 @@ export default function LaunchPage() {
               >
                 {launching ? "Launching..." : configReady ? `Launch $${symbol}` : "Launching opens soon"}
               </button>
+              <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+                Memecoins are volatile and can go to zero. Not investment advice. Launching costs {LAUNCH_FEE_SOL} SOL + network rent.
+              </p>
               <button onClick={() => setStep(2)} className="text-xs font-bold text-gray-400 hover:text-[#276A43]">Back to details</button>
             </div>
           </div>

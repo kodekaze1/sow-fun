@@ -50,6 +50,7 @@ type KivaTeam = {
   category?: string;
   loan_count?: number;
   member_count?: number;
+  loaned_amount?: number; // all-time USD lent under the team banner
 };
 
 async function fetchKiva<T>(path: string): Promise<T> {
@@ -146,6 +147,7 @@ export async function getKivaImpactStats() {
       url: KIVA_TEAM_URL,
       memberCount: teamLendersData.paging?.total ?? teamLendersData.lenders?.length ?? 0,
       loanCount: team?.loan_count ?? teamLoansData.paging?.total ?? teamLoansData.loans?.length ?? 0,
+      loanedAmount: team?.loaned_amount ?? 0,
       loans: (teamLoansData.loans ?? []).map(normalizeLoan),
     },
     canonical: {
@@ -182,6 +184,7 @@ export function getEmptyKivaImpactStats() {
       url: KIVA_TEAM_URL,
       memberCount: 0,
       loanCount: 0,
+      loanedAmount: 0,
       loans: [],
     },
   };

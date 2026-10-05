@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { searchFundraisingLoans } from "@/lib/kiva-graphql";
 import { KIVA_REGIONS, KIVA_SECTOR_IDS, type FundraisingLoan } from "@/lib/launchpad";
+import { fromOurSite, rateLimit } from "@/lib/rate-limit";
 
 // Server-side AI helper for the launch flow. Two actions:
 //  - "search": natural-language borrower matching over live Kiva loans
@@ -8,6 +9,12 @@ import { KIVA_REGIONS, KIVA_SECTOR_IDS, type FundraisingLoan } from "@/lib/launc
 // The Anthropic key never leaves the server.
 
 const MODEL = "claude-haiku-4-5-20251001";
+
+// Every call spends Anthropic credits, so the endpoint only answers our own
+// pages, caps input size, and rate-limits per IP (best-effort per instance).
+const MAX_BODY_BYTES = 8 * 1024;
+const CALLS_PER_MINUTE = 12;
+const field = (v: unknown, max = 80) => String(v ?? "").slice(0, max);
 
 async function claude(system: string, user: string, maxTokens: number): Promise<string> {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -64,18 +71,28 @@ Never mock the borrower. No financial promises. Keep it wholesome and CT-native.
 
 export async function POST(request: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: "AI helper not configured" }, { status: 503 });
+    return NextResponse.json({ ok: false, error: "AI helper not configured" }, { status: 503 });
+  }
+  if (!fromOurSite(request)) {
+    return NextResponse.json({ ok: false, error: "origin not allowed" }, { status: 403 });
+  }
+  if (!rateLimit(request, "ai", CALLS_PER_MINUTE, 60_000)) {
+    return NextResponse.json({ ok: false, error: "Too many requests - wait a minute and try again." }, { status: 429 });
   }
   let body: { action?: string; query?: string; borrower?: Record<string, unknown> };
   try {
-    body = await request.json();
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return NextResponse.json({ ok: false, error: "request too large" }, { status: 413 });
+    }
+    body = JSON.parse(raw);
   } catch {
-    return NextResponse.json({ error: "invalid body" }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "invalid body" }, { status: 400 });
   }
 
   try {
     if (body.action === "search") {
-      const query = (body.query ?? "").toString().slice(0, 300).trim();
+      const query = field(body.query, 200).trim();
       if (!query) return NextResponse.json({ error: "empty query" }, { status: 400 });
 
       const raw = await claude(SEARCH_SYSTEM, query, 200);
@@ -119,8 +136,8 @@ export async function POST(request: Request) {
     if (body.action === "concierge") {
       const b = body.borrower ?? {};
       const brief = JSON.stringify({
-        name: b.name, country: b.country, activity: b.activity,
-        use: String(b.use ?? "").slice(0, 220), loanAmount: b.loanAmount,
+        name: field(b.name), country: field(b.country), activity: field(b.activity),
+        use: field(b.use, 220), loanAmount: Number(b.loanAmount) || null,
       });
       const raw = await claude(CONCIERGE_SYSTEM, `Borrower: ${brief}`, 500);
       const ideas = extractJson<{ name: string; ticker: string; blurb: string }[]>(raw)
@@ -135,23 +152,25 @@ export async function POST(request: Request) {
 
     if (body.action === "screen") {
       const b = body.borrower ?? {};
-      const name = String((b as Record<string, unknown>).tokenName ?? "").slice(0, 40);
-      const symbol = String((b as Record<string, unknown>).tokenSymbol ?? "").slice(0, 12);
+      const name = field(b.tokenName, 40);
+      const symbol = field(b.tokenSymbol, 12);
       if (!name || !symbol) return NextResponse.json({ ok: false, reason: "Name and ticker required." });
       const raw = await claude(
         SCREEN_SYSTEM,
-        `Borrower: ${String(b.name ?? "")}\nToken name: ${name}\nTicker: ${symbol}`,
+        `Borrower: ${field(b.name)}\nToken name: ${name}\nTicker: ${symbol}`,
         150
       );
       const verdict = extractJson<{ ok: boolean; reason: string }>(raw);
-      return NextResponse.json({ ok: !!verdict.ok, reason: String(verdict.reason ?? "") });
+      // ok:true only on an explicit pass; anything malformed blocks the launch
+      return NextResponse.json({ ok: verdict.ok === true, reason: String(verdict.reason ?? "") });
     }
 
-    return NextResponse.json({ error: "unknown action" }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "unknown action" }, { status: 400 });
   } catch (e) {
+    // Non-200 with ok:false so callers (the pre-mint name screen) fail closed
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "AI helper failed" },
-      { status: 500 }
+      { ok: false, error: e instanceof Error ? e.message : "AI helper failed" },
+      { status: 502 }
     );
   }
 }

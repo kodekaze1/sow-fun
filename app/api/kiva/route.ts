@@ -3,7 +3,8 @@ import { KIVA_FETCH_HEADERS } from "@/lib/constants";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const page = searchParams.get("page") || "1";
+  // Whole page number only - never interpolate raw input into the Kiva URL
+  const page = Math.min(Math.max(parseInt(searchParams.get("page") ?? "1", 10) || 1, 1), 100);
 
   try {
     const res = await fetch(

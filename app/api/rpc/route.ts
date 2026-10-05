@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { serverRpcUrl } from "@/lib/rpc-server";
+import { fromOurSite, rateLimit } from "@/lib/rate-limit";
 
 // Same-origin JSON-RPC proxy for the browser wallet connection. Keeps the
-// Helius key server-side and only forwards the read/send methods the app
-// actually uses, so the endpoint can't be borrowed as a general RPC.
+// Helius key server-side and only forwards the read/send methods the browser
+// actually uses (wallet adapter, DBC create/claim, DAMM v2 position claims),
+// so the endpoint can't be borrowed as a general RPC. Program scans and
+// history lookups (getProgramAccounts, getSignaturesForAddress,
+// getTransaction) run server-side only and are not proxied.
 
 const ALLOWED_METHODS = new Set([
   "getAccountInfo",
@@ -15,15 +19,12 @@ const ALLOWED_METHODS = new Set([
   "getLatestBlockhash",
   "getMinimumBalanceForRentExemption",
   "getMultipleAccounts",
-  "getProgramAccounts",
   "getRecentPrioritizationFees",
   "getSignatureStatuses",
-  "getSignaturesForAddress",
   "getSlot",
   "getTokenAccountBalance",
   "getTokenAccountsByOwner",
   "getTokenSupply",
-  "getTransaction",
   "getVersion",
   "isBlockhashValid",
   "sendTransaction",
@@ -31,6 +32,9 @@ const ALLOWED_METHODS = new Set([
 ]);
 
 const MAX_BODY_BYTES = 256 * 1024;
+// Per-IP, per-instance best-effort limits (see lib/rate-limit.ts)
+const CALLS_PER_MINUTE = 120;
+const SENDS_PER_MINUTE = 10;
 const MAX_BATCH = 20;
 
 type RpcCall = { jsonrpc?: string; id?: unknown; method?: unknown; params?: unknown };
@@ -39,34 +43,15 @@ function rejectReason(call: RpcCall): string | null {
   if (typeof call.method !== "string" || !ALLOWED_METHODS.has(call.method)) {
     return `method not allowed: ${String(call.method)}`;
   }
-  // Unfiltered program scans are expensive - require at least one filter.
-  if (call.method === "getProgramAccounts") {
-    const opts = Array.isArray(call.params) ? (call.params[1] as { filters?: unknown[] } | undefined) : undefined;
-    if (!opts?.filters?.length) return "getProgramAccounts requires filters";
-  }
   return null;
 }
 
-function allowedOrigin(req: Request): boolean {
-  const origin = req.headers.get("origin");
-  if (!origin) return true; // same-origin fetches from some browsers omit it
-  try {
-    const host = new URL(origin).hostname;
-    return (
-      host === "sow.fun" ||
-      host === "www.sow.fun" ||
-      host === "localhost" ||
-      host === "127.0.0.1" ||
-      host.endsWith(".vercel.app")
-    );
-  } catch {
-    return false;
-  }
-}
-
 export async function POST(req: Request) {
-  if (!allowedOrigin(req)) {
+  if (!fromOurSite(req)) {
     return NextResponse.json({ error: "origin not allowed" }, { status: 403 });
+  }
+  if (!rateLimit(req, "rpc", CALLS_PER_MINUTE, 60_000)) {
+    return NextResponse.json({ error: "rate limited" }, { status: 429 });
   }
 
   const raw = await req.text();
@@ -84,6 +69,12 @@ export async function POST(req: Request) {
   const calls = Array.isArray(body) ? body : [body];
   if (calls.length === 0 || calls.length > MAX_BATCH) {
     return NextResponse.json({ error: "bad batch size" }, { status: 400 });
+  }
+  const sends = calls.filter((c) => c.method === "sendTransaction").length;
+  for (let i = 0; i < sends; i++) {
+    if (!rateLimit(req, "rpc-send", SENDS_PER_MINUTE, 60_000)) {
+      return NextResponse.json({ error: "rate limited" }, { status: 429 });
+    }
   }
   for (const call of calls) {
     const reason = rejectReason(call);

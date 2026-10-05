@@ -23,8 +23,9 @@ const DEMO_LAUNCH = {
   pendingVaultSol: 3.21,
   lifetimeFeesSol: 41.7,
   impactShareSol: 22.94,
-  quoteReserveSol: 92.4,
+  quoteReserveSol: 19.6, // 23% of the 85 SOL graduation threshold
   curvePct: 23,
+  migrated: false,
 };
 const DEMO_LOAN = {
   id: 0,
@@ -125,6 +126,9 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
             </a>
           )}
         </div>
+        {!isDemo && (
+          <p className="-mt-7 mb-10 text-[11px] text-gray-400">Memecoins are volatile and can go to zero. Not investment advice.</p>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           {/* BORROWER */}
@@ -179,11 +183,11 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                   }`}>
                     {loan.status === "funded" ? (
                       <><span className="font-bold text-[#276A43]">This loan is fully funded on Kiva.</span>{" "}
-                      Fees this coin generates now roll to its next adopted borrower - the pledge never
-                      stops, it just moves to the next person in line.</>
+                      Fees this coin generates now fund the borrowers its creator lined up (up to 5, in order) - the
+                      pledge never stops, it just moves to the next person in line.</>
                     ) : (
                       <><span className="font-bold">This loan closed on Kiva before filling.</span>{" "}
-                      Every pledged cent rolls to the coin&apos;s next adopted borrower instead - nothing
+                      Every pledged cent flows to the borrowers in the coin&apos;s queue instead - nothing
                       is lost or held back.</>
                     )}
                   </div>
@@ -294,6 +298,13 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
           )}
           <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2.5 text-[13px] text-[#223829]/75 leading-relaxed">
             <Icon name="leaf" className="w-5 h-5 flex-shrink-0 text-[#276A43] mt-0.5" />
+            {launch.migrated ? (
+              <span>
+                <span className="font-bold text-[#223829]">Graduated.</span>{" "}
+                This coin now trades on a Meteora DAMM v2 pool at a {MIGRATED_POOL_FEE_BPS / 100}% fee. Its liquidity is
+                permanently locked and keeps paying the same {CREATOR_FEE_PCT}/{IMPACT_FEE_PCT}/{OPS_FEE_PCT} split.
+              </span>
+            ) : (
             <span>
               <span className="font-bold text-[#223829]">No graduation needed.</span>{" "}
               {IMPACT_FEE_PCT}% of every trade flows toward the loan from the very first swap -
@@ -302,6 +313,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
                 <> This one proved it: <span className="font-bold text-[#276A43]">loan fully funded at just {launch.curvePct}% of the curve.</span></>
               )}
             </span>
+            )}
           </div>
         </div>
 

@@ -2,9 +2,11 @@
 // the sow.fun config, their token identities, and accrued fees.
 
 import { Connection, PublicKey } from "@solana/web3.js";
+import { unstable_cache } from "next/cache";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, OPS_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
 import { serverRpcUrl } from "@/lib/rpc-server";
+import { getMultipleAccountsChunked } from "@/lib/rpc-chunk.mjs";
 
 export const METADATA_PROGRAM = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
@@ -142,7 +144,31 @@ const VAULT_SHARE = (IMPACT_FEE_PCT + OPS_FEE_PCT) / 100;
 import delistedJson from "@/data/delisted.json";
 const DELISTED = new Set<string>(delistedJson as string[]);
 
+// The full index is two program scans plus a metadata batch - cache it
+// across requests (Next data cache, shared by serverless instances).
+// LaunchSummary is plain JSON, so it serializes safely.
+const LAUNCHES_REVALIDATE_SECONDS = 30;
+const getLaunchesCached = unstable_cache(() => loadLaunches(), ["sow-launches", DBC_CONFIG_KEY], {
+  revalidate: LAUNCHES_REVALIDATE_SECONDS,
+  tags: ["sow-launches"],
+});
+
+/** Cached launch index (up to 30s old). Use for boards, pages and plans. */
 export async function getLaunches(): Promise<LaunchSummary[]> {
+  try {
+    return await getLaunchesCached();
+  } catch {
+    // Outside a Next request (scripts, tests) the data cache is unavailable
+    return loadLaunches();
+  }
+}
+
+/** Uncached launch index - for the pre-mint "is this borrower taken" check. */
+export async function getLaunchesFresh(): Promise<LaunchSummary[]> {
+  return loadLaunches();
+}
+
+async function loadLaunches(): Promise<LaunchSummary[]> {
   if (!DBC_CONFIG_KEY || DBC_CONFIG_KEY.length < 30) return [];
   const { connection, client } = getDbcClient();
   const config = new PublicKey(DBC_CONFIG_KEY);
@@ -171,7 +197,7 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
   }).filter((e) => !e.baseMint || !DELISTED.has(e.baseMint.toBase58()));
 
   const pdas = entries.filter((e) => e.baseMint).map((e) => metadataPda(e.baseMint as PublicKey));
-  const metaAccounts = pdas.length ? await connection.getMultipleAccountsInfo(pdas) : [];
+  const metaAccounts = pdas.length ? await getMultipleAccountsChunked(connection, pdas) : [];
 
   const launches: LaunchSummary[] = [];
   let metaIdx = 0;

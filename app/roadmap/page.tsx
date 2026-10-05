@@ -1,4 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Roadmap | sow.fun",
+  description: "What's built, what's next, and the goal: the top lending team on Kiva.",
+  openGraph: { title: "Roadmap | sow.fun", description: "What's built, what's next, and the goal: the top lending team on Kiva." },
+};
 import Icon from "@/components/icons";
 
 const PHASES = [
@@ -6,7 +13,7 @@ const PHASES = [
     phase: "Phase 1",
     title: "Foundation",
     status: "completed",
-    date: "Q1 2026",
+    date: "Sep 2026",
     color: "#276A43",
     items: [
       { done: true, text: "Concept & launchpad economics (45/45/10, locked at launch)" },
@@ -19,47 +26,47 @@ const PHASES = [
   },
   {
     phase: "Phase 2",
-    title: "Launch",
+    title: "Launch readiness",
     status: "active",
-    date: "Q2 2026",
+    date: "Oct 2026",
     color: "#996210",
     items: [
+      { done: true, text: "Liquidity permanently locked at every graduation (85 SOL)" },
+      { done: true, text: "Borrower queues: creators line up to 5 next borrowers on-chain" },
+      { done: true, text: "The Furnace: on-chain $SOW burn program with public receipts" },
+      { done: true, text: "Full devnet rehearsal: launch, graduation and fee claims" },
       { done: false, text: "$SOW genesis launch on its own Meteora bonding curve" },
       { done: false, text: "Launchpad opens: anyone can sow a coin for a borrower" },
-      { done: false, text: "First community harvest with full receipt chain" },
-      { done: false, text: "Liquidity permanently locked at every graduation" },
-      { done: false, text: "X bot live: auto-posts each funded loan" },
-      { done: false, text: "First 100 borrowers funded" },
+      { done: false, text: "The Furnace live on mainnet" },
     ],
   },
   {
     phase: "Phase 3",
     title: "Growth",
     status: "upcoming",
-    date: "Q3 2026",
+    date: "Q4 2026",
     color: "#5C6B62",
     items: [
-      { done: false, text: "1,000 loans funded milestone" },
-      { done: false, text: "Recycling mechanic live (repayments → new loans)" },
+      { done: false, text: "First community harvest with full receipt chain" },
       { done: false, text: "Creator rewards paid in $SOW per life lifted" },
-      { done: false, text: "Borrower adoption flow at scale (excess 80/10/10)" },
-      { done: false, text: "Borrower spotlight series on X" },
-      { done: false, text: "CEX listing pursuit for $SOW" },
+      { done: false, text: "First 100 borrowers funded" },
+      { done: false, text: "Top-10 monthly lending team on Kiva" },
+      { done: false, text: "X bot live: auto-posts each funded loan" },
+      { done: false, text: "Recycling mechanic live (repayments -> new loans)" },
     ],
   },
   {
     phase: "Phase 4",
     title: "Scale",
     status: "upcoming",
-    date: "Q4 2026",
+    date: "2027",
     color: "#5C6B62",
     items: [
-      { done: false, text: "10,000 borrowers funded lifetime" },
-      { done: false, text: "$1M total capital deployed" },
+      { done: false, text: "The #1 lending team on Kiva" },
+      { done: false, text: "1,000 loans funded, then 10,000" },
       { done: false, text: "Automated harvest pipeline (exchange API off-ramp)" },
       { done: false, text: "Annual impact report (on-chain + public)" },
       { done: false, text: "Partnerships with additional impact platforms" },
-      { done: false, text: "Mobile app for impact tracking" },
     ],
   },
 ];
@@ -107,7 +114,7 @@ export default function RoadmapPage() {
                   {/* Circle */}
                   <div className="w-20 h-20 rounded-full flex flex-col items-center justify-center flex-shrink-0 relative z-10 shadow-lg"
                     style={{ background: `${phase.color}18`, border: `2px solid ${phase.color}44` }}>
-                    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: phase.color }}>{phase.phase}</span>
+                    <span className="text-[11px] font-black uppercase tracking-widest" style={{ color: phase.color }}>{phase.phase}</span>
                     <span className="text-xs font-bold text-gray-500 mt-0.5">{phase.date}</span>
                   </div>
 

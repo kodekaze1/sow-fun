@@ -1,0 +1,9 @@
+{
+  "as_of": "2026-10-05",
+  "source": "https://www.kiva.org/teams (Team Leaderboards, amount funded, this month)",
+  "note": "Kiva's public API has no monthly team figures, so these reference points are copied from the leaderboard by hand. Update when refreshing.",
+  "monthly": [
+    { "rank": 1, "team": "(A+) Atheists, Agnostics, Skeptics, Freethinkers, Secular Humanists and the Non-Religious", "amount": 103420 },
+    { "rank": 10, "team": "Trolltech Foundation", "amount": 17670 }
+  ]
+}

@@ -15,12 +15,18 @@ meaningful pending fees, run the loop for that pool IMMEDIATELY and ignore the
 coin's own money never reaches its named borrower. The claims console (/admin)
 flags these rows as "Loan filling fast - harvest early" (gold badge), sorted
 just under fund-now. If the loan still closes before the money lands, the
-whole harvest rolls to the next adopted borrower per the allocation policy.
+whole harvest counts as excess and flows down the coin's borrower queue.
 
 1. CLAIM (automated, on-chain receipt)
    KEYPAIR=<treasury.json> CONFIG=<config pubkey> node scripts/claim-fees.mjs
-   - Sweeps the partner 55% share (SOL) from every launched pool to the treasury.
+   - Sweeps, into the treasury: the partner 55% of bonding-curve fees from
+     every pool, the treasury's locked DAMM v2 LP fees on graduated coins,
+     and launch fees.
+   - Add CREATOR=1 to also claim $SOW's own creator share (the treasury
+     launched $SOW, so it is $SOW's creator): curve fees + creator LP
+     position. Recorded as source "genesis_vault", never as loan money.
    - Add DRY=1 first to preview pending fees.
+   - Writes data/claims/claim-<ts>.json - COMMIT IT (the ledger reads it).
    - Receipt: claim tx signatures (solscan links).
 
 2. OFF-RAMP (manual, receipt at every hop)
@@ -46,10 +52,14 @@ whole harvest rolls to the next adopted borrower per the allocation policy.
      (Creator's 45 never touches the vault - it is claimed by creators on-chain.)
 
 3. FUND ON KIVA (manual, Kiva receipt)
-   - Log in as lender `upliftifyfun`. Deposit via card/PayPal.
-   - CRITICAL: at checkout, attribute every loan to team "sow.fun" (team 290885),
-     or it will not appear in team stats. (The genesis Ailyn loan still needs its
-     attribution fixed at kiva.org -> Portfolio -> Loans.)
+   - Log in as lender `sowfun` (id 6479341). Fund exactly what the /admin
+     Harvest plan lists, per coin, in order.
+   - CRITICAL: at checkout, credit EVERY loan to team "sow.fun" (team id
+     290951, kiva.org/team/sowfun) in the basket's team dropdown. Kiva only
+     counts a loan for a team if it is credited at checkout - this is what
+     the monthly team leaderboard measures. Membership alone does nothing.
+     (Genesis loans 3246961 + 3248088 predate joining: try Portfolio ->
+     Loans -> team attribution; if Kiva won't allow it, they stay uncounted.)
    - Optional autopilot: enable Kiva auto-deposit + an autolending profile with
      team attribution - then this step reduces to topping up the balance.
    - Receipt: kiva.org/lend/<id> for each loan funded.
@@ -59,7 +69,12 @@ whole harvest rolls to the next adopted borrower per the allocation policy.
    - movements[]: claim txs (type: fee_claim, tx_hash, explorer_url),
      off-ramp transfer tx, exchange order ID (note field), Kiva deposit.
    - loans[]: kiva_id, borrower, uplift_cents, verification.verified once the
-     loan shows in the lender portfolio.
+     loan shows in the lender portfolio, AND "mint" (the coin whose money
+     paid) + "role" ("pledge" for its launch borrower, "excess" for queue /
+     fallback loans). Untagged loans count toward no coin.
+   - skims[]: { mint, cents, buy_tx, burn_tx } for each coin's $SOW skim.
+   - Shortcut: node scripts/harvest-plan.mjs writes a pre-tagged draft wave
+     from the current plan - fill in tx hashes and verification, then commit.
    Commit + push - the site renders it in the Harvest Ledger automatically.
 
 5. PROOF (automated)

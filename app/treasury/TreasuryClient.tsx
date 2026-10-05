@@ -1,0 +1,303 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { SHOW_LIVE_TREASURY } from "@/lib/types";
+import type { LedgerSummary } from "@/lib/waves";
+import Icon from "@/components/icons";
+import TeamRank from "@/components/TeamRank";
+
+interface TreasuryData {
+  balance: number;
+  usd: number;
+  wallet: string;
+}
+
+const money = (cents: number) => `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+
+export default function TreasuryClient({
+  ledger,
+  team,
+}: {
+  ledger: LedgerSummary;
+  team: { memberCount: number; loanCount: number; loanedAmount: number };
+}) {
+  const [treasury, setTreasury] = useState<TreasuryData | null>(null);
+  const [card, setCard] = useState<{ address: string; sol: number; usdc: number; recent: { signature: string; blockTime: number | null }[] } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/impact-card")
+      .then((r) => r.json())
+      .then(setCard)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/treasury")
+      .then((r) => r.json())
+      .then(setTreasury)
+      .catch(() => setTreasury({ balance: 0, usd: 0, wallet: "sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2" }));
+  }, []);
+
+  const goal = 10;
+  const pct = treasury ? Math.min(100, Math.round((treasury.balance / goal) * 100)) : 0;
+
+  return (
+    <div className="min-h-screen bg-white">
+
+      {/* HERO */}
+      <div className="relative overflow-hidden bg-[#223829] text-white py-20 px-6 text-center">
+        <img src="/images/fruit-man.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#16261c]/85 to-[#16261c]/55" />
+        <div className="relative max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest mb-6">
+            On-Chain · Public · Verifiable
+          </div>
+          <h1 className="text-5xl font-extrabold mb-4"
+            style={{ fontFamily: "var(--font-serif)" }}>
+            Impact Treasury
+          </h1>
+          <p className="text-lg opacity-80 leading-relaxed">
+            Every SOL in this wallet came from $SOW trading fees. Every spend funds a real microloan.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-[900px] mx-auto px-6 py-16 flex flex-col gap-8">
+
+        {!SHOW_LIVE_TREASURY && (
+          <div className="bg-[#FBF6EA]/80 border border-[#F8CD69]/30 rounded-2xl p-6 text-center">
+            <div className="text-xs font-black uppercase tracking-widest text-[#996210] mb-2">Pre-launch</div>
+            <p className="text-sm text-[#223829]/80 leading-relaxed max-w-lg mx-auto">
+              The live treasury balance and funding-card address appear here the moment $SOW goes live.
+              Until then, the genesis harvest below is the record - founder-seeded and fully receipted.
+            </p>
+          </div>
+        )}
+
+        {/* LIVE BALANCE */}
+        {SHOW_LIVE_TREASURY && (
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-extrabold text-[#223829]">Live Balance</h2>
+            <div className="flex items-center gap-2 bg-[#EDF4F1] border border-[#D9E6DF] rounded-full px-4 py-1.5 text-xs font-semibold text-[#223829]">
+              <div className="w-2 h-2 bg-[#276A43] rounded-full animate-pulse" />
+              Live · Solana Mainnet
+            </div>
+          </div>
+
+          {treasury ? (
+            <>
+              <div className="flex flex-wrap gap-8 mb-6">
+                <div>
+                  <div className="text-5xl font-black text-[#223829]">{treasury.balance.toFixed(2)} SOL</div>
+                  <div className="text-gray-400 text-sm mt-1">≈ ${treasury.usd.toLocaleString()} USD</div>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <div className="text-sm text-gray-500 mb-1">Next batch goal: <span className="font-bold text-gray-800">{goal} SOL</span></div>
+                  <div className="w-64 h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-[#276A43] to-[#2AA967] transition-all"
+                      style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">{pct}% funded toward next batch</div>
+                </div>
+              </div>
+              <div className="bg-[#EDF4F1] rounded-xl p-4 font-mono text-sm">
+                <span className="text-gray-400 text-xs uppercase tracking-wider block mb-1">Wallet Address</span>
+                <span className="text-[#223829] font-bold break-all">{treasury.wallet}</span>
+                <a
+                  href={`https://explorer.solana.com/address/${treasury.wallet}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 mt-3 text-xs font-bold font-sans text-[#276A43] hover:text-[#223829] transition-colors"
+                >
+                  View on Solana Explorer →
+                </a>
+              </div>
+            </>
+          ) : (
+            <div className="h-32 flex items-center justify-center text-gray-400 text-sm">Loading balance...</div>
+          )}
+        </div>
+        )}
+
+        {/* IMPACT CARD */}
+        {SHOW_LIVE_TREASURY && (
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white border border-[#D9E6DF] p-1 rotate-[3deg] shadow-sm">
+                <img src="/images/illustrations/heart-radiate.png" alt="" aria-hidden="true" className="w-full h-full object-contain" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-[#223829]">Impact Card</h2>
+            </div>
+            <span className="text-xs font-bold bg-[#EDF4F1] text-[#276A43] px-3 py-1 rounded-full">KAST Visa · Solana</span>
+          </div>
+
+          <p className="text-sm text-gray-500 leading-relaxed mb-5">
+            The fiat bridge. Each harvest, the treasury sends USDC to this address - that outflow and
+            top-up are visible on-chain below. Card purchases settle inside KAST&apos;s own ledger, so the
+            spend side is proven by the Kiva checkout receipt and loan link in the Harvest Ledger, and
+            the card balance is always shown as in transit, never as deployed. We top up only what a
+            harvest is about to deploy, so this balance sits near zero between harvests.
+          </p>
+
+          <div className="flex flex-wrap gap-8 mb-5">
+            <div>
+              <div className="text-4xl font-black text-[#996210]">${(card?.usdc ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+              <div className="text-gray-400 text-sm mt-1">
+                In transit · topped up per harvest, <span className="font-bold">not counted as deployed</span> until the Kiva receipt posts
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#EDF4F1] rounded-xl p-4 font-mono text-sm">
+            <span className="text-gray-400 text-xs uppercase tracking-wider block mb-1 font-sans font-bold">Card deposit address</span>
+            <span className="text-[#223829] font-bold break-all">{card?.address ?? "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q"}</span>
+            <a
+              href={`https://solscan.io/account/${card?.address ?? "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q"}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 mt-3 text-xs font-bold font-sans text-[#276A43] hover:text-[#223829] transition-colors"
+            >
+              Watch it on Solscan →
+            </a>
+          </div>
+
+          {card && card.recent.length > 0 ? (
+            <div className="mt-5">
+              <div className="text-xs font-black uppercase tracking-widest text-[#276A43] mb-2">Recent activity</div>
+              <div className="flex flex-col gap-1.5">
+                {card.recent.map((r) => (
+                  <a key={r.signature} href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noopener noreferrer"
+                    className="font-mono text-xs text-gray-500 hover:text-[#276A43] transition-colors truncate">
+                    {r.signature}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 text-xs text-gray-400">
+              No top-ups yet - the first harvest&apos;s transfer will appear here the moment it lands.
+            </div>
+          )}
+        </div>
+        )}
+
+        {/* STATS ROW - derived from the published harvest records */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { icon: "coins", value: money(ledger.deployedCents), label: "Total Deployed" },
+            { icon: "heart", value: String(ledger.loansFunded), label: "Loans Funded" },
+            { icon: "refresh", value: money(ledger.recycledCents), label: "Capital Recycled" },
+            { icon: "check", value: "-", label: "Repayment Rate (after first repayments)" },
+          ].map(({ icon, value, label }) => (
+            <div key={label} className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-5 text-center hover:bg-[#F8F2E6] transition-colors">
+              <div className="w-10 h-10 mx-auto mb-2.5 rounded-full bg-[#EDF4F1] flex items-center justify-center text-[#223829]">
+                <Icon name={icon} className="w-5 h-5" />
+              </div>
+              <div className="text-2xl font-black text-[#223829] leading-none mb-1">{value}</div>
+              <div className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">{label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center text-xs text-gray-400 -mt-2">
+          Updated at each verified harvest, straight from the published harvest records.
+        </div>
+
+        {/* BATCH LEDGER */}
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-[#EDF4F1] to-white">
+            <h2 className="flex items-center gap-2.5 text-lg font-extrabold"><span className="w-8 h-8 rounded-lg bg-white border border-[#D9E6DF] flex items-center justify-center text-[#223829]"><Icon name="ledger" className="w-5 h-5" /></span>Harvest Ledger</h2>
+            <span className="text-xs font-bold bg-[#EDF4F1] text-[#223829] px-3 py-1 rounded-full">{ledger.harvests.length} {ledger.harvests.length === 1 ? "harvest" : "harvests"}</span>
+          </div>
+          {ledger.harvests.map((h) => (
+            <div key={h.id} className="px-6 py-5 border-b border-gray-50 last:border-0">
+              <div className="flex justify-between items-center gap-3 mb-1">
+                <span className="font-extrabold text-gray-900">
+                  Harvest #{String(h.number).padStart(3, "0")} - {new Date(h.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}
+                </span>
+                <span className="font-extrabold text-[#276A43] whitespace-nowrap">{money(h.deployedCents)} deployed</span>
+              </div>
+              <div className="text-xs text-gray-400 mb-2">{h.loans.length} {h.loans.length === 1 ? "life" : "lives"} touched · {h.headline}</div>
+              <div className="flex flex-wrap items-center gap-2">
+                {h.loans.map((l) => (
+                  <a key={l.kivaId} href={`https://www.kiva.org/lend/${l.kivaId}`} target="_blank" rel="noopener noreferrer"
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#EDF4F1] text-[#223829] hover:bg-[#D9E6DF] transition-colors">
+                    {l.borrower} · {l.location} · {money(l.cents)} ↗
+                  </a>
+                ))}
+                <a href={h.proofUrl} target="_blank" rel="noopener noreferrer"
+                  className="font-mono text-xs bg-[#EDF4F1] text-[#276A43] px-2 py-0.5 rounded hover:bg-[#D9E6DF] transition-colors">
+                  Kiva Receipt ↗
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-xs text-gray-400 text-center leading-relaxed -mt-3 px-4">
+          Separately from harvests: a one-time $25 donation was made to Kiva&apos;s own operations
+          (promo-matched to $50 by Kiva). Donations fund Kiva itself, never borrowers, so they are
+          disclosed here but never counted as loans deployed.
+        </div>
+
+        {/* KIVA TEAM LEADERBOARD */}
+        <TeamRank memberCount={team.memberCount} loanCount={team.loanCount} loanedAmount={team.loanedAmount} tone="light" />
+
+        {/* HOW FUNDS FLOW */}
+        <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-shadow duration-300 hover:shadow-[0_10px_28px_rgba(34,56,41,0.10)] p-8">
+          <img src="/images/illustrations/receipt-trail.png" alt="" aria-hidden="true"
+            className="w-full max-w-sm mx-auto mb-5 rotate-[-1deg] mix-blend-multiply" />
+          <h2 className="text-xl font-extrabold text-[#223829] mb-4">How Funds Flow</h2>
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center">
+            {[
+              { icon: "coins", label: "$SOW Trade" },
+              { icon: "arrow", label: "", plain: true },
+              { icon: "vault", label: "Impact Treasury" },
+              { icon: "arrow", label: "", plain: true },
+              { icon: "globe", label: "Kiva Microloan" },
+              { icon: "arrow", label: "", plain: true },
+              { icon: "refresh", label: "Recycled / New Loan" },
+            ].map(({ icon, label, plain }, i) => (
+              plain ? (
+                <div key={i} className="text-gray-300 hidden sm:block"><Icon name="arrow" className="w-5 h-5" /></div>
+              ) : (
+                <div key={i} className="flex-1 p-4 bg-[#EDF4F1] rounded-xl">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-white flex items-center justify-center text-[#223829]">
+                    <Icon name={icon} className="w-5 h-5" />
+                  </div>
+                  <div className="text-sm font-bold text-gray-700">{label}</div>
+                </div>
+              )
+            ))}
+          </div>
+          <p className="text-sm text-gray-400 text-center mt-4 leading-relaxed">
+            Every launch carries a 2% trading fee, split at the pool level: 45% to the coin&apos;s creator,
+            45% to Kiva loans, 10% to operations - locked at launch and enforced on-chain.
+            Repayments are reinvested - not withdrawn.
+          </p>
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+            {[
+              { state: "On-chain", cls: "bg-[#EDF4F1] text-[#276A43]", body: "Fees sit in the public treasury wallet on Solana. Anyone can check the balance." },
+              { state: "In transit", cls: "bg-[#F8F2E6] text-[#996210]", body: "Converted and moving through the card bridge to Kiva. Not yet a loan - we never call it deployed." },
+              { state: "Deployed", cls: "bg-[#223829] text-white", body: "Lent on Kiva and listed in the Harvest Ledger above, with a link to each loan." },
+            ].map(({ state, cls, body }) => (
+              <div key={state} className="rounded-xl border border-[#E4EBE7] p-4">
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${cls}`}>{state}</span>
+                <p className="text-[13px] text-gray-500 leading-relaxed mt-2">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center">
+          <Link href="/" className="inline-flex items-center gap-2 bg-[#276A43] hover:bg-[#223829] text-white rounded-full px-8 py-3.5 text-sm font-bold transition-all shadow-lg">
+            ← Back to Dashboard
+          </Link>
+        </div>
+      </div>
+
+    </div>
+  );
+}

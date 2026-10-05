@@ -1,13 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
 import type { TreasuryData } from "@/lib/types";
-import { MOCK_STATS } from "@/lib/types";
+import { SHOW_LIVE_TREASURY } from "@/lib/types";
 import Icon from "@/components/icons";
 
-// Flip to true at launch: reveals the live balance and wallet address.
-const SHOW_LIVE_TREASURY = false;
+export interface TreasuryCardProps {
+  deployedCents: number;
+  recycledCents: number;
+  latest: { number: number; status: string; deployedCents: number; loanCount: number } | null;
+}
 
-export default function TreasuryCard() {
+const money = (cents: number) => `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+export default function TreasuryCard({ deployedCents, recycledCents, latest }: TreasuryCardProps) {
   const [data, setData] = useState<TreasuryData | null>(null);
 
   useEffect(() => {
@@ -48,8 +53,8 @@ export default function TreasuryCard() {
           : []),
         { icon: "send", label: "Last withdrawal", value: <span className="font-bold text-gray-400">pending launch</span> },
         { icon: "vault", label: "In transit (bridge + Kiva)", value: <span className="font-bold text-[#996210]">$0.00</span> },
-        { icon: "coins", label: "Deployed to loans", value: <span className="font-bold text-[#276A43]">${MOCK_STATS.feesCollected}</span> },
-        { icon: "refresh", label: "Recycled capital", value: <span className="font-bold text-[#996210]">$0.00</span> },
+        { icon: "coins", label: "Deployed to loans", value: <span className="font-bold text-[#276A43]">{money(deployedCents)}</span> },
+        { icon: "refresh", label: "Recycled capital", value: <span className="font-bold text-[#996210]">{money(recycledCents)}</span> },
       ].map(({ icon, label, value }) => (
         <div key={label} className="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0 text-sm">
           <span className="flex items-center gap-2 text-gray-500 font-medium">
@@ -60,19 +65,26 @@ export default function TreasuryCard() {
         </div>
       ))}
 
-      {/* Progress */}
-      <div className="mt-4">
-        <div className="flex justify-between text-xs text-gray-500 font-semibold mb-1.5">
-          <span>Harvest #001 Status</span>
-          <span className="text-[#276A43] font-bold">In Progress</span>
-        </div>
-        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full w-[15%] bg-gradient-to-r from-[#223829] via-[#276A43] to-[#2AA967] rounded-full relative">
-            <div className="absolute right-0 top-0 w-1 h-full bg-white/50 rounded-r-full animate-shimmer" />
+      {/* Latest harvest */}
+      {latest && (
+        <div className="mt-4">
+          <div className="flex justify-between text-xs text-gray-500 font-semibold mb-1.5">
+            <span>Harvest #{String(latest.number).padStart(3, "0")}</span>
+            <span className="text-[#276A43] font-bold">
+              {latest.status === "funded" || latest.status === "published" ? "Funded ✓" : latest.status === "funding" ? "Funding" : latest.status}
+            </span>
+          </div>
+          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-[#223829] via-[#276A43] to-[#2AA967] rounded-full"
+              style={{ width: latest.status === "funding" ? "50%" : "100%" }}
+            />
+          </div>
+          <div className="text-center text-[11px] text-gray-400 mt-1.5">
+            {money(latest.deployedCents)} across {latest.loanCount} {latest.loanCount === 1 ? "loan" : "loans"}, verified on Kiva
           </div>
         </div>
-        <div className="text-center text-[11px] text-gray-400 mt-1.5">Founder-seeded $50 across two loans while treasury scales</div>
-      </div>
+      )}
     </div>
   );
 }

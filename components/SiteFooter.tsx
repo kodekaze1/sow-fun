@@ -77,10 +77,10 @@ export default function SiteFooter() {
           <div className="font-mono text-xs opacity-60">
             © {new Date().getFullYear()} SOW FUN LLC · Treasury: sowS...HtD2 · Built on Solana
           </div>
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
             <Link href="/about" className="opacity-60 hover:opacity-100 transition-opacity">About</Link>
             <Link href="/terms" className="opacity-60 hover:opacity-100 transition-opacity">Terms of Service</Link>
-            <span className="opacity-40 hidden sm:inline">Not affiliated with or endorsed by Kiva.</span>
+            <span className="opacity-60 w-full sm:w-auto text-center">Not affiliated with or endorsed by Kiva.</span>
           </div>
         </div>
       </div>

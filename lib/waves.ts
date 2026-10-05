@@ -81,3 +81,54 @@ export async function getWaveById(id: string): Promise<UpliftWave | null> {
   const waves = await getAllWaves();
   return waves.find(w => w.id === id) || null;
 }
+
+// One summary of every non-draft harvest - the single source for site stats
+// (homepage strip, Harvest Ledger, treasury card and /treasury). Derived from
+// the wave records so nothing is typed in twice.
+export interface LedgerHarvest {
+  id: string;
+  number: number;
+  status: UpliftWave['status'];
+  headline: string;
+  date: string; // ISO
+  deployedCents: number;
+  proofUrl: string;
+  loans: { kivaId: string; borrower: string; location: string; cents: number }[];
+}
+
+export interface LedgerSummary {
+  deployedCents: number;
+  recycledCents: number;
+  loansFunded: number;
+  countries: string[];
+  harvests: LedgerHarvest[]; // newest first
+}
+
+export function summarizeLedger(waves: UpliftWave[]): LedgerSummary {
+  const live = waves.filter((w) => w.status !== 'draft');
+  const loanIds = new Set<string>();
+  const countries = new Set<string>();
+  let deployedCents = 0;
+  let recycledCents = 0;
+  const harvests = live.map((w) => {
+    const loans = w.loans.map((l) => {
+      loanIds.add(l.kiva_id);
+      if (l.location) countries.add(l.location);
+      recycledCents += l.repaid_cents ?? 0;
+      return { kivaId: l.kiva_id, borrower: l.borrower, location: l.location, cents: l.uplift_cents };
+    });
+    const cents = w.totals?.uplift_deployed_cents ?? loans.reduce((s, l) => s + l.cents, 0);
+    deployedCents += cents;
+    return {
+      id: w.id,
+      number: w.wave_number,
+      status: w.status,
+      headline: w.display.headline,
+      date: w.timestamps.started,
+      deployedCents: cents,
+      proofUrl: w.loans[0]?.verification?.source_urls?.find((u) => u.includes('/lender/')) ?? 'https://www.kiva.org/lender/sowfun',
+      loans,
+    };
+  });
+  return { deployedCents, recycledCents, loansFunded: loanIds.size, countries: [...countries], harvests };
+}

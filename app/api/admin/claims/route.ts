@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
+import { getMultipleAccountsChunked } from "@/lib/rpc-chunk.mjs";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { kivaGQL } from "@/lib/kiva-graphql";
@@ -48,7 +50,9 @@ export async function GET(request: Request) {
   if (!adminKey) {
     return NextResponse.json({ error: "ADMIN_KEY not configured on the server" }, { status: 503 });
   }
-  if (request.headers.get("x-admin-key") !== adminKey) {
+  const given = Buffer.from(request.headers.get("x-admin-key") ?? "");
+  const expected = Buffer.from(adminKey);
+  if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   if (!DBC_CONFIG_KEY || DBC_CONFIG_KEY.length < 30) {
@@ -90,7 +94,7 @@ export async function GET(request: Request) {
     const baseMints = poolEntries.map((p) => poolField<PublicKey>(p.account, "baseMint") ?? null);
     const pdas = baseMints.map((m) => (m ? metadataPda(m) : null));
     const metaAccounts = pdas.length
-      ? await connection.getMultipleAccountsInfo(pdas.filter(Boolean) as PublicKey[])
+      ? await getMultipleAccountsChunked(connection, pdas.filter(Boolean) as PublicKey[])
       : [];
 
     const rows: {

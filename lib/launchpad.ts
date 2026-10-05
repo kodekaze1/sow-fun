@@ -85,12 +85,34 @@ export function tokenMetadataUri(params: {
   loanId: number;
   borrower: string;
 }): string {
-  const q = new URLSearchParams({
-    name: params.name,
-    symbol: params.symbol,
-    image: params.image,
-    loan: String(params.loanId),
-    borrower: params.borrower,
-  });
+  const q = new URLSearchParams({ name: params.name, symbol: params.symbol });
+  // No upload: omit the image so /api/meta uses its default (a full Kiva
+  // image URL alone can eat most of the 200-byte URI budget)
+  if (params.image) q.set("image", params.image);
+  q.set("loan", String(params.loanId));
+  if (params.borrower) q.set("borrower", params.borrower);
   return `${SITE_URL}/api/meta?${q.toString()}`;
+}
+
+// Metaplex caps the metadata URI at 200 bytes; past it pool creation fails
+// with an opaque program error, so check before the wallet prompt.
+export const MAX_URI_BYTES = 200;
+
+export function uriByteLength(uri: string): number {
+  return new TextEncoder().encode(uri).length;
+}
+
+/**
+ * The launch URI, shortened to fit MAX_URI_BYTES: the borrower name is
+ * trimmed first (it is also on Kiva via the loan id), then dropped.
+ * `ok: false` means even the minimal URI is too long - the token name is.
+ */
+export function fitTokenMetadataUri(params: Parameters<typeof tokenMetadataUri>[0]): { uri: string; bytes: number; ok: boolean } {
+  let uri = tokenMetadataUri(params);
+  const words = params.borrower.trim().split(/\s+/);
+  for (let n = words.length - 1; uriByteLength(uri) > MAX_URI_BYTES && n >= 0; n--) {
+    uri = tokenMetadataUri({ ...params, borrower: words.slice(0, n).join(" ") });
+  }
+  const bytes = uriByteLength(uri);
+  return { uri, bytes, ok: bytes <= MAX_URI_BYTES };
 }

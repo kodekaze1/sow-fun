@@ -33,8 +33,13 @@ const LOAN_SHARE_OF_TREASURY = IMPACT_FEE_PCT / (100 - CREATOR_FEE_PCT);
 interface ClaimSnapshot {
   claimed_at: string;
   sol_price_usd: number | null;
-  pools: { mint: string | null; claimed_sol: number }[];
+  pools: { mint: string | null; claimed_sol: number; source?: string }[];
 }
+
+// Snapshot rows that are loan money. Untagged rows are the original
+// bonding-curve partner claims. "genesis_vault" ($SOW's own creator share)
+// and any unknown source are never counted toward a coin's loan ledger.
+const LOAN_SOURCES = new Set([undefined, "dbc_partner", "damm_v2_locked_lp"]);
 
 const CLAIMS_DIR = path.join(process.cwd(), "data", "claims");
 
@@ -95,7 +100,7 @@ export function computeCoinLedger(input: {
   let lastClaimAt: string | null = null;
   for (const snap of snapshots) {
     for (const pool of snap.pools) {
-      if (pool.mint !== mint || !snap.sol_price_usd) continue;
+      if (pool.mint !== mint || !snap.sol_price_usd || !LOAN_SOURCES.has(pool.source)) continue;
       earnedCents += Math.floor(pool.claimed_sol * LOAN_SHARE_OF_TREASURY * snap.sol_price_usd * 100);
       if (!lastClaimAt || snap.claimed_at > lastClaimAt) lastClaimAt = snap.claimed_at;
     }

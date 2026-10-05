@@ -3,9 +3,8 @@ import { KivaLoan, COUNTRY_FLAGS, SECTOR_COLORS, getAvatarFallback } from "@/lib
 import Icon from "@/components/icons";
 
 const STATUS_STYLES: Record<string, string> = {
-  funded:   "bg-[#EDF4F1] text-[#276A43]",
-  repaying: "bg-[#F8F2E6] text-[#996210]",
-  fundraising: "bg-[#EDF4F1] text-[#276A43]",
+  funded: "bg-[#EDF4F1] text-[#276A43]",
+  fundraising: "bg-[#F8F2E6] text-[#996210]",
 };
 
 export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
@@ -29,8 +28,8 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
 
         const pct = loan.loan_amount > 0 ? Math.round((loan.funded_amount / loan.loan_amount) * 100) : 0;
         const description = loan.description?.texts?.en ?? `This loan will help ${loan.name} ${loan.use}`;
-        const status = pct >= 100 ? "funded" : pct > 50 ? "repaying" : "fundraising";
-        const statusLabel = pct >= 100 ? "Funded" : `${pct}% funded`;
+        const status = pct >= 100 ? "funded" : "fundraising";
+        const statusLabel = pct >= 100 ? "Fully funded" : `${pct}% funded`;
 
         return (
           <div
@@ -71,7 +70,7 @@ export default function LoanFeed({ loans }: { loans: KivaLoan[] }) {
             <div className="text-right flex-shrink-0">
               <div className="text-base font-extrabold text-[#223829]">${loan.loan_amount}</div>
               <div className="text-[11px] text-gray-400 mt-0.5">
-                Active Round
+                {status === "funded" ? "Loan size" : "Raising on Kiva"}
               </div>
             </div>
           </div>
