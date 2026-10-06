@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Icon from "@/components/icons";
 import WalletAction from "./WalletAction";
 import QueuePanel from "./QueuePanel";
+import LiveTraffic from "./LiveTraffic";
 import type { CoinLedger } from "@/lib/coin-ledger";
 import type { HarvestRecord } from "@/lib/harvest-auto";
 import type { LedgerHarvest } from "@/lib/waves";
@@ -829,6 +830,10 @@ export default function AdminPage() {
               <Stat label="Close to funded" value={String(t.borrowersClose)} sub="≥80% or ≤$100 left" tone={t.borrowersClose ? "warn" : undefined} />
               <Stat label="Needs review" value={String(t.reviewCount)} sub="unmatched Kiva loans" tone={t.reviewCount ? "warn" : undefined} />
             </div>
+
+            <Section title="Live traffic" hint="Real browser page loads on sow.fun, from Cloudflare.">
+              <LiveTraffic adminKey={savedKey} />
+            </Section>
 
             <Section title="Money flow" hint="Where every dollar is right now. The reconciliation line checks the treasury against the per-coin ledger - if it ever says SHORT, money moved without a record.">
               <MoneyFlow t={t} wallets={data.wallets} solPrice={data.solPrice} />

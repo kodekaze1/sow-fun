@@ -382,7 +382,7 @@ export default function MyCoinsPage() {
                               <div key={d.id} className="flex items-center gap-2 rounded-lg border border-[#E4EBE7] px-3 py-2">
                                 <span className="font-mono text-xs text-gray-400 w-4">{i + 1}</span>
                                 <div className="min-w-0 flex-1">
-                                  <div className="text-sm font-bold text-[#223829] truncate">{d.name}</div>
+                                  <a href={`https://www.kiva.org/lend/${d.id}`} target="_blank" rel="noopener noreferrer" className="block text-sm font-bold text-[#223829] hover:underline truncate">{d.name} <span className="text-[11px] font-semibold text-[#276A43]">Kiva ↗</span></a>
                                   <div className="text-[11px] text-gray-500 flex flex-wrap gap-x-2">
                                     {d.remaining !== null && <span>${d.remaining.toFixed(0)} to go</span>}
                                     {chip && <span className={`px-1.5 rounded-full font-bold ${chip.cls}`}>{chip.label}{planned?.takenBy ? ` ($${planned.takenBy})` : ""}</span>}
@@ -423,9 +423,9 @@ export default function MyCoinsPage() {
                                 <div key={loan.id} className="flex items-center gap-3 rounded-xl border border-[#E4EBE7] p-2.5">
                                   {loan.image && <img src={loan.image} alt="" className="w-10 h-10 rounded-lg object-cover" />}
                                   <div className="min-w-0 flex-1">
-                                    <div className="text-sm font-bold text-[#223829] truncate">
-                                      {loan.name} {COUNTRY_FLAGS[loan.country] ?? ""}
-                                    </div>
+                                    <a href={`https://www.kiva.org/lend/${loan.id}`} target="_blank" rel="noopener noreferrer" className="block text-sm font-bold text-[#223829] hover:underline truncate">
+                                      {loan.name} {COUNTRY_FLAGS[loan.country] ?? ""} <span className="text-[11px] font-semibold text-[#276A43]">Kiva ↗</span>
+                                    </a>
                                     <div className="text-[11px] text-gray-500">
                                       {loan.activity} · ${loan.remaining.toFixed(0)} to go · {pct}% funded
                                     </div>
