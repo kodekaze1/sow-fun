@@ -9,9 +9,9 @@ node_modules/
 .vercel
 
 # promo video sources/renders (heavy binaries, kept local only)
-public/brand/video/*.mp4
-public/brand/video/*.wav
-public/brand/video/*.png
+public/brand/video/**/*.mp4
+public/brand/video/**/*.wav
+public/brand/video/**/*.png
 
 # furnace program (Anchor) build output
 programs/furnace/target/

@@ -7,7 +7,9 @@
 
 import { ImageResponse } from "next/og";
 import type { ReactElement } from "react";
-import { getLaunchByMint, type LaunchSummary } from "@/lib/launchpad-onchain";
+import { PublicKey } from "@solana/web3.js";
+import { getDbcClient, getLaunchByMint, type LaunchSummary } from "@/lib/launchpad-onchain";
+import delistedJson from "@/data/delisted.json";
 import { readCoinMeta, type CoinMeta } from "@/lib/coin-meta";
 import { getLoansById, type KivaLoanLive } from "@/lib/kiva-graphql";
 import { IMPACT_FEE_PCT, SITE_URL } from "@/lib/launchpad";
@@ -92,8 +94,18 @@ export interface CoinCardData {
   country: string | null;
   loan: KivaLoanLive | null;
   migrated: boolean;
-  launch: LaunchSummary;
+  launch: LaunchSummary | null; // null for a fresh coin not yet in the cached index
   meta: CoinMeta | null;
+}
+
+const DELISTED = new Set<string>(delistedJson as string[]);
+
+async function mintExists(mint: string): Promise<boolean> {
+  try {
+    return (await getDbcClient().connection.getAccountInfo(new PublicKey(mint))) !== null;
+  } catch {
+    return false;
+  }
 }
 
 function blobUrl(key: string | null | undefined): string | null {
@@ -103,25 +115,28 @@ function blobUrl(key: string | null | undefined): string | null {
 
 export async function getCoinCardData(mint: string): Promise<CoinCardData | null> {
   const launch = await getLaunchByMint(mint).catch(() => null);
-  if (!launch?.mint) return null;
-  const meta = await readCoinMeta(launch.mint);
-  const loanId = meta?.loanId ?? launch.loanId;
+  const meta = await readCoinMeta(launch?.mint ?? mint);
+  // A coin launched seconds ago may not be in the cached index yet - its
+  // launch details were saved just before minting, so render from those once
+  // the mint exists on-chain (an abandoned launch leaves details but no mint)
+  if (!launch?.mint && (!meta || DELISTED.has(meta.mint) || !(await mintExists(meta.mint)))) return null;
+  const loanId = meta?.loanId ?? launch?.loanId ?? null;
   const loans = loanId ? await getLoansById([loanId]).catch(() => new Map<number, KivaLoanLive>()) : new Map<number, KivaLoanLive>();
   const loan = loanId ? loans.get(loanId) ?? null : null;
   const [coinImage, borrowerImage] = await Promise.all([
-    imageDataUri(blobUrl(meta?.image) ?? launch.image),
+    imageDataUri(blobUrl(meta?.image) ?? launch?.image ?? `${SITE_URL}/sow-logo.png`),
     imageDataUri(loan?.image),
   ]);
   return {
-    mint: launch.mint,
-    name: meta?.name ?? launch.name,
-    symbol: meta?.symbol ?? launch.symbol,
+    mint: launch?.mint ?? meta!.mint,
+    name: meta?.name ?? launch!.name,
+    symbol: meta?.symbol ?? launch!.symbol,
     coinImage,
-    borrower: loan?.name ?? meta?.borrower ?? launch.borrowerName,
+    borrower: loan?.name ?? meta?.borrower ?? launch?.borrowerName ?? null,
     borrowerImage: borrowerImage ?? coinImage,
     country: loan?.country ?? null,
     loan,
-    migrated: launch.migrated,
+    migrated: launch?.migrated ?? false,
     launch,
     meta,
   };
@@ -619,7 +634,8 @@ export async function renderCard(
 }
 
 export function cardNotFound(message = "unknown coin"): Response {
-  return new Response(message, { status: 404, headers: { "Cache-Control": "public, max-age=60" } });
+  // Never cache a miss: a coin that is seconds old must not stay "unknown"
+  return new Response(message, { status: 404, headers: { "Cache-Control": "no-store" } });
 }
 
 export const COIN_VARIANTS = { 1: CoinPortrait, 2: CoinTicker, 3: CoinImpact } as const;

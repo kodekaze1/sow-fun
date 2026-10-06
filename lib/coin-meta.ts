@@ -118,8 +118,17 @@ export function validateCoinMeta(input: Record<string, unknown>): { meta: CoinMe
 
 /** Stored launch details for a mint, or null if none were saved. */
 export async function readCoinMeta(mint: string): Promise<CoinMeta | null> {
+  return (await readCoinMetaChecked(mint)).meta;
+}
+
+/**
+ * Like readCoinMeta, but tells a confirmed miss (no details were ever saved -
+ * the coin was not launched through sow.fun) apart from a lookup that failed.
+ * Callers that hide coins must only act on a confirmed miss.
+ */
+export async function readCoinMetaChecked(mint: string): Promise<{ meta: CoinMeta | null; confirmedMissing: boolean }> {
   const base = process.env.BLOB_BASE_URL;
-  if (!base || !isPubkey(mint)) return null;
+  if (!base || !isPubkey(mint)) return { meta: null, confirmedMissing: false };
   const url = `${base}/${COIN_META_PREFIX}${mint}.json`;
   // A miss must be real before we treat a coin as having no details: a
   // network blip (or a cached miss from the moment the blob was written)
@@ -128,14 +137,14 @@ export async function readCoinMeta(mint: string): Promise<CoinMeta | null> {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const res = await fetch(url, attempt === 0 ? { next: { revalidate: 3600 } } : { cache: "no-store" });
-      if (res.ok) return (await res.json()) as CoinMeta;
-      if (res.status === 404 && attempt > 0) return null; // confirmed missing
+      if (res.ok) return { meta: (await res.json()) as CoinMeta, confirmedMissing: false };
+      if (res.status === 404 && attempt > 0) return { meta: null, confirmedMissing: true };
     } catch {
       /* network error - retry */
     }
     if (attempt < 2) await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
   }
-  return null;
+  return { meta: null, confirmedMissing: false };
 }
 
 function imageUrl(key: string | null): string {
@@ -152,14 +161,13 @@ export function buildTokenJson(meta: Pick<CoinMeta, "mint" | "name" | "symbol" |
   const impact = meta.loanId
     ? `Trading fees help fund ${meta.borrower ?? "a borrower"}'s Kiva loan (kiva.org/lend/${meta.loanId}) through the sow.fun launchpad.`
     : "Launched on the sow.fun launchpad - trading fees fund Kiva microloans.";
-  const split = `Fee split: ${CREATOR_FEE_PCT}% creator / ${IMPACT_FEE_PCT}% Kiva loans / ${OPS_FEE_PCT}% operations - locked at launch.`;
   const coinPage = `${SITE_URL}/t/${meta.mint}`;
   const website = meta.website ?? coinPage;
   const twitter = meta.x ?? X_LINK;
   return {
     name: meta.name,
     symbol: meta.symbol,
-    description: meta.description ? `${meta.description}\n\n${impact} ${split}` : `${impact} ${split}`,
+    description: meta.description ? `${meta.description}\n\n${impact}` : impact,
     image: imageUrl(meta.image),
     external_url: website,
     website,

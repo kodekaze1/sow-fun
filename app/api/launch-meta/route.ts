@@ -13,6 +13,11 @@ import { getDbcClient } from "@/lib/launchpad-onchain";
 // chain is rejected, so nobody can attach details to someone else's coin.
 
 const SAVES_PER_10_MIN = 10;
+
+function isReservedBrand(name: string, symbol: string): boolean {
+  const flat = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return flat(symbol) === "sow" || flat(name) === "sow" || flat(name).includes("sowfun");
+}
 const MAX_BODY_BYTES = 4 * 1024;
 
 export async function POST(request: Request) {
@@ -41,6 +46,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
   const { meta } = result;
+
+  // The $SOW ticker and the sow.fun name are reserved for the official genesis
+  // coin. The origin check above is only a browser courtesy (any script can
+  // send an Origin header), so the genesis script proves itself with the
+  // server-side admin key instead.
+  if (isReservedBrand(meta.name, meta.symbol)) {
+    const key = request.headers.get("x-admin-key");
+    if (!process.env.ADMIN_KEY || key !== process.env.ADMIN_KEY) {
+      return NextResponse.json({ error: "That name or ticker is reserved for the official $SOW - pick another." }, { status: 400 });
+    }
+  }
 
   // The mint must not exist yet: details are attached only to brand-new coins
   try {

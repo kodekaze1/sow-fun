@@ -1,0 +1,16 @@
+[0:v]trim=1.0:8.0,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v0];
+[1:v]trim=0:6.5,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v1];
+[2:v]trim=0.5:8.0,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v2];
+[3:v]trim=0:8.0,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1,fps=24,settb=AVTB[v3];
+[4:v]fps=24,settb=AVTB[v4];
+[v0][v1]xfade=transition=fade:duration=0.5:offset=6.5[x1];
+[x1][v2]xfade=transition=fade:duration=0.5:offset=12.5[x2];
+[x2][v3]xfade=transition=fade:duration=0.5:offset=19.5[x3];
+[x3]drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='The leaderboard isn’t market cap.':expansion=none:fontsize=62:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:borderw=6:bordercolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=h-100:enable='between(t,0.8,6.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='It’s lives lifted.':expansion=none:fontsize=66:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:borderw=6:bordercolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=60:enable='between(t,7.2,12.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Every coin funds a borrower,':expansion=none:fontsize=58:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:borderw=6:bordercolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=h-148:enable='between(t,13.2,19.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='then quietly moves on to the next.':expansion=none:fontsize=44:fontcolor=0x276A43:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.9:borderw=5:bordercolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=h-78:enable='between(t,14.0,19.2)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiab.ttf':text='Harvest after harvest.':expansion=none:fontsize=64:fontcolor=0x223829:shadowx=2:shadowy=3:shadowcolor=0xF8F2E6@0.9:borderw=6:bordercolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=50:enable='between(t,20.2,26.6)',
+drawtext=fontfile='C\:/Windows/Fonts/georgiai.ttf':text='The coin that leads is the one that helped the most people.':expansion=none:fontsize=42:fontcolor=0x276A43:shadowx=2:shadowy=2:shadowcolor=0xF8F2E6@0.9:borderw=5:bordercolor=0xF8F2E6@0.9:x=(w-text_w)/2:y=130:enable='between(t,21.0,26.6)'[xt];
+[xt][v4]xfade=transition=fade:duration=0.7:offset=26.8[vout];
+[5:a]atrim=0:30.8,afade=t=out:st=28.0:d=2.8,loudnorm=I=-16:TP=-1.5:LRA=11[aout]

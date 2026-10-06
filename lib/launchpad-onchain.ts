@@ -6,7 +6,7 @@ import { unstable_cache } from "next/cache";
 import { DynamicBondingCurveClient, getPriceFromSqrtPrice, TokenDecimal } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
 import { serverRpcUrl } from "@/lib/rpc-server";
-import { readCoinMeta } from "@/lib/coin-meta";
+import { readCoinMeta, readCoinMetaChecked } from "@/lib/coin-meta";
 import { getMultipleAccountsChunked } from "@/lib/rpc-chunk.mjs";
 
 export const METADATA_PROGRAM = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
@@ -65,6 +65,30 @@ export async function resolveLaunchUri(uri: string): Promise<{ loanId: number | 
     }
   } catch { /* fall through to the legacy query-param form */ }
   return parseLaunchUri(uri);
+}
+
+// The DBC config is permissionless: anyone can create a pool on it straight
+// from the contract, skipping the site's checks, and name it anything (e.g.
+// a fake "$SOW"). A coin counts as a sow.fun launch only if its on-chain URI
+// is sow.fun/m/<its own mint> AND sow.fun saved its details at launch.
+// "unknown" = the details lookup failed; callers keep such coins (without
+// borrower details) so a storage outage never hides a real launch.
+export async function classifyLaunch(uri: string, mint: string): Promise<
+  { kind: "sowfun"; loanId: number | null; borrower: string | null; image: string | null } | { kind: "foreign" } | { kind: "unknown" }
+> {
+  let pathMint: string | null = null;
+  try {
+    const u = new URL(uri);
+    const m = /^\/m\/([1-9A-HJ-NP-Za-km-z]{32,44})\/?$/.exec(u.pathname);
+    if ((u.hostname === "sow.fun" || u.hostname.endsWith(".sow.fun")) && m) pathMint = m[1];
+  } catch { /* not a URL */ }
+  if (pathMint !== mint) return { kind: "foreign" };
+  const { meta, confirmedMissing } = await readCoinMetaChecked(mint);
+  if (meta) {
+    const image = meta.image ? (meta.image.startsWith("http") ? meta.image : `${process.env.BLOB_BASE_URL ?? ""}/${meta.image}`) : null;
+    return { kind: "sowfun", loanId: meta.loanId, borrower: meta.borrower, image };
+  }
+  return confirmedMissing ? { kind: "foreign" } : { kind: "unknown" };
 }
 
 export function getDbcClient(): { connection: Connection; client: DynamicBondingCurveClient } {
@@ -248,19 +272,25 @@ async function loadLaunches(): Promise<LaunchSummary[]> {
     let borrowerName: string | null = null;
     let image: string | null = null;
 
-    if (entry.baseMint) {
-      const info = metaAccounts[metaIdx++];
-      if (info?.data) {
-        try {
-          const meta = parseMetadata(info.data as Buffer);
-          name = meta.name || name;
-          symbol = meta.symbol || symbol;
-          const parsed = await resolveLaunchUri(meta.uri);
-          loanId = parsed.loanId;
-          borrowerName = parsed.borrower;
-          image = parsed.image;
-        } catch { /* foreign or unparseable metadata */ }
+    // Only coins launched through sow.fun are listed (see classifyLaunch).
+    // Foreign pools on the config still pay its fee claimer - they just never
+    // appear on the board, token pages or borrower claims.
+    if (!entry.baseMint) continue;
+    const info = metaAccounts[metaIdx++];
+    if (!info?.data) continue;
+    try {
+      const meta = parseMetadata(info.data as Buffer);
+      const launch = await classifyLaunch(meta.uri, entry.baseMint.toBase58());
+      if (launch.kind === "foreign") continue;
+      name = meta.name || name;
+      symbol = meta.symbol || symbol;
+      if (launch.kind === "sowfun") {
+        loanId = launch.loanId;
+        borrowerName = launch.borrower;
+        image = launch.image;
       }
+    } catch {
+      continue; // unparseable metadata - not a sow.fun launch
     }
 
     launches.push({

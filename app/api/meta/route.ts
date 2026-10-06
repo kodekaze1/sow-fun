@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     {
       name,
       symbol,
-      description: `${impactLine} Fee split: ${CREATOR_FEE_PCT}% creator / ${IMPACT_FEE_PCT}% Kiva loans / ${OPS_FEE_PCT}% operations - locked at launch.`,
+      description: impactLine,
       image,
       external_url: loan ? `https://www.kiva.org/lend/${loan}` : SITE_URL,
       attributes: [

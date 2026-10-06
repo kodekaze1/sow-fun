@@ -29,9 +29,22 @@ const { KEYPAIR, MINT_KEYPAIR, CONFIG, LOAN, BORROWER, IMAGE } = process.env;
 const NAME = process.env.NAME ?? "Sow";
 const SYMBOL = process.env.SYMBOL ?? "SOW";
 const SITE = "https://sow.fun";
+// The $SOW ticker is reserved on /api/launch-meta - the admin key unlocks it
+const ADMIN_KEY = process.env.ADMIN_KEY ?? (() => {
+  try {
+    const line = fs.readFileSync(".env.local", "utf8").split(/\r?\n/).find((l) => l.startsWith("ADMIN_KEY="));
+    return line ? line.slice("ADMIN_KEY=".length).trim() : undefined;
+  } catch {
+    return undefined;
+  }
+})();
 
 if (!KEYPAIR || !MINT_KEYPAIR || !CONFIG) {
   console.error("Required env: KEYPAIR, MINT_KEYPAIR, CONFIG. Recommended: LOAN, BORROWER, IMAGE.");
+  process.exit(1);
+}
+if (NETWORK === "mainnet" && !ADMIN_KEY) {
+  console.error("ADMIN_KEY missing (env or .env.local) - it is needed to save the reserved $SOW details");
   process.exit(1);
 }
 
@@ -78,7 +91,8 @@ console.log("uri:     ", uri);
 if (NETWORK === "mainnet") {
   const res = await fetch(`${SITE}/api/launch-meta`, {
     method: "POST",
-    headers: { "content-type": "application/json", origin: SITE },
+    // The admin key unlocks the reserved $SOW ticker on /api/launch-meta
+    headers: { "content-type": "application/json", origin: SITE, "x-admin-key": ADMIN_KEY },
     body: JSON.stringify(details),
   });
   if (!res.ok) {

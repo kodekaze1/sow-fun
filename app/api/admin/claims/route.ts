@@ -5,7 +5,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { kivaGQL } from "@/lib/kiva-graphql";
 import { DBC_CONFIG_KEY } from "@/lib/launchpad";
-import { poolField, resolveLaunchUri } from "@/lib/launchpad-onchain";
+import { classifyLaunch, poolField } from "@/lib/launchpad-onchain";
 import { serverRpcUrl } from "@/lib/rpc-server";
 import { TREASURY_WALLET } from "@/lib/constants";
 import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
@@ -124,7 +124,10 @@ export async function GET(request: Request) {
             const meta = parseMetadata(info.data as Buffer);
             name = meta.name || name;
             symbol = meta.symbol || symbol;
-            loanId = (await resolveLaunchUri(meta.uri)).loanId;
+            // Only sow.fun launches carry a pledge - a pool created straight on
+            // the config can't steer its fees to a borrower via its URI
+            const launch = await classifyLaunch(meta.uri, baseMints[i]!.toBase58());
+            loanId = launch.kind === "sowfun" ? launch.loanId : null;
           } catch { /* unparseable metadata - keep placeholders */ }
         }
       }

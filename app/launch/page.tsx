@@ -546,10 +546,13 @@ export default function LaunchPage() {
                     );
                   }
                   return (
-                    <button
+                    <div
                       key={loan.id}
+                      className="flex flex-col bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden hover:border-[#276A43] hover:shadow-[0_10px_28px_rgba(34,56,41,0.12)] transition-all"
+                    >
+                    <button
                       onClick={() => { setBorrower(loan); setIdeas(null); setStep(2); }}
-                      className="text-left bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] overflow-hidden hover:border-[#276A43] hover:shadow-[0_10px_28px_rgba(34,56,41,0.12)] transition-all"
+                      className="flex-1 text-left"
                     >
                       {loan.image && (
                         <img src={loan.image} alt={loan.name} className="w-full h-40 object-cover" />
@@ -579,6 +582,15 @@ export default function LaunchPage() {
                         </div>
                       </div>
                     </button>
+                    <a
+                      href={`https://www.kiva.org/lend/${loan.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mx-4 mb-3 pt-2.5 border-t border-[#E4EBE7] text-[12px] font-bold text-[#276A43] hover:underline"
+                    >
+                      Read {loan.name}&apos;s story on Kiva ↗
+                    </a>
+                    </div>
                   );
                 })}
               </div>
@@ -595,6 +607,8 @@ export default function LaunchPage() {
               <div className="text-sm">
                 <div className="font-bold">{borrower.name} {COUNTRY_FLAGS[borrower.country] ?? ""}</div>
                 <div className="text-gray-500 text-xs">{borrower.activity} · ${borrower.loanAmount} loan</div>
+                <a href={`https://www.kiva.org/lend/${borrower.id}`} target="_blank" rel="noopener noreferrer"
+                  className="text-xs font-bold text-[#276A43] hover:underline">Read their story on Kiva ↗</a>
               </div>
               <button onClick={() => setStep(1)} className="ml-auto text-xs font-bold text-[#276A43] hover:underline">Change</button>
             </div>

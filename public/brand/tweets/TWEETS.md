@@ -77,15 +77,15 @@ every hop has a receipt. the FAQ literally explains the one fiat hop instead of 
 ---
 
 ## 7. The flywheel / leaderboard
-Media: tw4-cycle.png
+Media: video/hf/sow-tw7-harvest-v2.mp4 (30.8s, weaver opener + Warm Breeze; v1 = stall + Simple Joys; fallback tw4-cycle.png)
 
 the leaderboard isn't market cap
 
 it's lives lifted
 
-your coin claims a borrower, funds them, adopts the next one, and the counter climbs. harvest after harvest. the winning coin on sow.fun is the one that fed the most families
+a coin funds its borrower, then moves on to the next one in line. harvest after harvest
 
-degens competing to do good. what a timeline
+the coin that leads on sow.fun is simply the one that helped the most people
 
 ---
 
@@ -116,9 +116,9 @@ they're ours. thousands of one-of-ones are still open. who's yours? 🌱
 ## 10. The CA tease (~48h before launch)
 Media: ../video/sow-seed-tease.mp4
 
-the $SOW contract address ends in "sow"
+fake $SOW coins are already trading. none of them are us
 
-ground it ourselves. sitting cold until launch
+the real $SOW contract address will only ever be posted by @sowfunhq and shown on sow.fun. if it didn't come from here, it isn't $SOW
 
 $SOW launches through our own launchpad like every other coin, pledged to a real borrower on day one. we eat the same dogfood we serve
 
@@ -126,11 +126,11 @@ soon 🌱
 
 ---
 
-## 11. Launch-eve
-Media: tw10-sunrise.png (or ../video/sow-promo-teaser.mp4)
+## 11. Pre-launch (before it opens)
+Media: tw11-soon.png (or ../video/hf/promo/sow-promo-host.mp4)
 
-tomorrow we plant the first seed
+soon we plant the first seed
 
-sow.fun goes live: 6,000+ one-of-one borrowers open at the bell. claim yours, fund a life, watch the receipts stack. the genesis coin is $SOW and its fees start funding a real borrower from the first trade
+sow.fun goes live soon: 6,000+ one-of-one borrowers open at the bell. claim yours, fund a life, watch the receipts stack. the genesis coin is $SOW, and its fees fund a real borrower from the very first trade
 
 sow good, reap good. see you in the garden 🌱
