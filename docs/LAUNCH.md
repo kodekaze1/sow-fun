@@ -46,6 +46,23 @@ site; their sow.fun/t/<mint> default website link 404s on production.
 6. Keys backed up offline: Impact Treasury, Genesis wallet, Ops wallet, $SOW vanity mint, Furnace program key.
 7. Tweet #10 (impersonation warning: the CA only comes from @sowfunhq + sow.fun) posted ~48h out.
 
+## T-24h: deploy the Furnace (burns work from day one)
+
+1. Top up the Genesis wallet (sowMw8eT...) to ~6.5 SOL total: the deploy needs
+   ~2.8 SOL at peak (upload buffer + program; the buffer is refunded right
+   after, ~1.39 SOL stays locked as program rent) and launch day still needs
+   ~3.2 SOL.
+2. Deploy programs/furnace to mainnet with the Genesis wallet as payer AND
+   upgrade authority. Keep it upgradeable for now: `solana program close`
+   by the authority reclaims the ~1.39 SOL later (closing is permanent - the
+   program id can never be reused). Revoking the authority makes it immutable
+   and locks the rent forever - a later, public decision.
+3. Record the program id + deploy signature in the launch log, set it as
+   FURNACE_PROGRAM for buyback-burn.mjs (or update scripts/lib/furnace.mjs),
+   and say publicly who holds the upgrade authority.
+4. $SOW's Furnace is lit by its FIRST burn, and the payer becomes its recorded
+   authority - make that first burn from the Genesis wallet.
+
 ## T-0: go-live
 
 1. FUND THE WALLETS:
@@ -137,4 +154,3 @@ site; their sow.fun/t/<mint> default website link 404s on production.
 - Genesis Vault: `KEYPAIR=<genesis.json> CONFIG=<config> CREATOR=1 node scripts/claim-fees.mjs` claims $SOW's own
   creator share; record what it is used for (bonus loans, buyback + burn,
   community rewards) in the ledger.
-- Deploy the Furnace to mainnet (~1.4 SOL) and record its authority decision.
