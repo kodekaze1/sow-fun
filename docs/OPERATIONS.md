@@ -83,6 +83,38 @@ whole harvest counts as excess and flows down the coin's borrower queue.
    The site polls the public Kiva GraphQL for lender/team stats and shows each
    loan with its kiva.org link. Keep the lender profile public or this breaks.
 
+## Fee routing (automatic, every claim run - user-approved 2026-10-06)
+
+claim-fees.mjs (signed by the Impact Treasury) routes in the same run, with
+one transfer tx recorded under splits[] in the claim snapshot:
+- sow.fun coins' partner share: 45/55 STAYS in the Impact Treasury for Kiva
+  (and the 20% $SOW skims); 10/55 -> Ops wallet sowyBNQ...
+- Launch fees (every pool on the config) -> Ops.
+- Foreign pools (created straight on the config, not through sow.fun - e.g.
+  the fake $SOWs) -> Genesis wallet sowMw8eT... (their fees were never
+  pledged to a borrower; the Genesis Vault is publicly committed to bonus
+  loans / buyback + burn / rewards, with receipts). Snapshot rows are tagged
+  "foreign_pool" / "foreign_pool_lp" and never count as loan money.
+- A coin is sow.fun's only if its URI is sow.fun/m/<own mint> AND sow.fun
+  serves its saved details. If any pool can't be verified (network), the run
+  claims NOTHING. The split only forwards SOL that actually arrived in the
+  run (keeps a 0.005 SOL reserve); otherwise it prints SPLIT NOT SENT and
+  the amounts must be forwarded by hand and recorded in the wave.
+- NO_SPLIT=1 claims without forwarding. $SOW's own creator share is claimed
+  separately by the Genesis wallet (CREATOR=1) and is never split.
+
+## Buybacks and burns (who signs)
+
+- Policy skims (20% of each coin's excess loan money): sign buyback-burn.mjs
+  with the Impact Treasury - the money is already there, and the receipt
+  trail stays treasury -> Jupiter -> Furnace. Accruing creator rewards ($SOW)
+  are held in the Impact Treasury until payout.
+- Discretionary Genesis Vault buybacks: sign with the Genesis wallet.
+- The FIRST burn of a mint lights its Furnace and makes the payer the
+  recorded authority: light $SOW's Furnace from the Genesis wallet (or a
+  multisig, once decided), not ad hoc from whichever wallet runs first.
+- The Furnace program is devnet-only until its mainnet deploy (~1.4 SOL).
+
 ## Harvest allocation policy (user-approved 2026-09-17)
 
 Per token, per harvest, from the vault's impact share:

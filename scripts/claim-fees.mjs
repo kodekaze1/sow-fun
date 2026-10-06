@@ -19,7 +19,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { Connection, Keypair, PublicKey, sendAndConfirmTransaction } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { resolveRpc } from "./lib/rpc.mjs";
 import { getOwnerPositions, buildClaimPositionFeeTx, unclaimedSolLamports } from "../lib/damm-v2.mjs";
@@ -96,6 +96,52 @@ if (!isPartner && !CREATOR) {
 }
 console.log(`wallet:  ${wallet.publicKey.toBase58()} (${isPartner ? "fee claimer" : "creator"}${CREATOR ? " + creator fees" : ""})`);
 console.log(`config:  ${CONFIG}\n`);
+
+// --- Fee routing (OPERATIONS.md "Fee routing"), done in the same run so
+// every split has a receipt in the snapshot:
+//   sow.fun coins' partner share: 45/55 stays here for Kiva, 10/55 -> Ops
+//   launch fees (every pool)     -> Ops
+//   foreign pools' partner share -> Genesis (no borrower was ever pledged)
+// NO_SPLIT=1 claims without forwarding anything.
+const OPS_WALLET = new PublicKey(process.env.OPS_WALLET ?? "sowyBNQiNbDPKvuScQfUWsCTZMFWfA1UdFqdHFNG5tP");
+const GENESIS_WALLET = new PublicKey(process.env.GENESIS_WALLET ?? "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj");
+const SPLIT = isPartner && !process.env.NO_SPLIT;
+const OPS_SHARE = 10 / 55;
+const RESERVE_LAMPORTS = 5_000_000; // keep 0.005 SOL in the treasury for fees
+
+// A coin is a sow.fun coin only if its URI is sow.fun/m/<its own mint> AND
+// sow.fun serves its saved launch details (anyone can create a pool on the
+// config straight from the contract). "unknown" = couldn't tell (network).
+const infoCache = new Map();
+async function coinInfo(mintPk) {
+  const key = mintPk.toBase58();
+  if (infoCache.has(key)) return infoCache.get(key);
+  let out = { name: null, symbol: null, loanId: null, origin: "unknown" };
+  try {
+    const info = await connection.getAccountInfo(metadataPda(mintPk));
+    if (!info?.data) {
+      out = { ...out, origin: "foreign" };
+    } else {
+      const meta = parseMetadata(info.data);
+      const own = `https://sow.fun/m/${key}`;
+      let origin = "foreign";
+      if (meta.uri.replace(/\/$/, "") === own) {
+        const res = await fetch(own, { cache: "no-store" }).catch(() => null);
+        origin = res?.status === 200 ? "sowfun" : res?.status === 404 ? "foreign" : "unknown";
+      }
+      out = {
+        name: meta.name || null,
+        symbol: meta.symbol || null,
+        loanId: origin === "sowfun" ? await loanIdFromUri(meta.uri) : null,
+        origin,
+      };
+    }
+  } catch { /* stays unknown */ }
+  infoCache.set(key, out);
+  return out;
+}
+let sowfunPartnerLamports = 0; // sow.fun coins' claimed partner share (curve + LP)
+let foreignLamports = 0; // foreign pools' claimed partner share (curve + LP)
 const [fees, pools] = await Promise.all([
   client.state.getPoolsFeesByConfig(configKey),
   client.state.getPoolsByConfig(configKey),
@@ -125,30 +171,38 @@ try {
   solPriceUsd = (await priceRes.json())?.solana?.usd ?? null;
 } catch { /* snapshot records null - fill from the swap receipt instead */ }
 
+// Classify every pool with partner fees BEFORE claiming anything: a run that
+// can't tell where money belongs must not move any of it.
+if (isPartner) {
+  const unverified = [];
+  for (const f of fees) {
+    const m = mintByPool.get(f.poolAddress.toBase58());
+    if (!f.partnerQuoteFee.isZero() && m && (await coinInfo(m)).origin === "unknown") unverified.push(m.toBase58());
+  }
+  if (unverified.length) {
+    console.error(`Couldn't verify which coins these are (network?): ${unverified.join(", ")}`);
+    console.error("Nothing was claimed. Try again in a minute.");
+    process.exit(1);
+  }
+}
+const balanceStart = isPartner && !DRY ? await connection.getBalance(wallet.publicKey) : 0;
+
 let totalClaimedLamports = new BN(0);
 const snapshotPools = [];
 for (const f of isPartner ? fees : []) {
   const poolAddr = f.poolAddress.toBase58();
   const pendingSol = f.partnerQuoteFee.toNumber() / 1e9;
-  console.log(`pool ${poolAddr}  pending partner fees: ${pendingSol.toFixed(6)} SOL`);
-  if (DRY || f.partnerQuoteFee.isZero()) continue;
-
-  // Resolve the coin identity and its Kiva loan binding BEFORE claiming,
+  // Coin identity, Kiva loan binding and origin are resolved BEFORE claiming,
   // so the snapshot is a faithful picture of the moment of harvest.
-  let name = null, symbol = null, loanId = null, mint = null;
   const baseMint = mintByPool.get(poolAddr);
-  if (baseMint) {
-    mint = baseMint.toBase58();
-    try {
-      const info = await connection.getAccountInfo(metadataPda(baseMint));
-      if (info?.data) {
-        const meta = parseMetadata(info.data);
-        name = meta.name || null;
-        symbol = meta.symbol || null;
-        loanId = await loanIdFromUri(meta.uri);
-      }
-    } catch { /* metadata unreadable - snapshot still records the mint */ }
-  }
+  const mint = baseMint ? baseMint.toBase58() : null;
+  const { name, symbol, loanId, origin } = baseMint ? await coinInfo(baseMint) : { name: null, symbol: null, loanId: null, origin: "foreign" };
+  const foreign = origin !== "sowfun";
+  console.log(`pool ${poolAddr}  pending partner fees: ${pendingSol.toFixed(6)} SOL  ${foreign ? `[foreign${symbol ? ` $${symbol}` : ""} -> Genesis]` : `[$${symbol} -> 45 Kiva / 10 Ops]`}`);
+  if (f.partnerQuoteFee.isZero()) continue;
+  if (foreign) foreignLamports += f.partnerQuoteFee.toNumber();
+  else sowfunPartnerLamports += f.partnerQuoteFee.toNumber();
+  if (DRY) continue;
 
   const tx = await client.partner.claimPartnerTradingFee({
     pool: f.poolAddress,
@@ -162,7 +216,8 @@ for (const f of isPartner ? fees : []) {
   console.log(`  claimed -> https://solscan.io/tx/${signature}`);
 
   snapshotPools.push({
-    source: "dbc_partner",
+    // "foreign_pool" rows are never loan money (lib/coin-ledger LOAN_SOURCES)
+    source: foreign ? "foreign_pool" : "dbc_partner",
     pool: poolAddr,
     mint,
     name,
@@ -239,24 +294,25 @@ for (const p of positions) {
   const lamports = unclaimedSolLamports(p);
   const sol = lamports.toNumber() / 1e9;
   const mint = coinMints.has(p.pool.tokenAMint.toBase58()) ? p.pool.tokenAMint : p.pool.tokenBMint;
-  console.log(`damm v2 ${p.poolAddress.toBase58()}  pending LP fees: ${sol.toFixed(6)} SOL`);
-  if (DRY || lamports.isZero()) continue;
-  let name = null, symbol = null, loanId = null;
-  try {
-    const info = await connection.getAccountInfo(metadataPda(mint));
-    if (info?.data) {
-      const meta = parseMetadata(info.data);
-      name = meta.name || null;
-      symbol = meta.symbol || null;
-      loanId = await loanIdFromUri(meta.uri);
-    }
-  } catch { /* metadata unreadable - snapshot still records the mint */ }
+  const { name, symbol, loanId, origin } = await coinInfo(mint);
+  const foreign = !isGenesis && origin === "foreign";
+  console.log(`damm v2 ${p.poolAddress.toBase58()}  pending LP fees: ${sol.toFixed(6)} SOL${isGenesis ? "  [Genesis Vault]" : foreign ? "  [foreign -> Genesis]" : ""}`);
+  if (lamports.isZero()) continue;
+  if (!isGenesis && origin === "unknown") {
+    console.log("  skipped - couldn't verify this coin (network?); it will be claimed next run");
+    continue;
+  }
+  if (!isGenesis) {
+    if (foreign) foreignLamports += lamports.toNumber();
+    else sowfunPartnerLamports += lamports.toNumber();
+  }
+  if (DRY) continue;
   const tx = await buildClaimPositionFeeTx(connection, wallet.publicKey, p);
   const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
   totalClaimedLamports = totalClaimedLamports.add(lamports);
   console.log(`  claimed -> https://solscan.io/tx/${signature}`);
   snapshotPools.push({
-    source: isGenesis ? "genesis_vault" : "damm_v2_locked_lp",
+    source: isGenesis ? "genesis_vault" : foreign ? "foreign_pool_lp" : "damm_v2_locked_lp",
     pool: p.poolAddress.toBase58(),
     dbc_pool: coinMints.get(mint.toBase58()),
     mint: mint.toBase58(),
@@ -297,6 +353,37 @@ for (const p of isPartner ? pools : []) {
 
 console.log(`\ntotal claimed: ${(totalClaimedLamports.toNumber() / 1e9).toFixed(6)} SOL`);
 
+// --- Route the split: one transfer tx, receipt in the snapshot.
+const launchFeeLamports = launchFees.reduce((s, l) => s + Math.max(0, l.net_lamports), 0);
+const opsLamports = Math.floor(sowfunPartnerLamports * OPS_SHARE) + launchFeeLamports;
+const genesisLamports = foreignLamports;
+const sol9 = (l) => (l / 1e9).toFixed(6);
+const splits = [];
+if (SPLIT) {
+  console.log(`\nrouting: ${sol9(sowfunPartnerLamports - Math.floor(sowfunPartnerLamports * OPS_SHARE))} SOL stays for Kiva (45/55 of sow.fun coins)`);
+  console.log(`         ${sol9(opsLamports)} SOL -> Ops ${OPS_WALLET.toBase58()} (10/55 of sow.fun coins${DRY ? " + launch fees, claimed at run time" : ` + ${sol9(launchFeeLamports)} launch fees`})`);
+  console.log(`         ${sol9(genesisLamports)} SOL -> Genesis ${GENESIS_WALLET.toBase58()} (foreign pools)`);
+}
+if (SPLIT && !DRY && opsLamports + genesisLamports > 0) {
+  // Only forward what actually arrived as SOL in this run (never dip into
+  // money that was already here), keeping a small reserve for fees.
+  const balanceEnd = await connection.getBalance(wallet.publicKey);
+  const arrived = balanceEnd - balanceStart;
+  const total = opsLamports + genesisLamports;
+  if (total > arrived || balanceEnd - total < RESERVE_LAMPORTS) {
+    console.error(`\nSPLIT NOT SENT: planned ${sol9(total)} SOL but only ${sol9(arrived)} SOL arrived (balance ${sol9(balanceEnd)}).`);
+    console.error("Check the claim txs, then forward the Ops/Genesis amounts manually and record them in the wave.");
+  } else {
+    const tx = new Transaction();
+    if (opsLamports > 0) tx.add(SystemProgram.transfer({ fromPubkey: wallet.publicKey, toPubkey: OPS_WALLET, lamports: opsLamports }));
+    if (genesisLamports > 0) tx.add(SystemProgram.transfer({ fromPubkey: wallet.publicKey, toPubkey: GENESIS_WALLET, lamports: genesisLamports }));
+    const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
+    console.log(`  split sent -> https://solscan.io/tx/${signature}`);
+    if (opsLamports > 0) splits.push({ to: "ops", wallet: OPS_WALLET.toBase58(), lamports: String(opsLamports), sol: opsLamports / 1e9, tx: signature });
+    if (genesisLamports > 0) splits.push({ to: "genesis", wallet: GENESIS_WALLET.toBase58(), lamports: String(genesisLamports), sol: genesisLamports / 1e9, tx: signature });
+  }
+}
+
 if (DRY) {
   console.log("(dry run - nothing claimed, no snapshot written)");
 } else if (snapshotPools.length || launchFees.length) {
@@ -310,6 +397,9 @@ if (DRY) {
     total_claimed_sol: totalClaimedLamports.toNumber() / 1e9,
     pools: snapshotPools,
     launch_fees: launchFees,
+    // Ops = 10/55 of sow.fun coins' partner share + all launch fees;
+    // Genesis = foreign pools' partner share. The rest stays for Kiva.
+    splits,
   };
   const dir = path.join(process.cwd(), "data", "claims");
   fs.mkdirSync(dir, { recursive: true });
