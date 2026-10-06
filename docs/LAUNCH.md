@@ -1,10 +1,18 @@
 # Launch day runbook ($SOW + launchpad go-live)
 
-Launch treasury: sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj
-(keypair: vanity-grinder/gpu-grinder/sowMw8eT...json). It is the mainnet
-config's feeClaimer AND $SOW's creator - every <treasury.json> below means
-this keypair. The old sowSZPr... wallet is TEST-ONLY (devnet rehearsals);
-create-dbc-config and launch-genesis refuse to use anything else on mainnet.
+Three live wallets, one job each (keypairs in vanity-grinder/gpu-grinder/<address>.json):
+- Impact Treasury  sowSaeMnVU3h4eV5Af6A6zzk4KR6oYgHHL3N3YoYJDy  <impact.json>
+  The mainnet config's feeClaimer (PERMANENT once the config exists): 55% vault
+  share + launch fees. Pays out only to Kiva (Impact Card), $SOW skims, and
+  the ops share to the Ops wallet. Signs claim-fees and buyback-burn.
+- Genesis wallet   sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj  <genesis.json>
+  Launches $SOW (its creator), makes and locks the team buy, receives $SOW's
+  creator fees (Genesis Vault, claim-fees CREATOR=1). Never loan money.
+- Ops wallet       sowyBNQiNbDPKvuScQfUWsCTZMFWfA1UdFqdHFNG5tP
+  Receives the 10% ops share, pays running costs.
+The sowSZPr... wallet is TEST-ONLY (pilot + devnet). create-dbc-config sets the
+Impact Treasury as feeClaimer and launch-genesis refuses any signer but the
+Genesis wallet on mainnet.
 
 Order matters. The DBC config is IMMUTABLE once created, so everything before
 step 4 is a rehearsal and everything after it is permanent. Keep a terminal
@@ -35,14 +43,16 @@ site; their sow.fun/t/<mint> default website link 404s on production.
 5. Kiva: logged in as lender `sowfun`, member of team sow.fun (290951), card
    bridge (KAST) funded for the first harvest, team selected as the default
    at checkout.
-6. Keys backed up offline: treasury, $SOW vanity mint, Furnace program key.
-7. Tweet #10 (CA tease) posted ~48h out.
+6. Keys backed up offline: Impact Treasury, Genesis wallet, Ops wallet, $SOW vanity mint, Furnace program key.
+7. Tweet #10 (impersonation warning: the CA only comes from @sowfunhq + sow.fun) posted ~48h out.
 
 ## T-0: go-live
 
-1. FUND THE LAUNCH TREASURY (sowMw8eT...): ~3.2 SOL total.
-   3 SOL team buy (FIRST_BUY_SOL=3 buys ~10.03% of a fresh pool) + ~0.2 SOL
-   for config rent, the 0.035 launch fee, pool rent, Streamflow fees and tx fees.
+1. FUND THE WALLETS:
+   - Genesis wallet (sowMw8eT...): ~3.2 SOL. 3 SOL team buy (FIRST_BUY_SOL=3
+     buys ~10.03% of a fresh pool) + ~0.2 SOL for config rent (it pays for the
+     config), the 0.035 launch fee, pool rent, Streamflow fees and tx fees.
+   - Impact Treasury (sowSaeM...): ~0.05 SOL for claim transaction fees.
 
 2. REVIEW THE ECONOMICS (dry run, sends nothing):
    `node scripts/create-dbc-config.mjs`
@@ -55,8 +65,10 @@ site; their sow.fun/t/<mint> default website link 404s on production.
    would want to replace.
 
 3. CREATE THE CONFIG (permanent):
-   `KEYPAIR=<treasury.json> CONFIRM=1 node scripts/create-dbc-config.mjs`
-   Record the config pubkey and signature.
+   `KEYPAIR=<genesis.json> CONFIRM=1 node scripts/create-dbc-config.mjs`
+   The KEYPAIR only pays. CHECK the printed "vault:" line reads
+   sowSaeMnVU3h4eV5Af6A6zzk4KR6oYgHHL3N3YoYJDy before trusting it - that is the
+   permanent fee claimer. Record the config pubkey and signature.
 
 4. POINT THE SITE AT IT (it is baked in at build time, so a redeploy is required):
    - Vercel: add NEXT_PUBLIC_DBC_CONFIG_KEY=<config> to Production.
@@ -67,7 +79,7 @@ site; their sow.fun/t/<mint> default website link 404s on production.
 
 5. LAUNCH $SOW (vanity mint, atomic dev buy):
    ```
-   KEYPAIR=<treasury.json> MINT_KEYPAIR=<sow mint.json> CONFIG=<config> \
+   KEYPAIR=<genesis.json> MINT_KEYPAIR=<sow mint.json> CONFIG=<config> \
    LOAN=<kiva id> BORROWER="<name>" IMAGE=<blob key or https link> FIRST_BUY_SOL=3 \
    DESCRIPTION="<one or two lines>" X=@sowfunhq TELEGRAM=<t.me link, optional> \
    node scripts/launch-genesis.mjs
@@ -76,12 +88,12 @@ site; their sow.fun/t/<mint> default website link 404s on production.
    launch tx) and sets the coin's on-chain URI to sow.fun/m/<mint>. WEBSITE
    defaults to https://sow.fun. Check https://sow.fun/m/<mint> afterwards.
    Confirm the mint ends in `sow` and the pool shows on /launches and /t/<mint>.
-   Record the exact $SOW received (the team buy) from the treasury's token account.
+   Record the exact $SOW received (the team buy) from the Genesis wallet's token account.
 
 5b. LOCK THE TEAM BUY ON STREAMFLOW (manual, app.streamflow.finance, connect
-   the launch treasury) - immediately, before the CA reveal:
+   the Genesis wallet) - immediately, before the CA reveal:
    - Token: $SOW (the mint above). Amount: the ENTIRE team buy.
-   - Recipient: the launch treasury (sowMw8eT...).
+   - Recipient: the Genesis wallet (sowMw8eT...).
    - Cliff: 1 month from now, cliff amount 0; then linear unlock over the
      following 6 months (fully unlocked at month 7).
    - Cancelable by sender: OFF. Transferable (sender and recipient): OFF.
@@ -118,10 +130,11 @@ site; their sow.fun/t/<mint> default website link 404s on production.
 
 ## Within the first week
 
-- First harvest: claim-fees (commit the snapshot) -> /admin plan or
+- First harvest: `KEYPAIR=<impact.json> CONFIG=<config> node scripts/claim-fees.mjs`
+  (commit the snapshot) -> /admin plan or
   `node scripts/harvest-plan.mjs` -> Kiva checkout credited to team sow.fun ->
   buyback-burn per skim -> complete and commit the wave.
-- Genesis Vault: `CREATOR=1 node scripts/claim-fees.mjs` claims $SOW's own
+- Genesis Vault: `KEYPAIR=<genesis.json> CONFIG=<config> CREATOR=1 node scripts/claim-fees.mjs` claims $SOW's own
   creator share; record what it is used for (bonus loans, buyback + burn,
   community rewards) in the ledger.
 - Deploy the Furnace to mainnet (~1.4 SOL) and record its authority decision.

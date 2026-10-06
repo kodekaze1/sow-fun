@@ -2,7 +2,7 @@
 // mint keypair (CA ending in ...sow). Run ONCE, locally, after the config exists.
 //
 // Usage:
-//   KEYPAIR=<path to treasury keypair json> \
+//   KEYPAIR=<path to Genesis wallet keypair json (sowMw8eT...)> \
 //   MINT_KEYPAIR=<path to vanity mint keypair json> \
 //   CONFIG=<DBC config pubkey> \
 //   LOAN=<kiva loan id> BORROWER="<name>" IMAGE="<image url>" \
@@ -50,14 +50,16 @@ if (NETWORK === "mainnet" && !ADMIN_KEY) {
 
 const load = (p) => Keypair.fromSecretKey(new Uint8Array(JSON.parse(fs.readFileSync(p, "utf8"))));
 const creator = load(KEYPAIR);
-// $SOW must be launched by the launch treasury on mainnet (it is the
-// feeClaimer AND $SOW's creator). The old sowSZPr... wallet is test-only.
+// $SOW must be launched by the Genesis wallet on mainnet: it becomes $SOW's
+// creator (Genesis Vault fees, claimed with claim-fees.mjs CREATOR=1) and
+// makes the team buy. It is NOT the fee claimer - loan money goes to the
+// separate Impact Treasury. The sowSZPr... wallet is test-only.
 // PILOT=1 allows the test treasury for a mainnet pilot genesis (pilot config only).
-const LAUNCH_TREASURY = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+const GENESIS_WALLET = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
 const TEST_TREASURY = "sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2";
-const expected = process.env.PILOT ? TEST_TREASURY : LAUNCH_TREASURY;
+const expected = process.env.PILOT ? TEST_TREASURY : GENESIS_WALLET;
 if (NETWORK === "mainnet" && creator.publicKey.toBase58() !== expected) {
-  console.error(`KEYPAIR is ${creator.publicKey.toBase58()} - mainnet genesis must be signed by ${expected}${process.env.PILOT ? " (pilot)" : " (launch treasury)"}`);
+  console.error(`KEYPAIR is ${creator.publicKey.toBase58()} - mainnet genesis must be signed by ${expected}${process.env.PILOT ? " (pilot)" : " (Genesis wallet)"}`);
   process.exit(1);
 }
 if (process.env.PILOT) console.log("*** PILOT genesis on the test treasury - not the real $SOW launch ***");

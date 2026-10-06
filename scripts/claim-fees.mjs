@@ -3,13 +3,14 @@
 //   - partner (impact vault) share of bonding-curve fees     source "dbc_partner"
 //   - the treasury's locked DAMM v2 LP position fees          source "damm_v2_locked_lp"
 //   - launch fees (anti-bot, never loan money)                launch_fees[]
-//   - with CREATOR=1: $SOW's own creator share, for coins the treasury itself
+//   - with CREATOR=1: $SOW's own creator share, for coins the signing wallet
 //     launched (curve creator fees + the creator LP position)  source "genesis_vault"
 //     Genesis Vault money is never counted as loan money by the ledger.
 //
-// Usage:
-//   KEYPAIR=C:\path\to\treasury-keypair.json CONFIG=<config pubkey> node scripts/claim-fees.mjs
-//   ...add DRY=1 to only print pending fees without claiming, CREATOR=1 for the Genesis Vault.
+// Usage (mainnet: Impact Treasury sowSaeM... claims, Genesis wallet sowMw8eT... launched $SOW):
+//   KEYPAIR=<impact treasury json> CONFIG=<config pubkey> node scripts/claim-fees.mjs
+//   KEYPAIR=<genesis wallet json> CONFIG=<config pubkey> CREATOR=1 node scripts/claim-fees.mjs
+//   ...add DRY=1 to only print pending fees without claiming.
 //
 // Prints a receipt table (pool, SOL claimed, tx signature) AND writes a
 // per-pool attribution snapshot to data/claims/ - this is the public record
@@ -74,14 +75,27 @@ if (!KEYPAIR_PATH || !CONFIG) {
   process.exit(1);
 }
 
-const feeClaimer = Keypair.fromSecretKey(new Uint8Array(JSON.parse(fs.readFileSync(KEYPAIR_PATH, "utf8"))));
+const wallet = Keypair.fromSecretKey(new Uint8Array(JSON.parse(fs.readFileSync(KEYPAIR_PATH, "utf8"))));
 const connection = new Connection(RPC, "confirmed");
 const client = new DynamicBondingCurveClient(connection, "confirmed");
 
-console.log(`fee claimer: ${feeClaimer.publicKey.toBase58()}`);
-console.log(`config:      ${CONFIG}\n`);
-
 const configKey = new PublicKey(CONFIG);
+
+// Two wallets claim, each only what is theirs:
+//   - the config's fee claimer (Impact Treasury): partner fees, its locked LP,
+//     launch fees - loan and ops money
+//   - with CREATOR=1, the Genesis wallet that launched $SOW: $SOW's creator
+//     fees and creator LP - Genesis Vault money, never loan money
+// (On the pilot config one test wallet is both, so it can do both.)
+const configFeeClaimer = (await client.state.getPoolConfig(configKey)).feeClaimer.toBase58();
+const isPartner = wallet.publicKey.toBase58() === configFeeClaimer;
+if (!isPartner && !CREATOR) {
+  console.error(`KEYPAIR ${wallet.publicKey.toBase58()} is not this config's fee claimer (${configFeeClaimer}).`);
+  console.error("Use the Impact Treasury keypair - or CREATOR=1 with the Genesis wallet for $SOW's creator fees.");
+  process.exit(1);
+}
+console.log(`wallet:  ${wallet.publicKey.toBase58()} (${isPartner ? "fee claimer" : "creator"}${CREATOR ? " + creator fees" : ""})`);
+console.log(`config:  ${CONFIG}\n`);
 const [fees, pools] = await Promise.all([
   client.state.getPoolsFeesByConfig(configKey),
   client.state.getPoolsByConfig(configKey),
@@ -103,7 +117,7 @@ for (const p of pools) {
   if (addr && creator) creatorByPool.set(addr, creator.toBase58());
 }
 // Coins the treasury launched itself ($SOW): it is both partner AND creator
-const treasuryLaunched = (poolAddr) => creatorByPool.get(poolAddr) === feeClaimer.publicKey.toBase58();
+const treasuryLaunched = (poolAddr) => creatorByPool.get(poolAddr) === wallet.publicKey.toBase58();
 
 let solPriceUsd = null;
 try {
@@ -113,7 +127,7 @@ try {
 
 let totalClaimedLamports = new BN(0);
 const snapshotPools = [];
-for (const f of fees) {
+for (const f of isPartner ? fees : []) {
   const poolAddr = f.poolAddress.toBase58();
   const pendingSol = f.partnerQuoteFee.toNumber() / 1e9;
   console.log(`pool ${poolAddr}  pending partner fees: ${pendingSol.toFixed(6)} SOL`);
@@ -138,12 +152,12 @@ for (const f of fees) {
 
   const tx = await client.partner.claimPartnerTradingFee({
     pool: f.poolAddress,
-    feeClaimer: feeClaimer.publicKey,
-    payer: feeClaimer.publicKey,
+    feeClaimer: wallet.publicKey,
+    payer: wallet.publicKey,
     maxBaseAmount: new BN(0), // quote (SOL) only - base tokens stay untouched
     maxQuoteAmount: f.partnerQuoteFee,
   });
-  const signature = await sendAndConfirmTransaction(connection, tx, [feeClaimer]);
+  const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
   totalClaimedLamports = totalClaimedLamports.add(f.partnerQuoteFee);
   console.log(`  claimed -> https://solscan.io/tx/${signature}`);
 
@@ -170,13 +184,13 @@ if (CREATOR) {
     console.log(`genesis vault ${poolAddr}  pending creator fees: ${sol.toFixed(6)} SOL`);
     if (DRY) continue;
     const tx = await client.creator.claimCreatorTradingFee({
-      creator: feeClaimer.publicKey,
-      payer: feeClaimer.publicKey,
+      creator: wallet.publicKey,
+      payer: wallet.publicKey,
       pool: f.poolAddress,
       maxBaseAmount: new BN(0),
       maxQuoteAmount: f.creatorQuoteFee,
     });
-    const signature = await sendAndConfirmTransaction(connection, tx, [feeClaimer]);
+    const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
     totalClaimedLamports = totalClaimedLamports.add(f.creatorQuoteFee);
     console.log(`  claimed -> https://solscan.io/tx/${signature}`);
     snapshotPools.push({
@@ -196,7 +210,7 @@ if (CREATOR) {
 // locked positions instead (55% treasury / 45% creator by liquidity).
 const coinMints = new Map(); // base mint -> DBC pool address
 for (const [poolAddr, mint] of mintByPool) coinMints.set(mint.toBase58(), poolAddr);
-const positions = (await getOwnerPositions(connection, feeClaimer.publicKey)).filter(
+const positions = (await getOwnerPositions(connection, wallet.publicKey)).filter(
   (p) => coinMints.has(p.pool.tokenAMint.toBase58()) || coinMints.has(p.pool.tokenBMint.toBase58())
 );
 // On coins the treasury launched it holds BOTH positions: the larger (55%)
@@ -216,7 +230,8 @@ for (const group of byPool.values()) {
 }
 
 for (const p of positions) {
-  const isGenesis = creatorPositions.has(p.positionAddress.toBase58());
+  // A non-claimer wallet only ever holds creator positions (Genesis Vault)
+  const isGenesis = !isPartner || creatorPositions.has(p.positionAddress.toBase58());
   if (isGenesis && !CREATOR) {
     console.log(`damm v2 ${p.poolAddress.toBase58()}  creator LP position skipped (Genesis Vault - run with CREATOR=1)`);
     continue;
@@ -236,8 +251,8 @@ for (const p of positions) {
       loanId = await loanIdFromUri(meta.uri);
     }
   } catch { /* metadata unreadable - snapshot still records the mint */ }
-  const tx = await buildClaimPositionFeeTx(connection, feeClaimer.publicKey, p);
-  const signature = await sendAndConfirmTransaction(connection, tx, [feeClaimer]);
+  const tx = await buildClaimPositionFeeTx(connection, wallet.publicKey, p);
+  const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
   totalClaimedLamports = totalClaimedLamports.add(lamports);
   console.log(`  claimed -> https://solscan.io/tx/${signature}`);
   snapshotPools.push({
@@ -259,22 +274,22 @@ for (const p of positions) {
 // creation (treasury share). Not trading revenue, so it is recorded
 // separately and never attributed to a coin's loan pledge.
 const launchFees = [];
-for (const p of pools) {
+for (const p of isPartner ? pools : []) {
   const poolKey = p.publicKey ?? p.address;
   if (!poolKey) continue;
   try {
-    const tx = await client.partner.claimPartnerPoolCreationFee({ pool: poolKey, feeReceiver: feeClaimer.publicKey });
-    tx.feePayer = feeClaimer.publicKey;
+    const tx = await client.partner.claimPartnerPoolCreationFee({ pool: poolKey, feeReceiver: wallet.publicKey });
+    tx.feePayer = wallet.publicKey;
     tx.recentBlockhash = (await connection.getLatestBlockhash("confirmed")).blockhash;
-    const sim = await connection.simulateTransaction(tx, [feeClaimer]);
+    const sim = await connection.simulateTransaction(tx, [wallet]);
     if (sim.value.err) continue; // already claimed, or no launch fee on this config
     if (DRY) {
       console.log(`launch fee claimable on ${poolKey.toBase58()}`);
       continue;
     }
-    const before = await connection.getBalance(feeClaimer.publicKey);
-    const signature = await sendAndConfirmTransaction(connection, tx, [feeClaimer]);
-    const after = await connection.getBalance(feeClaimer.publicKey);
+    const before = await connection.getBalance(wallet.publicKey);
+    const signature = await sendAndConfirmTransaction(connection, tx, [wallet]);
+    const after = await connection.getBalance(wallet.publicKey);
     launchFees.push({ pool: poolKey.toBase58(), net_lamports: after - before, tx: signature });
     console.log(`launch fee ${poolKey.toBase58()} -> https://solscan.io/tx/${signature}`);
   } catch { /* pool not eligible */ }
@@ -289,7 +304,7 @@ if (DRY) {
   const snapshot = {
     claimed_at: claimedAt,
     config: CONFIG,
-    treasury: feeClaimer.publicKey.toBase58(),
+    treasury: wallet.publicKey.toBase58(),
     sol_price_usd: solPriceUsd,
     total_claimed_lamports: totalClaimedLamports.toString(),
     total_claimed_sol: totalClaimedLamports.toNumber() / 1e9,

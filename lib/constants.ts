@@ -1,8 +1,16 @@
-// Launch treasury: feeClaimer of the mainnet DBC config, receives the vault
-// share of every coin's fees. Shown on the site only once SHOW_LIVE_TREASURY
-// (lib/types.ts) is on. The earlier sowSZPr... wallet is TEST-ONLY (devnet
-// rehearsals) and must never appear on the site or in the mainnet config.
-export const TREASURY_WALLET = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+// The three live wallets - each with one job, so every receipt is easy to read.
+// Shown on the site only once SHOW_LIVE_TREASURY (lib/types.ts) is on. The
+// sowSZPr... wallet is TEST-ONLY and must never appear on the site or in the
+// mainnet config.
+// Impact Treasury: fee claimer of the mainnet DBC config - the 55% vault share
+// of every coin's fees and launch fees. Pays out only to Kiva (via the Impact
+// Card), $SOW skims, and the ops share to the Ops wallet.
+export const TREASURY_WALLET = "sowSaeMnVU3h4eV5Af6A6zzk4KR6oYgHHL3N3YoYJDy";
+// Genesis wallet: launched $SOW, holds the locked team buy, receives $SOW's
+// creator fees (the Genesis Vault - never loan money).
+export const GENESIS_WALLET = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+// Ops wallet: receives the 10% operations share, pays running costs.
+export const OPS_WALLET = "sowyBNQiNbDPKvuScQfUWsCTZMFWfA1UdFqdHFNG5tP";
 
 // Kiva's WAF rejects requests without a browser-like User-Agent (403)
 export const KIVA_FETCH_HEADERS = {

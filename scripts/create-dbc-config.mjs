@@ -4,7 +4,7 @@
 //
 // Usage (run locally from the repo root, never in CI):
 //   node scripts/create-dbc-config.mjs                      # dry run: prints the economics, sends nothing
-//   KEYPAIR=C:\path\to\treasury.json CONFIRM=1 node scripts/create-dbc-config.mjs
+//   KEYPAIR=C:\path\to\payer.json CONFIRM=1 node scripts/create-dbc-config.mjs   (payer: any funded wallet)
 //
 // Optional env: NETWORK=devnet, RPC (full URL), HELIUS_API_KEY (read from
 // .env.local if unset), MIGRATION_SOL (devnet only - shrink graduation for tests).
@@ -21,18 +21,21 @@ import { buildSowCurve, describeCurve, ECONOMICS } from "./lib/sow-config.mjs";
 const NATIVE_MINT = new PublicKey("So11111111111111111111111111111111111111112");
 // Treasury / impact vault - feeClaimer for the partner share of trading fees,
 // the launch fee, and the partner's locked LP position after migration.
-// Mainnet uses the launch treasury. PILOT=1 creates a mainnet PILOT config
-// whose fees go to the test treasury instead (same economics) - for testing
-// the full loop with real SOL and Kiva. Never put a pilot config on sow.fun.
-// TREASURY=<pubkey> overrides are devnet-only.
-const LAUNCH_TREASURY = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+// Mainnet uses the Impact Treasury (fee claimer only - $SOW is launched by
+// the separate Genesis wallet, ops spending comes from the Ops wallet). The
+// fee claimer is PERMANENT once the config exists. PILOT=1 creates a mainnet
+// PILOT config whose fees go to the test treasury instead (same economics) -
+// for testing the full loop with real SOL and Kiva. Never put a pilot config
+// on sow.fun. TREASURY=<pubkey> overrides are devnet-only. Any funded wallet
+// can be the KEYPAIR (payer).
+const IMPACT_TREASURY = "sowSaeMnVU3h4eV5Af6A6zzk4KR6oYgHHL3N3YoYJDy";
 const TEST_TREASURY = "sowSZPr36YSZQWemGUEUvxULFyFr6fwXde61sTYHtD2";
 const PILOT = !!process.env.PILOT;
 if (process.env.TREASURY && NETWORK !== "devnet") {
   console.error("TREASURY overrides are devnet-only - use PILOT=1 for a mainnet test config");
   process.exit(1);
 }
-const TREASURY = new PublicKey(process.env.TREASURY ?? (PILOT ? TEST_TREASURY : LAUNCH_TREASURY));
+const TREASURY = new PublicKey(process.env.TREASURY ?? (PILOT ? TEST_TREASURY : IMPACT_TREASURY));
 if (PILOT) {
   console.log("\n*** PILOT CONFIG - fees go to the TEST treasury " + TEST_TREASURY + " ***");
   console.log("*** Use it on localhost only. Do NOT set it as NEXT_PUBLIC_DBC_CONFIG_KEY on Vercel. ***\n");
@@ -50,9 +53,10 @@ if (process.env.MIGRATION_SOL) {
 const curveConfig = buildSowCurve({ migrationQuoteSol });
 console.log(`network: ${NETWORK} (${rpcLabel(resolveRpc())})\n`);
 console.log(describeCurve(curveConfig));
+console.log(`\nfee claimer (PERMANENT): ${TREASURY.toBase58()}`);
 
 if (!process.env.CONFIRM) {
-  console.log("\nDry run only. Re-run with KEYPAIR=<treasury json> CONFIRM=1 to create the config (immutable).");
+  console.log("\nDry run only. Re-run with KEYPAIR=<payer json> CONFIRM=1 to create the config (immutable).");
   process.exit(0);
 }
 

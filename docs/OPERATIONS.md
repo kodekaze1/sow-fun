@@ -18,13 +18,15 @@ just under fund-now. If the loan still closes before the money lands, the
 whole harvest counts as excess and flows down the coin's borrower queue.
 
 1. CLAIM (automated, on-chain receipt)
-   KEYPAIR=<treasury.json> CONFIG=<config pubkey> node scripts/claim-fees.mjs
-   - Sweeps, into the treasury: the partner 55% of bonding-curve fees from
+   KEYPAIR=<impact treasury.json> CONFIG=<config pubkey> node scripts/claim-fees.mjs
+   - Sweeps, into the Impact Treasury (sowSaeM..., the config's fee claimer): the partner 55% of bonding-curve fees from
      every pool, the treasury's locked DAMM v2 LP fees on graduated coins,
      and launch fees.
-   - Add CREATOR=1 to also claim $SOW's own creator share (the treasury
-     launched $SOW, so it is $SOW's creator): curve fees + creator LP
-     position. Recorded as source "genesis_vault", never as loan money.
+   - $SOW's own creator share belongs to the Genesis wallet (sowMw8eT...,
+     which launched $SOW): run it separately with
+     KEYPAIR=<genesis.json> CREATOR=1 - curve fees + creator LP position.
+     Recorded as source "genesis_vault", never as loan money. The script
+     refuses any wallet that is neither the fee claimer nor CREATOR=1.
    - Add DRY=1 first to preview pending fees.
    - Writes data/claims/claim-<ts>.json - COMMIT IT (the ledger reads it).
    - Receipt: claim tx signatures (solscan links).
@@ -201,7 +203,8 @@ entries are appended after the creator's queue.
 ## Genesis Vault ($SOW creator share)
 
 $SOW's 45% creator share belongs to the project and accrues to the Genesis
-Vault (claim with the creator flow, same as any creator). Public commitment:
+Vault in the Genesis wallet sowMw8eT... (claim with KEYPAIR=<genesis.json>
+CREATOR=1, same as any creator). Public commitment:
 it is deployed back into the ecosystem - bonus loans, $SOW buyback+burn, or
 community rewards - at operator discretion based on what $SOW needs, and
 EVERY deployment is published in the ledger with tx receipts. Never market-
