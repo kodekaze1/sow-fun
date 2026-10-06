@@ -91,8 +91,14 @@ site; their sow.fun/t/<mint> default website link 404s on production.
    - Vercel: add NEXT_PUBLIC_DBC_CONFIG_KEY=<config> to Production.
    - .env.local: same line (BOM-less).
    - `npx vercel deploy --prod --yes`
-   - Check /launch loads borrowers and /admin shows "no pools yet" (not the
-     "config not created" notice).
+   - Public launching stays CLOSED: /launch shows "Launching opens with $SOW"
+     and /api/launch-meta refuses every coin except the admin-keyed genesis,
+     until NEXT_PUBLIC_SOW_MINT is set at the reveal (LAUNCHES_OPEN in
+     lib/launchpad.ts). Anyone can still create pools on the config from the
+     contract; sow.fun never lists or registers them ("foreign").
+   - Check /admin shows the Live config.
+   - Tip: steps 3 and 5 can run back to back - CONFIG_OUT=.launch-config on
+     create-dbc-config writes the key, then CONFIG=$(cat .launch-config).
 
 5. LAUNCH $SOW (vanity mint, atomic dev buy):
    ```
@@ -104,7 +110,9 @@ site; their sow.fun/t/<mint> default website link 404s on production.
    The script saves these details to sow.fun (write-once, seconds before the
    launch tx) and sets the coin's on-chain URI to sow.fun/m/<mint>. WEBSITE
    defaults to https://sow.fun. Check https://sow.fun/m/<mint> afterwards.
-   Confirm the mint ends in `sow` and the pool shows on /launches and /t/<mint>.
+   Confirm the mint ends in `sow` and the pool shows on /launches and /t/<mint>
+   (the site lists it as soon as the config is set - only the launch FORM
+   waits for the reveal).
    Record the exact $SOW received (the team buy) from the Genesis wallet's token account.
 
 5b. LOCK THE TEAM BUY ON STREAMFLOW (manual, app.streamflow.finance, connect
@@ -120,8 +128,9 @@ site; their sow.fun/t/<mint> default website link 404s on production.
      SOW_TEAM_ALLOCATION in lib/launchpad.ts and the FAQ to match.
 
 6. REVEAL:
-   - Vercel: NEXT_PUBLIC_SOW_MINT=<mint> (shows the CA + how-to-buy block),
-     flip SHOW_LIVE_TREASURY to true in lib/types.ts, commit, redeploy.
+   - Vercel: NEXT_PUBLIC_SOW_MINT=<mint> (shows the CA + how-to-buy block AND
+     opens public launching), flip SHOW_LIVE_TREASURY to true in
+     lib/types.ts, commit, redeploy.
    - Post the CA and the team-buy disclosure: SOL spent, $SOW received, % of
      supply, and the Streamflow lock link.
    - Tweet #11.

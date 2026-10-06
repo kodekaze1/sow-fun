@@ -3,6 +3,14 @@
 // and is immutable after creation: fee split, fee tier, and LP locks cannot change.
 
 export const DBC_CONFIG_KEY = process.env.NEXT_PUBLIC_DBC_CONFIG_KEY ?? "";
+export const SOW_MINT = process.env.NEXT_PUBLIC_SOW_MINT ?? "";
+// Public launching opens only once $SOW is live (its mint is set on Vercel at
+// the reveal). Before that the config may already exist - anyone can create
+// pools on it from the contract, but sow.fun neither shows nor registers them.
+// NEXT_PUBLIC_LAUNCHES_OPEN=1 opens it early - only for the LOCAL pilot site
+// (never set it on Vercel).
+export const LAUNCHES_OPEN =
+  DBC_CONFIG_KEY.length > 30 && (SOW_MINT.length > 30 || process.env.NEXT_PUBLIC_LAUNCHES_OPEN === "1");
 
 // Browser RPC goes through the same-origin /api/rpc proxy so the Helius key
 // stays server-side (server code uses serverRpcUrl() from lib/rpc-server).

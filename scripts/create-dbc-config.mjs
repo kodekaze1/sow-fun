@@ -86,6 +86,9 @@ const tx = await client.partner.createConfig({
 
 const signature = await sendAndConfirmTransaction(connection, tx, [payer, configKeypair]);
 console.log("\nconfig created!");
+// CONFIG_OUT=<file>: write the key there so launch day chains straight into
+// launch-genesis.mjs (CONFIG=$(cat <file>)).
+if (process.env.CONFIG_OUT) fs.writeFileSync(process.env.CONFIG_OUT, configKeypair.publicKey.toBase58());
 console.log("signature:", signature);
 if (NETWORK === "mainnet" && PILOT) {
   console.log(`\nPilot config: ${configKeypair.publicKey.toBase58()}`);

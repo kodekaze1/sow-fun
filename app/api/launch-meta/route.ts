@@ -4,6 +4,7 @@ import { PublicKey } from "@solana/web3.js";
 import { fromOurSite, rateLimit } from "@/lib/rate-limit";
 import { COIN_META_PREFIX, validateCoinMeta } from "@/lib/coin-meta";
 import { getDbcClient } from "@/lib/launchpad-onchain";
+import { LAUNCHES_OPEN } from "@/lib/launchpad";
 
 // Saves a coin's launch details (image, Kiva loan, creator description and
 // links) right before its pool is created. The coin's on-chain URI is
@@ -56,6 +57,13 @@ export async function POST(request: Request) {
     if (!process.env.ADMIN_KEY || key !== process.env.ADMIN_KEY) {
       return NextResponse.json({ error: "That name or ticker is reserved for the official $SOW - pick another." }, { status: 400 });
     }
+  }
+
+  // Until $SOW is live nobody registers a coin with sow.fun - except the
+  // genesis script itself (admin key), which is how $SOW gets registered
+  const isGenesis = !!process.env.ADMIN_KEY && request.headers.get("x-admin-key") === process.env.ADMIN_KEY;
+  if (!LAUNCHES_OPEN && !isGenesis) {
+    return NextResponse.json({ error: "Launching opens when $SOW goes live." }, { status: 403 });
   }
 
   // The mint must not exist yet: details are attached only to brand-new coins

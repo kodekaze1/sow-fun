@@ -11,6 +11,7 @@ import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk
 import Icon from "@/components/icons";
 import {
   DBC_CONFIG_KEY,
+  LAUNCHES_OPEN,
   CREATOR_FEE_PCT,
   IMPACT_FEE_PCT,
   OPS_FEE_PCT,
@@ -361,6 +362,27 @@ export default function LaunchPage() {
               className="border border-[#D9E6DF] hover:border-[#276A43] rounded-full px-6 py-2.5 text-sm font-bold transition-colors">
               Token page
             </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!LAUNCHES_OPEN) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6 py-24">
+        <div className="max-w-md text-center">
+          <img src="/sow-logo.png" alt="" className="w-20 h-20 mx-auto mb-6" />
+          <h1 className="font-serif text-4xl font-semibold text-[#223829] mb-3">
+            Launching opens <span className="italic text-[#276A43]">with $SOW.</span>
+          </h1>
+          <p className="text-gray-600 leading-relaxed mb-8">
+            The first seed goes in the ground before anyone else&apos;s. The moment $SOW is live, this is where you pick a real
+            Kiva borrower and launch a coin for them.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 text-sm font-bold">
+            <a href="/how-it-works" className="rounded-full bg-[#276A43] hover:bg-[#223829] text-white px-5 py-2.5 transition-colors">How it works</a>
+            <a href="https://x.com/sowfunhq" target="_blank" rel="noopener noreferrer" className="rounded-full border border-[#D9E6DF] text-[#223829] hover:border-[#276A43] px-5 py-2.5 transition-colors">Follow @sowfunhq</a>
           </div>
         </div>
       </div>
