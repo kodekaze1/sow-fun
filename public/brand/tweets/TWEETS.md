@@ -114,11 +114,7 @@ they're ours. thousands of one-of-ones are still open. who's yours? 🌱
 ---
 
 ## Pre-launch: tested on mainnet (build in public)
-Media: tw-testing.png
-
-we've been testing sow.fun on mainnet
-
-trading fees from a test coin just funded a real kiva loan
+Media: tw-testing.png (alt, more specific: tw-testing-receipt.png - first fees -> first loan receipt)
 
 almost ready to plant the first seed 🌱
 
