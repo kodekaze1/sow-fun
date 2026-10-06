@@ -16,7 +16,7 @@ import {
   poolField,
 } from "@/lib/launchpad-onchain";
 import { serverRpcUrl } from "@/lib/rpc-server";
-import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET, PILOT_CONFIG, TREASURY_WALLET } from "@/lib/constants";
+import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET, TEST_CONFIGS, TREASURY_WALLET } from "@/lib/constants";
 import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { getCoinPlans } from "@/lib/coin-plans";
 import { isAdmin } from "@/lib/admin-auth";
@@ -119,7 +119,7 @@ export async function GET(request: Request) {
   // watch either; the public site only ever uses the live one
   const configs = [
     ...(DBC_CONFIG_KEY && DBC_CONFIG_KEY.length >= 30 ? [{ key: DBC_CONFIG_KEY, label: "Live" }] : []),
-    ...(DBC_CONFIG_KEY === PILOT_CONFIG ? [] : [{ key: PILOT_CONFIG, label: "Pilot" }]),
+    ...TEST_CONFIGS.filter((c) => c.key !== DBC_CONFIG_KEY),
   ];
   const requested = new URL(request.url).searchParams.get("config");
   const configKey = configs.find((c) => c.key === requested)?.key ?? configs[0].key;

@@ -12,7 +12,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID, PILOT_CONFIG } from "@/lib/constants";
+import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID, TEST_CONFIGS } from "@/lib/constants";
 import { DBC_CONFIG_KEY } from "@/lib/launchpad";
 import { getCoinPlans } from "@/lib/coin-plans";
 import { getLaunchesFresh, getSolPrice } from "@/lib/launchpad-onchain";
@@ -68,7 +68,7 @@ export async function runHarvestSync(): Promise<SyncResult> {
   // Open plan lines: loan id -> the coin and amount the plan set aside for it
   // Plans from every watched config (live + pilot), so pilot harvests match too
   const solPrice = await getSolPrice();
-  const watched = [...new Set([DBC_CONFIG_KEY, PILOT_CONFIG].filter((c) => c && c.length >= 30))];
+  const watched = [...new Set([DBC_CONFIG_KEY, ...TEST_CONFIGS.map((c) => c.key)].filter((c) => c && c.length >= 30))];
   const planMaps = await Promise.all(watched.map(async (c) => getCoinPlans({ solPrice, launches: await getLaunchesFresh(c) })));
   const lines = new Map<number, { mint: string; symbol: string; role: "pledge" | "excess"; cents: number }>();
   for (const p of planMaps.flatMap((m) => [...m.values()])) {

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { buildClaim, buildFund, executePlan, type Plan } from "@/lib/admin-tx";
 import { DBC_CONFIG_KEY } from "@/lib/launchpad";
-import { PILOT_CONFIG } from "@/lib/constants";
+import { TEST_CONFIGS } from "@/lib/constants";
 
 // One-click money operations for /admin (see lib/admin-tx.ts).
 //   { action: "build", kind: "claim" | "creator" | "fund", config, wallet, usd? }
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "invalid JSON" }, { status: 400 });
   }
-  const allowed = [DBC_CONFIG_KEY, PILOT_CONFIG].filter((c) => c && c.length >= 30);
+  const allowed = [DBC_CONFIG_KEY, ...TEST_CONFIGS.map((c) => c.key)].filter((c) => c && c.length >= 30);
   try {
     if (body.action === "build") {
       const config = String(body.config ?? "");
