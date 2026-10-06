@@ -14,6 +14,7 @@ export async function GET(request: Request) {
   const mint = url.searchParams.get("mint") ?? "";
   const loan = Number(url.searchParams.get("loan"));
   const q = (url.searchParams.get("q") ?? "").slice(0, 60);
+  const sort = url.searchParams.get("sort") ?? "expiringSoon";
   let sector: string | null = null;
   let sectorId: number | null = null;
   if (Number.isInteger(loan) && loan > 0) {
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
     sectorId = d?.lend.loan?.sector?.id ?? null;
   }
   const [candidates, picks] = await Promise.all([
-    searchFundraisingLoans({ ...(sectorId && !q ? { sector: sectorId } : {}), ...(q ? { q } : {}), sort: "expiringSoon" }, 24).catch(() => []),
+    searchFundraisingLoans({ ...(sectorId && !q ? { sector: sectorId } : {}), ...(q ? { q } : {}), sort }, 24).catch(() => []),
     mint ? getSuccessionChainLive(mint) : Promise.resolve([]),
   ]);
   return NextResponse.json({ sector, candidates, picks });

@@ -54,6 +54,7 @@ const STATUS: Record<QueueEntry["status"], string> = {
 export default function QueuePanel({ row, adminKey, onChanged }: { row: QueueRow; adminKey: string; onChanged: () => void }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState("expiringSoon");
   const [sector, setSector] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -62,11 +63,11 @@ export default function QueuePanel({ row, adminKey, onChanged }: { row: QueueRow
   const plan = row.plan;
   const queued = new Set((plan?.queue ?? []).map((e) => e.loanId));
 
-  const search = async (query = q) => {
+  const search = async (query = q, sortBy = sort) => {
     setBusy("search");
     setErr(null);
     try {
-      const res = await fetch(`/api/admin/queue?mint=${row.mint}&loan=${row.loanId ?? ""}&q=${encodeURIComponent(query)}`, { headers: { "x-admin-key": adminKey } });
+      const res = await fetch(`/api/admin/queue?mint=${row.mint}&loan=${row.loanId ?? ""}&q=${encodeURIComponent(query)}&sort=${sortBy}`, { headers: { "x-admin-key": adminKey } });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "search failed");
       setSector(json.sector);
@@ -147,7 +148,13 @@ export default function QueuePanel({ row, adminKey, onChanged }: { row: QueueRow
             <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && search()}
               placeholder={sector ? `${sector} borrowers - or search anything` : "Search Kiva borrowers"} className="flex-1 min-w-[200px] rounded-lg border border-[#D9E6DF] px-2 py-1.5" />
             <button onClick={() => search()} className="font-bold text-[#276A43] hover:underline">Search</button>
-            {sector && !q && <span className="text-gray-400">Same sector as the launch borrower ({sector}), ending soonest first</span>}
+            <select value={sort} onChange={(e) => { setSort(e.target.value); search(q, e.target.value); }} className="rounded-lg border border-[#D9E6DF] px-2 py-1.5 font-bold">
+              <option value="expiringSoon">Ending soon</option>
+              <option value="amountLeft">Almost funded</option>
+              <option value="popularity">Recommended</option>
+              <option value="newest">Most recent</option>
+            </select>
+            {sector && !q && <span className="text-gray-400">Same sector as the launch borrower ({sector})</span>}
           </div>
           {busy === "search" && <div className="text-[12px] text-gray-400">Searching Kiva...</div>}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

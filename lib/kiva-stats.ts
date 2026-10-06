@@ -56,7 +56,7 @@ type KivaTeam = {
 async function fetchKiva<T>(path: string): Promise<T> {
   const res = await fetch(`${KIVA_API_BASE}${path}`, {
     headers: KIVA_FETCH_HEADERS,
-    next: { revalidate: 3600 },
+    next: { revalidate: 600 }, // countries/sectors on the homepage follow new loans within ~10 min
   });
 
   if (!res.ok) {

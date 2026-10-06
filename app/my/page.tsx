@@ -9,7 +9,7 @@ import { DynamicBondingCurveClient } from "@meteora-ag/dynamic-bonding-curve-sdk
 import Icon from "@/components/icons";
 import { markCreator } from "@/lib/creator-flag";
 import { getOwnerPositions, buildClaimPositionFeeTx, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
-import { IMPACT_FEE_PCT, CREATOR_FEE_PCT, type FundraisingLoan } from "@/lib/launchpad";
+import { IMPACT_FEE_PCT, CREATOR_FEE_PCT, KIVA_SECTOR_IDS, LOAN_SORTS, type FundraisingLoan } from "@/lib/launchpad";
 import { COUNTRY_FLAGS } from "@/lib/types";
 import { MAX_QUEUE, buildQueueMemo } from "@/lib/borrower-queue";
 import type { CoinLedger, QueueStatus } from "@/lib/coin-ledger";
@@ -79,6 +79,9 @@ export default function MyCoinsPage() {
   const [adoptFor, setAdoptFor] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ id: number; name: string; remaining: number | null }[]>([]);
   const [adoptSearch, setAdoptSearch] = useState("");
+  // "Almost funded" first: a small top-up finishes a real loan fastest
+  const [adoptSort, setAdoptSort] = useState("amountLeft");
+  const [adoptSector, setAdoptSector] = useState("");
   const [adoptResults, setAdoptResults] = useState<FundraisingLoan[]>([]);
   const [adoptLoading, setAdoptLoading] = useState(false);
   const [adopting, setAdopting] = useState(false);
@@ -115,10 +118,12 @@ export default function MyCoinsPage() {
     setAdoptLoading(true);
     const t = setTimeout(async () => {
       try {
-        const q = adoptSearch ? `?q=${encodeURIComponent(adoptSearch)}` : "";
-        const res = await fetch(`/api/kiva/fundraising${q}`);
+        const params = new URLSearchParams({ sort: adoptSort });
+        if (adoptSearch) params.set("q", adoptSearch);
+        if (adoptSector) params.set("sector", adoptSector);
+        const res = await fetch(`/api/kiva/fundraising?${params}`);
         const data = await res.json();
-        setAdoptResults((data.loans ?? []).slice(0, 6));
+        setAdoptResults((data.loans ?? []).slice(0, 16));
       } catch {
         setAdoptResults([]);
       } finally {
@@ -126,7 +131,7 @@ export default function MyCoinsPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [adoptFor, adoptSearch]);
+  }, [adoptFor, adoptSearch, adoptSort, adoptSector]);
 
   // Send with a pinned blockhash and confirm robustly. "unknown" is not a
   // failure: the tx may still land, so we say so instead of inviting a retry.
@@ -394,8 +399,19 @@ export default function MyCoinsPage() {
                           value={adoptSearch}
                           onChange={(e) => setAdoptSearch(e.target.value)}
                           placeholder="Search borrowers - try 'tailor', 'farm', 'solar'..."
-                          className="w-full rounded-full border border-[#D9E6DF] px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-[#276A43]"
+                          className="w-full rounded-full border border-[#D9E6DF] px-4 py-2.5 text-sm mb-2 focus:outline-none focus:border-[#276A43]"
                         />
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          <select value={adoptSort} onChange={(e) => setAdoptSort(e.target.value)} aria-label="Sort borrowers"
+                            className="rounded-full border border-[#D9E6DF] bg-white px-3 py-1.5 text-xs font-bold text-[#223829] focus:outline-none focus:border-[#276A43]">
+                            {LOAN_SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                          </select>
+                          <select value={adoptSector} onChange={(e) => setAdoptSector(e.target.value)} aria-label="Filter by sector"
+                            className="rounded-full border border-[#D9E6DF] bg-white px-3 py-1.5 text-xs font-bold text-[#223829] focus:outline-none focus:border-[#276A43]">
+                            <option value="">All sectors</option>
+                            {Object.entries(KIVA_SECTOR_IDS).map(([name, id]) => <option key={id} value={id}>{name}</option>)}
+                          </select>
+                        </div>
                         {adoptLoading ? (
                           <div className="py-6 text-center text-gray-400 text-sm">Finding live borrowers on Kiva...</div>
                         ) : (
