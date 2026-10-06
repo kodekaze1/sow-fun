@@ -5,7 +5,7 @@ import { SHOW_LIVE_TREASURY } from "@/lib/types";
 import type { LedgerSummary } from "@/lib/waves";
 import Icon from "@/components/icons";
 import TeamRank from "@/components/TeamRank";
-import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET, TREASURY_WALLET } from "@/lib/constants";
+import { GENESIS_WALLET_DISPLAY, IMPACT_CARD_ADDRESS, OPS_WALLET, TREASURY_WALLET } from "@/lib/constants";
 
 interface TreasuryData {
   balance: number;
@@ -129,7 +129,7 @@ export default function TreasuryClient({
           <div className="flex flex-col divide-y divide-gray-100">
             {[
               { name: "Impact Treasury", addr: TREASURY_WALLET, body: "Collects the 55% vault share of every coin's fees and the launch fees. Pays out only to the Impact Card (Kiva loans), $SOW buybacks, and the ops share." },
-              { name: "Genesis Vault", addr: GENESIS_WALLET, body: "Launched $SOW and holds the team buy (locked on Streamflow). Receives $SOW's 45% creator share - spent only on bonus loans, buyback-and-burns or community rewards, always with receipts." },
+              { name: "Genesis Vault", addr: GENESIS_WALLET_DISPLAY, body: "Launched $SOW and holds the team buy (locked on Streamflow). Receives $SOW's 45% creator share - spent only on bonus loans, buyback-and-burns or community rewards, always with receipts." },
               { name: "Operations", addr: OPS_WALLET, body: "Receives the 10% operations share. Pays the costs of running sow.fun." },
               { name: "Impact Card", addr: IMPACT_CARD_ADDRESS, body: "The KAST card that pays Kiva at checkout. Topped up per harvest only - money here is in transit, not yet lent." },
             ].map((w) => (

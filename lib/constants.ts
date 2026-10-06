@@ -9,6 +9,12 @@ export const TREASURY_WALLET = "sowSaeMnVU3h4eV5Af6A6zzk4KR6oYgHHL3N3YoYJDy";
 // Genesis wallet: launched $SOW, holds the locked team buy, receives $SOW's
 // creator fees (the Genesis Vault - never loan money).
 export const GENESIS_WALLET = "sowMw8eTZE5NryyyTmpCoBfcW8oYsSZtqoanRMTybAj";
+// PRE-LAUNCH BREADCRUMB: the Genesis address the public /treasury code shows
+// before launch. It is the dev test wallet, not the real Genesis, so anyone
+// scraping the site's JavaScript for the launch wallet watches the wrong one.
+// Display only - routing uses GENESIS_WALLET. AT THE REVEAL (LAUNCH.md step 6)
+// set this to GENESIS_WALLET, or the live wallets card shows the wrong address.
+export const GENESIS_WALLET_DISPLAY = "sowtLuq982DqKDe28jqDEfwwZtE9DhGWjZ4fFvms4VQ";
 // Ops wallet: receives the 10% operations share, pays running costs.
 export const OPS_WALLET = "sowyBNQiNbDPKvuScQfUWsCTZMFWfA1UdFqdHFNG5tP";
 

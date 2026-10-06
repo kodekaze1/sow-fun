@@ -140,7 +140,8 @@ site; their sow.fun/t/<mint> default website link 404s on production.
 6. REVEAL:
    - Vercel: NEXT_PUBLIC_SOW_MINT=<mint> (shows the CA + how-to-buy block AND
      opens public launching), flip SHOW_LIVE_TREASURY to true in
-     lib/types.ts, commit, redeploy.
+     lib/types.ts, AND set GENESIS_WALLET_DISPLAY = GENESIS_WALLET in
+     lib/constants.ts (it is a decoy until then), commit, redeploy.
    - Post the CA and the team-buy disclosure: SOL spent, $SOW received, % of
      supply, and the Streamflow lock link.
    - Tweet #11.
