@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getHarvestRecords, recordsToWaves } from '@/lib/harvest-auto';
 
 export interface UpliftWave {
   id: string;
@@ -61,17 +62,23 @@ export interface UpliftWave {
 
 const WAVES_DIR = path.join(process.cwd(), 'data', 'waves');
 
+/**
+ * Every harvest: committed wave files (data/waves) plus loans recorded
+ * automatically by the harvest sync (lib/harvest-auto, Vercel Blob). A loan
+ * already in a committed wave is never counted twice.
+ */
 export async function getAllWaves(): Promise<UpliftWave[]> {
-  if (!fs.existsSync(WAVES_DIR)) {
-    return [];
-  }
+  const committed: UpliftWave[] = fs.existsSync(WAVES_DIR)
+    ? fs
+        .readdirSync(WAVES_DIR)
+        .filter((f) => f.endsWith('.json') && !f.endsWith('.fixture.json'))
+        .map((file) => JSON.parse(fs.readFileSync(path.join(WAVES_DIR, file), 'utf8')) as UpliftWave)
+    : [];
 
-  const files = fs.readdirSync(WAVES_DIR).filter(f => f.endsWith('.json') && !f.endsWith('.fixture.json'));
-  const waves = files.map(file => {
-    const filePath = path.join(WAVES_DIR, file);
-    const content = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(content) as UpliftWave;
-  });
+  const committedIds = new Set(committed.flatMap((w) => w.loans.map((l) => l.kiva_id)));
+  const records = (await getHarvestRecords().catch(() => [])).filter((r) => !committedIds.has(r.kiva_id));
+  const lastNumber = committed.reduce((m, w) => Math.max(m, w.wave_number), 0);
+  const waves = [...committed, ...recordsToWaves(records, lastNumber)];
 
   // Sort by wave number descending
   return waves.sort((a, b) => b.wave_number - a.wave_number);

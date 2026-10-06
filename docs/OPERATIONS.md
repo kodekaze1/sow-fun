@@ -66,7 +66,20 @@ whole harvest counts as excess and flows down the coin's borrower queue.
      team attribution - then this step reduces to topping up the balance.
    - Receipt: kiva.org/lend/<id> for each loan funded.
 
-4. RECORD THE HARVEST (manual, public ledger)
+4. RECORD THE HARVEST (automatic since 2026-10-07 - /admin Command Center)
+   The harvest sync (lib/harvest-sync.ts; daily Vercel Cron + every /admin
+   load) reads the sowfun lender profile. Each NEW loan that matches an open
+   harvest-plan line is recorded with that line's amount, coin and role
+   (Vercel Blob, harvest/loans/) and shows on the Harvest Ledger at once - no
+   commit, no deploy. Unmatched loans wait in /admin "review" (hidden from
+   the public ledger) until assigned or ignored. Kiva never shows how much a
+   lender put into a loan, so FUND EXACTLY WHAT THE PLAN LISTS (amounts are
+   already Kiva $25 steps); fix any amount in /admin. A second lending to an
+   already-recorded loan: edit its amount in /admin.
+   Swap only the plan's "lend now" total (Jupiter exact-out USDC) - the rest
+   stays as SOL in the treasury and rolls to the coin's next harvest.
+   The manual wave-file route below still works (committed waves win):
+   (legacy, manual)
    Add data/waves/wave-XXX.json:
    - movements[]: claim txs (type: fee_claim, tx_hash, explorer_url),
      off-ramp transfer tx, exchange order ID (note field), Kiva deposit.

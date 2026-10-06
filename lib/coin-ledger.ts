@@ -25,6 +25,20 @@ import { CREATOR_FEE_PCT, IMPACT_FEE_PCT } from "@/lib/launchpad";
 
 export const SOW_SKIM_PCT = 20; // of excess: 10 burn + 10 creator rewards
 export const FALLBACK_HOURS = 72;
+export const KIVA_STEP_CENTS = 2500; // Kiva lends in $25 steps
+
+/**
+ * What can actually be lent on Kiva from `cents` toward a loan that still
+ * needs `remainingCents`: whole $25 steps, or - when the money covers it -
+ * the loan's exact final remainder if that is under $25. Whatever doesn't fit
+ * stays in the treasury (as SOL) and rolls into the coin's next harvest.
+ */
+export function kivaLendableCents(cents: number, remainingCents: number): number {
+  const target = Math.min(cents, remainingCents);
+  if (target <= 0) return 0;
+  if (target === remainingCents && remainingCents < KIVA_STEP_CENTS) return remainingCents;
+  return Math.floor(target / KIVA_STEP_CENTS) * KIVA_STEP_CENTS;
+}
 
 // Loan share of what the treasury claims: treasury holds the non-creator
 // part of each fee (loans + ops), of which the loan share is IMPACT_FEE_PCT.
@@ -126,9 +140,13 @@ export function computeCoinLedger(input: {
 
   const launch = launchLoanId ? loans.get(launchLoanId) : undefined;
   const pledgeOpen = !!launch && launch.status === "fundraising" && launch.remaining > 0;
-  const pledgeCents = pledgeOpen ? Math.min(availableCents, Math.round(launch!.remaining * 100)) : 0;
+  const pledgeRemainingCents = pledgeOpen ? Math.round(launch!.remaining * 100) : 0;
+  // Money reserved for the launch borrower (never excess while their loan is
+  // open) vs what can be lent on Kiva right now; the gap waits for next time
+  const pledgeReservedCents = pledgeOpen ? Math.min(availableCents, pledgeRemainingCents) : 0;
+  const pledgeCents = kivaLendableCents(pledgeReservedCents, pledgeRemainingCents);
 
-  const excessEverCents = Math.max(0, earnedCents - deployedPledgeCents - pledgeCents);
+  const excessEverCents = Math.max(0, earnedCents - deployedPledgeCents - pledgeReservedCents);
   const skimCents = Math.max(0, Math.round((excessEverCents * SOW_SKIM_PCT) / 100) - skimDoneCents);
   let budget = Math.max(0, excessEverCents - Math.round((excessEverCents * SOW_SKIM_PCT) / 100) - deployedExcessCents);
 
@@ -140,7 +158,7 @@ export function computeCoinLedger(input: {
     if (loan.status !== "fundraising" || loan.remaining <= 0) return { ...base, status: "closed" as const, cents: 0 };
     const holder = takenByOthers.get(loanId);
     if (holder) return { ...base, status: "taken" as const, cents: 0, takenBy: holder };
-    const cents = Math.min(budget, remainingCents);
+    const cents = kivaLendableCents(budget, remainingCents);
     budget -= cents;
     return { ...base, status: cents > 0 ? ("fund" as const) : ("waiting" as const), cents };
   });

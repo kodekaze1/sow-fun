@@ -121,7 +121,7 @@ type BNLike = { toNumber: () => number };
 // Market cap in SOL from the pool's sqrt price: price per token (6-decimal
 // base, 9-decimal SOL) times the fixed 1,000,000,000 supply.
 const TOTAL_SUPPLY = 1_000_000_000;
-function marketCapFromAccount(account: unknown): number | null {
+export function marketCapFromAccount(account: unknown): number | null {
   try {
     const sqrt = poolField<BNLike & { toString(): string }>(account, "sqrtPrice");
     if (!sqrt) return null;
@@ -176,7 +176,7 @@ export function resolveBorrowerClaims(launches: LaunchSummary[], nowSec = Date.n
 
 // Migration threshold (lamports) from the config account, cached per process
 let thresholdCache: { key: string; lamports: number | null } | null = null;
-async function getMigrationThresholdLamports(client: DynamicBondingCurveClient): Promise<number | null> {
+export async function getMigrationThresholdLamports(client: DynamicBondingCurveClient): Promise<number | null> {
   if (thresholdCache?.key === DBC_CONFIG_KEY) return thresholdCache.lamports;
   let lamports: number | null = null;
   try {
@@ -188,7 +188,8 @@ async function getMigrationThresholdLamports(client: DynamicBondingCurveClient):
       lamports = cfg?.migrationQuoteThreshold?.toNumber() ?? null;
     }
   } catch { /* optional - graduation bar hides without it */ }
-  thresholdCache = { key: DBC_CONFIG_KEY, lamports };
+  // Never cache a failed lookup (e.g. an RPC outage) - retry next time
+  if (lamports !== null) thresholdCache = { key: DBC_CONFIG_KEY, lamports };
   return lamports;
 }
 
