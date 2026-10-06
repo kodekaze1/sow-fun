@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Icon from "@/components/icons";
+import WalletAction from "./WalletAction";
 import type { CoinLedger } from "@/lib/coin-ledger";
 import type { HarvestRecord } from "@/lib/harvest-auto";
 import type { LedgerHarvest } from "@/lib/waves";
@@ -255,7 +256,7 @@ function MoneyFlow({ t, wallets, solPrice }: { t: Totals; wallets: Wallet[]; sol
 
 // ------------------------------------------------------------- do next
 
-function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
+function DoNext({ data, keyDir, adminKey, onDone }: { data: Overview; keyDir: string; adminKey: string; onDone: () => void }) {
   const t = data.totals!;
   const wallets = data.wallets ?? [];
   const CONFIG = data.config ?? "<config>";
@@ -264,6 +265,8 @@ function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
     return `${keyDir.replace(/[\\/]+$/, "")}/${addr}.json`;
   };
   const treasuryKey = keyFor("Impact Treasury");
+  const treasuryAddr = wallets.find((w) => w.role.startsWith("Impact Treasury"))?.address ?? null;
+  const genesisAddr = wallets.find((w) => w.role === "Genesis")?.address ?? null;
   const genesisKey = keyFor("Genesis");
   const sowRows = data.pools.filter((p) => p.origin === "sowfun");
   const sowCreatorPending = data.pools.find((p) => p.mint === SOW_MINT)?.creatorPendingSol ?? 0;
@@ -288,8 +291,14 @@ function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
       title: `Claim ${sol(claimable, 3)} into the Impact Treasury (auto-splits Ops / Genesis)`,
       body: (
         <div className="flex flex-col gap-2">
-          <CopyCmd label="1. Preview (sends nothing)" cmd={`KEYPAIR="${treasuryKey}" CONFIG=${CONFIG} DRY=1 node scripts/claim-fees.mjs`} />
-          <CopyCmd label="2. One paste: claim + route Ops/Genesis + publish the snapshot (commit, push, deploy) - then Refresh this page" cmd={`KEYPAIR="${treasuryKey}" CONFIG=${CONFIG} node scripts/claim-fees.mjs && git add data/claims && git commit -m "Claim snapshot" && git push sowfun master && npx vercel deploy --prod --yes`} />
+          <WalletAction kind="claim" label="Claim + route" config={CONFIG} adminKey={adminKey} expectWallet={treasuryAddr} onDone={onDone} />
+          <details className="text-[12px] text-gray-500">
+            <summary className="cursor-pointer font-bold">Or run it from the terminal</summary>
+            <div className="flex flex-col gap-2 mt-2">
+              <CopyCmd label="Preview (sends nothing)" cmd={`KEYPAIR="${treasuryKey}" CONFIG=${CONFIG} DRY=1 node scripts/claim-fees.mjs`} />
+              <CopyCmd label="Claim + route + publish the snapshot" cmd={`KEYPAIR="${treasuryKey}" CONFIG=${CONFIG} node scripts/claim-fees.mjs && git add data/claims && git commit -m "Claim snapshot" && git push sowfun master && npx vercel deploy --prod --yes`} />
+            </div>
+          </details>
         </div>
       ),
     });
@@ -298,7 +307,7 @@ function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
     const dollars = (t.toLendCents / 100).toFixed(2);
     steps.push({
       title: `Lend ${usd(t.toLendCents)} on Kiva`,
-      body: <LendSteps key={lendLines.map((l) => `${l.loanId}_${l.cents}`).join(",")} lines={lendLines} dollars={dollars} totalCents={t.toLendCents} treasuryKey={treasuryKey} />,
+      body: <LendSteps key={lendLines.map((l) => `${l.loanId}_${l.cents}`).join(",")} lines={lendLines} dollars={dollars} totalCents={t.toLendCents} treasuryKey={treasuryKey} config={CONFIG} adminKey={adminKey} treasuryAddr={treasuryAddr} onDone={onDone} />,
     });
   }
   if (skimRows.length) {
@@ -320,7 +329,12 @@ function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
   if (sowCreatorPending > 0.001) {
     steps.push({
       title: `Claim ${sol(sowCreatorPending, 3)} $SOW creator fees into Genesis (Genesis Vault)`,
-      body: <CopyCmd label="Genesis Vault claim" cmd={`KEYPAIR="${genesisKey}" CONFIG=${CONFIG} CREATOR=1 node scripts/claim-fees.mjs`} />,
+      body: (
+        <div className="flex flex-col gap-2">
+          <WalletAction kind="creator" label="Claim Genesis Vault" config={CONFIG} adminKey={adminKey} expectWallet={genesisAddr} onDone={onDone} />
+          <CopyCmd label="Or from the terminal" cmd={`KEYPAIR="${genesisKey}" CONFIG=${CONFIG} CREATOR=1 node scripts/claim-fees.mjs`} />
+        </div>
+      ),
     });
   }
   if (!steps.length) {
@@ -342,11 +356,15 @@ function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
 
 const KAST_DEPOSIT = "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q";
 
-function LendSteps({ lines, dollars, totalCents, treasuryKey }: {
+function LendSteps({ lines, dollars, totalCents, treasuryKey, config, adminKey, treasuryAddr, onDone }: {
   lines: { coin: string; loanId: number; name: string | null; cents: number; role: string }[];
   dollars: string;
   totalCents: number;
   treasuryKey: string;
+  config: string;
+  adminKey: string;
+  treasuryAddr: string | null;
+  onDone: () => void;
 }) {
   // Ticks survive a refresh; keyed by loan + amount so a new plan starts clean
   const tickKey = (l: { loanId: number; cents: number }) => `sow_lent_${l.loanId}_${l.cents}`;
@@ -369,9 +387,14 @@ function LendSteps({ lines, dollars, totalCents, treasuryKey }: {
       <div>
         <div className="font-bold text-[#223829] mb-1.5">A. Fund the card with exactly {usd(totalCents)}</div>
         <div className="flex flex-col gap-2">
-          <CopyCmd label="Preview the swap (sends nothing)" cmd={fundCmd.replace(" node", " DRY=1 node")} />
-          <CopyCmd label="One paste: swap exactly this much SOL -> USDC + send to KAST + publish the receipt"
-            cmd={`${fundCmd} && git add data/card-topups.json && git commit -m "Card top-up $${dollars}" && git push sowfun master`} />
+          <WalletAction kind="fund" label={`Fund card ${usd(totalCents)}`} usd={Number(dollars)} config={config} adminKey={adminKey} expectWallet={treasuryAddr} onDone={onDone} />
+          <details className="text-[12px] text-gray-500">
+            <summary className="cursor-pointer font-bold">Or run it from the terminal</summary>
+            <div className="flex flex-col gap-2 mt-2">
+              <CopyCmd label="Preview the swap (sends nothing)" cmd={fundCmd.replace(" node", " DRY=1 node")} />
+              <CopyCmd label="Swap + send to KAST + publish the receipt" cmd={`${fundCmd} && git add data/card-topups.json && git commit -m "Card top-up $${dollars}" && git push sowfun master`} />
+            </div>
+          </details>
           <p className="text-[12px] text-gray-500">
             By hand instead: <a href="https://jup.ag/swap/SOL-USDC" target="_blank" rel="noopener noreferrer" className="font-bold text-[#276A43] hover:underline">Jupiter SOL→USDC ↗</a>{" "}
             (switch to exact-out, receive {usd(totalCents)}), then send it to the KAST deposit{" "}
@@ -754,7 +777,7 @@ export default function AdminPage() {
             Refresh + sync Kiva
           </button>
         </div>
-        <p className="text-sm text-gray-500">Every dollar from the pools to Kiva, reconciled. Read-only: it builds the commands, your local scripts sign.</p>
+        <p className="text-sm text-gray-500">Every dollar from the pools to Kiva, reconciled. Connect the right wallet and click - it builds, you approve once, it sends and records.</p>
         {sync && <p className="text-xs text-gray-400 mt-1">{sync}</p>}
         {data?.configs && (
           <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px]">
@@ -800,7 +823,7 @@ export default function AdminPage() {
             </Section>
 
             <Section title="Do next" hint="Built from the live numbers. Commands use your key folder below - copy, run locally, done.">
-              <DoNext data={data} keyDir={keyDir} />
+              <DoNext data={data} keyDir={keyDir} adminKey={savedKey} onDone={() => load(savedKey, false, cfg)} />
               <label className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-gray-500">
                 Key folder:
                 <input value={keyDir} onChange={(e) => { setKeyDir(e.target.value); localStorage.setItem("sow_key_dir", e.target.value); }}

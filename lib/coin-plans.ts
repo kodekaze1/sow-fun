@@ -3,7 +3,8 @@
 
 import { getDbcClient, getLaunches, resolveBorrowerClaims, type LaunchSummary } from "@/lib/launchpad-onchain";
 import { getCreatorQueues, type CoinQueue } from "@/lib/borrower-queue";
-import { computeCoinLedger, readClaimSnapshots, type CoinLedger } from "@/lib/coin-ledger";
+import { computeCoinLedger, type CoinLedger } from "@/lib/coin-ledger";
+import { readAllClaimSnapshots } from "@/lib/claim-store";
 import { getLoansById, type KivaLoanLive } from "@/lib/kiva-graphql";
 import { getSuccessionChain } from "@/lib/impact-ledger";
 import { getAllWaves } from "@/lib/waves";
@@ -59,7 +60,8 @@ export async function getCoinPlans(opts: {
     ids.length ? getLoansById(ids).catch(() => new Map<number, KivaLoanLive>()) : new Map<number, KivaLoanLive>(),
     getAllWaves(),
   ]);
-  const snapshots = readClaimSnapshots();
+  // Committed claim files + one-click claims from /admin
+  const snapshots = await readAllClaimSnapshots();
   const { holders } = resolveBorrowerClaims(launches);
 
   for (const l of targets) {

@@ -22,6 +22,7 @@ import { getCoinPlans } from "@/lib/coin-plans";
 import { isAdmin } from "@/lib/admin-auth";
 import { getHarvestRecords } from "@/lib/harvest-auto";
 import { getAllWaves, summarizeLedger } from "@/lib/waves";
+import { readAllClaimSnapshots, readCardTopups } from "@/lib/claim-store";
 
 // Operator command center data (/admin). Everything returned is public
 // on-chain / Kiva data - the key just keeps the ops view private.
@@ -48,14 +49,6 @@ interface RawSnapshot {
 }
 
 const sum = (xs: number[]) => xs.reduce((s, x) => s + x, 0);
-
-function readJsonDir<T>(dir: string): T[] {
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")) as T);
-}
 
 async function walletBalance(connection: Connection, address: string) {
   const owner = new PublicKey(address);
@@ -177,7 +170,8 @@ export async function GET(request: Request) {
     const metaAccounts = pdas.length ? await getMultipleAccountsChunked(connection, pdas) : [];
 
     // Launch fees already claimed (recorded in claim snapshots)
-    const snapshots = readJsonDir<RawSnapshot>(path.join(process.cwd(), "data", "claims"));
+    const snapshots = (await readAllClaimSnapshots()) as RawSnapshot[];
+    const topups = await readCardTopups();
     const launchFeeClaimed = new Set(snapshots.flatMap((s) => (s.launch_fees ?? []).map((l) => l.pool)));
 
     // Metadata accounts were fetched only for pools with a mint - map back by index
@@ -418,6 +412,7 @@ export async function GET(request: Request) {
           })),
         harvests: ledger.harvests,
         burns,
+        topups,
       },
     });
   } catch (e) {
