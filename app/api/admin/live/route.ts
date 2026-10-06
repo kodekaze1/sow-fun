@@ -6,8 +6,8 @@ import { isAdmin } from "@/lib/admin-auth";
 // traffic (not Workers / Cloudflare itself), HTML responses (not API calls or
 // assets), excluding the operator's IPs. Cloudflare data lags ~1-2 minutes.
 //
-// Env: CLOUDFLARE_API_TOKEN (read-only "Analytics: Read" for the zone),
-// CLOUDFLARE_ZONE_ID.
+// Env: CLOUDFLARE_API_TOKEN (read-only: Zone > Analytics > Read, plus Zone >
+// Zone > Read so the zone id can be looked up), optional CLOUDFLARE_ZONE_ID.
 
 const QUERY = `query Live($zone: String!, $since5: Time!, $since60: Time!, $exclude: [String!]) {
   viewer {
@@ -31,13 +31,24 @@ const QUERY = `query Live($zone: String!, $since5: Time!, $since60: Time!, $excl
   }
 }`;
 
+let zoneCache: string | null = null;
+async function zoneId(token: string): Promise<string | null> {
+  if (process.env.CLOUDFLARE_ZONE_ID) return process.env.CLOUDFLARE_ZONE_ID;
+  if (zoneCache) return zoneCache;
+  const res = await fetch("https://api.cloudflare.com/client/v4/zones?name=sow.fun", { headers: { authorization: `Bearer ${token}` }, cache: "no-store" });
+  const json = (await res.json().catch(() => null)) as { result?: { id: string }[] } | null;
+  zoneCache = json?.result?.[0]?.id ?? null;
+  return zoneCache;
+}
+
 type Group = { count: number; sum?: { visits: number }; dimensions: Record<string, string> };
 
 export async function GET(request: Request) {
   if (!isAdmin(request)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const token = process.env.CLOUDFLARE_API_TOKEN;
-  const zone = process.env.CLOUDFLARE_ZONE_ID;
-  if (!token || !zone) return NextResponse.json({ configured: false });
+  if (!token) return NextResponse.json({ configured: false });
+  const zone = await zoneId(token).catch(() => null);
+  if (!zone) return NextResponse.json({ configured: true, error: "couldn't find the sow.fun zone - give the token Zone > Zone > Read, or set CLOUDFLARE_ZONE_ID" }, { status: 502 });
 
   const now = Date.now();
   const iso = (ms: number) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");

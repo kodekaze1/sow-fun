@@ -40,7 +40,7 @@ export default function LiveTraffic({ adminKey }: { adminKey: string }) {
   if (!live.configured) {
     return (
       <div className="rounded-2xl bg-[#F8F2E6] border border-[#F8CD69]/50 text-[#996210] p-4 text-sm">
-        Not connected yet: add <b>CLOUDFLARE_API_TOKEN</b> (read-only Analytics) and <b>CLOUDFLARE_ZONE_ID</b> on Vercel, then redeploy.
+        Not connected yet: add <b>CLOUDFLARE_API_TOKEN</b> on Vercel (read-only: Zone → Analytics → Read and Zone → Zone → Read, for sow.fun), then redeploy.
       </div>
     );
   }
