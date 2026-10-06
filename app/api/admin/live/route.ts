@@ -9,7 +9,7 @@ import { isAdmin } from "@/lib/admin-auth";
 // Env: CLOUDFLARE_API_TOKEN (read-only: Zone > Analytics > Read, plus Zone >
 // Zone > Read so the zone id can be looked up), optional CLOUDFLARE_ZONE_ID.
 
-const QUERY = `query Live($zone: String!, $since5: Time!, $since60: Time!, $exclude: [String!]) {
+const QUERY_TEMPLATE = `query Live($zone: String!, $since5: Time!, $since60: Time!, $exclude: [String!]) {
   viewer {
     zones(filter: { zoneTag: $zone }) {
       now: httpRequestsAdaptiveGroups(
@@ -31,7 +31,7 @@ const QUERY = `query Live($zone: String!, $since5: Time!, $since60: Time!, $excl
         limit: 12
         filter: { datetime_geq: $since60, requestSource: "eyeball", edgeResponseContentTypeName: "html", clientIP_notin: $exclude }
         orderBy: [count_DESC]
-      ) { count dimensions { userAgentBrowser userAgentOS } }
+      ) { count dimensions { userAgentBrowser userAgentOS __ASN__ } }
     }
   }
 }`;
@@ -46,6 +46,10 @@ async function zoneId(token: string): Promise<string | null> {
   return zoneCache;
 }
 
+// Network names (ASN) need a paid Cloudflare plan - try with them, fall back without
+const QUERY_ASN = QUERY_TEMPLATE.replace("__ASN__", "clientAsn clientASNDescription");
+const QUERY_BASIC = QUERY_TEMPLATE.replace("__ASN__", "");
+
 type Group = { count: number; sum?: { visits: number }; dimensions: Record<string, string> };
 
 export async function GET(request: Request) {
@@ -59,13 +63,19 @@ export async function GET(request: Request) {
   const iso = (ms: number) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
   const exclude = (process.env.ADMIN_IPS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   try {
-    const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
-      body: JSON.stringify({ query: QUERY, variables: { zone, since5: iso(now - 5 * 60_000), since60: iso(now - 60 * 60_000), exclude } }),
-      cache: "no-store",
-    });
-    const json = (await res.json()) as { data?: { viewer: { zones: { now: Group[]; hour: Group[]; countries: Group[]; who: Group[] }[] } }; errors?: { message: string }[] };
+    const variables = { zone, since5: iso(now - 5 * 60_000), since60: iso(now - 60 * 60_000), exclude };
+    const run = async (query: string) =>
+      (await (
+        await fetch("https://api.cloudflare.com/client/v4/graphql", {
+          method: "POST",
+          headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+          body: JSON.stringify({ query, variables }),
+          cache: "no-store",
+        })
+      ).json()) as { errors?: { message: string }[] };
+    let raw = await run(QUERY_ASN);
+    if (raw.errors?.some((e) => /clientasn|access to the field/i.test(e.message))) raw = await run(QUERY_BASIC);
+    const json = raw as { data?: { viewer: { zones: { now: Group[]; hour: Group[]; countries: Group[]; who: Group[] }[] } }; errors?: { message: string }[] };
     if (json.errors?.length) return NextResponse.json({ configured: true, error: json.errors[0].message });
     const z = json.data?.viewer.zones[0];
     if (!z) return NextResponse.json({ configured: true, error: "zone not found - check CLOUDFLARE_ZONE_ID" });
@@ -84,7 +94,7 @@ export async function GET(request: Request) {
       last60: { views: minutes.reduce((s, m) => s + m.views, 0), visits: minutes.reduce((s, m) => s + m.visits, 0) },
       pages: z.now.map((g) => ({ path: g.dimensions.clientRequestPath, views: g.count })).slice(0, 10),
       countries: z.countries.map((g) => ({ country: g.dimensions.clientCountryName, views: g.count })),
-      who: z.who.map((g) => ({ browser: g.dimensions.userAgentBrowser, os: g.dimensions.userAgentOS, views: g.count })),
+      who: z.who.map((g) => ({ browser: g.dimensions.userAgentBrowser, os: g.dimensions.userAgentOS, network: g.dimensions.clientASNDescription ?? null, asn: g.dimensions.clientAsn ?? null, views: g.count })),
       minutes,
     });
   } catch (e) {
