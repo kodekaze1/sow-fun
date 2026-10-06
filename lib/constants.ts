@@ -24,9 +24,10 @@ export const X_LINK = "https://x.com/sowfunhq";
 export const PILOT_CONFIG = "AJyDjMdvnxysFetFXvfKsYCX1P2z6KRtCGhimUruefgv";
 // Mainnet test configs the operator can watch in /admin (never set on Vercel).
 // Test 2 pays the REAL Impact Treasury (it was first created as the live config).
+// The first entry is what /admin opens on.
 export const TEST_CONFIGS = [
-  { key: PILOT_CONFIG, label: "Pilot" },
   { key: "5znCMHGyxiDn595365q9ntzPJ6KKCR9GpPE4aFMuVMFo", label: "Test 2" },
+  { key: PILOT_CONFIG, label: "Pilot" },
 ];
 // KAST card Solana deposit address - the fiat bridge to Kiva.
 // Every wave's impact share is topped up here (publicly visible), then the
