@@ -147,9 +147,19 @@ export async function readCoinMetaChecked(mint: string): Promise<{ meta: CoinMet
   return { meta: null, confirmedMissing: false };
 }
 
+/**
+ * Public link for a stored image: launch uploads are served from our own
+ * domain (sow.fun/i/launch/<uuid>.<ext>, app/i/[...path]) instead of the raw
+ * storage host; https links pass through unchanged.
+ */
+export function publicImageUrl(key: string): string {
+  if (key.startsWith("http")) return key;
+  if (/^launch\/[0-9a-f-]{36}\.(png|jpg|webp|gif)$/.test(key)) return `${SITE_URL}/i/${key}`;
+  return `${process.env.BLOB_BASE_URL ?? ""}/${key}`;
+}
+
 function imageUrl(key: string | null): string {
-  if (!key) return `${SITE_URL}/sow-logo.png`;
-  return key.startsWith("http") ? key : `${process.env.BLOB_BASE_URL ?? ""}/${key}`;
+  return key ? publicImageUrl(key) : `${SITE_URL}/sow-logo.png`;
 }
 
 /**

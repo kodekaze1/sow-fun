@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicImageUrl } from "@/lib/coin-meta";
 import { CREATOR_FEE_PCT, IMPACT_FEE_PCT, OPS_FEE_PCT, SITE_URL } from "@/lib/launchpad";
 
 // Metaplex-shaped token metadata, generated statelessly from the launch
@@ -10,9 +11,7 @@ export async function GET(request: Request) {
   // Uploaded images are stored as short blob keys to fit Metaplex's
   // 200-byte URI cap; expand them to the public blob URL here.
   let image = searchParams.get("image") ?? `${SITE_URL}/sow-logo.png`;
-  if (image && !image.startsWith("http")) {
-    image = `${process.env.BLOB_BASE_URL ?? ""}/${image}`;
-  }
+  if (image) image = publicImageUrl(image);
   const loan = searchParams.get("loan");
   const borrower = searchParams.get("borrower");
 

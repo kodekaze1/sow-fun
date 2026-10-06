@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicImageUrl } from "@/lib/coin-meta";
 import { put } from "@vercel/blob";
 import { fromOurSite, rateLimit } from "@/lib/rate-limit";
 
@@ -56,5 +57,6 @@ export async function POST(request: Request) {
   }
   const key = `launch/${crypto.randomUUID()}.${ALLOWED[type]}`;
   const blob = await put(key, new Blob([bytes], { type }), { access: "public", contentType: type });
-  return NextResponse.json({ url: blob.url, key });
+  // Shown in the launch form preview - our own domain, same as in the metadata
+  return NextResponse.json({ url: publicImageUrl(key), key, blobUrl: blob.url });
 }

@@ -19,6 +19,9 @@ export const KIVA_FETCH_HEADERS = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
 };
 export const X_LINK = "https://x.com/sowfunhq";
+// Mainnet PILOT config (fees to the test wallet sowSZPr...). Never the site's
+// NEXT_PUBLIC_DBC_CONFIG_KEY - only the operator's /admin can watch it.
+export const PILOT_CONFIG = "AJyDjMdvnxysFetFXvfKsYCX1P2z6KRtCGhimUruefgv";
 // KAST card Solana deposit address - the fiat bridge to Kiva.
 // Every wave's impact share is topped up here (publicly visible), then the
 // Visa card pays Kiva at checkout; amounts match the harvest ledger receipts.

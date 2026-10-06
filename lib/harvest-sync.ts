@@ -12,7 +12,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID } from "@/lib/constants";
+import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID, PILOT_CONFIG } from "@/lib/constants";
+import { DBC_CONFIG_KEY } from "@/lib/launchpad";
 import { getCoinPlans } from "@/lib/coin-plans";
 import { getLaunchesFresh, getSolPrice } from "@/lib/launchpad-onchain";
 import { getHarvestRecordsFresh, saveHarvestRecord, type HarvestRecord } from "@/lib/harvest-auto";
@@ -65,10 +66,12 @@ export async function runHarvestSync(): Promise<SyncResult> {
   if (!fresh.length) return result;
 
   // Open plan lines: loan id -> the coin and amount the plan set aside for it
+  // Plans from every watched config (live + pilot), so pilot harvests match too
   const solPrice = await getSolPrice();
-  const plans = await getCoinPlans({ solPrice, launches: await getLaunchesFresh() });
+  const watched = [...new Set([DBC_CONFIG_KEY, PILOT_CONFIG].filter((c) => c && c.length >= 30))];
+  const planMaps = await Promise.all(watched.map(async (c) => getCoinPlans({ solPrice, launches: await getLaunchesFresh(c) })));
   const lines = new Map<number, { mint: string; symbol: string; role: "pledge" | "excess"; cents: number }>();
-  for (const p of plans.values()) {
+  for (const p of planMaps.flatMap((m) => [...m.values()])) {
     const { pledge, queue } = p.ledger.plan;
     if (pledge && pledge.cents > 0 && !lines.has(pledge.loanId)) {
       lines.set(pledge.loanId, { mint: p.mint, symbol: p.symbol, role: "pledge", cents: pledge.cents });

@@ -6,7 +6,7 @@ import { unstable_cache } from "next/cache";
 import { DynamicBondingCurveClient, getPriceFromSqrtPrice, TokenDecimal } from "@meteora-ag/dynamic-bonding-curve-sdk";
 import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
 import { serverRpcUrl } from "@/lib/rpc-server";
-import { readCoinMeta, readCoinMetaChecked } from "@/lib/coin-meta";
+import { publicImageUrl, readCoinMeta, readCoinMetaChecked } from "@/lib/coin-meta";
 import { getMultipleAccountsChunked } from "@/lib/rpc-chunk.mjs";
 
 export const METADATA_PROGRAM = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
@@ -39,9 +39,7 @@ export function parseLaunchUri(uri: string): { loanId: number | null; borrower: 
     // Uploaded images are stored as short blob keys (URI length cap);
     // expand to the public blob URL for display.
     let image = u.searchParams.get("image");
-    if (image && !image.startsWith("http")) {
-      image = `${process.env.BLOB_BASE_URL ?? ""}/${image}`;
-    }
+    if (image) image = publicImageUrl(image);
     return {
       loanId: loan ? parseInt(loan, 10) || null : null,
       borrower: u.searchParams.get("borrower"),
@@ -60,7 +58,7 @@ export async function resolveLaunchUri(uri: string): Promise<{ loanId: number | 
     if (m) {
       const stored = await readCoinMeta(m[1]);
       if (!stored) return { loanId: null, borrower: null, image: null };
-      const image = stored.image ? (stored.image.startsWith("http") ? stored.image : `${process.env.BLOB_BASE_URL ?? ""}/${stored.image}`) : null;
+      const image = stored.image ? publicImageUrl(stored.image) : null;
       return { loanId: stored.loanId, borrower: stored.borrower, image };
     }
   } catch { /* fall through to the legacy query-param form */ }
@@ -85,7 +83,7 @@ export async function classifyLaunch(uri: string, mint: string): Promise<
   if (pathMint !== mint) return { kind: "foreign" };
   const { meta, confirmedMissing } = await readCoinMetaChecked(mint);
   if (meta) {
-    const image = meta.image ? (meta.image.startsWith("http") ? meta.image : `${process.env.BLOB_BASE_URL ?? ""}/${meta.image}`) : null;
+    const image = meta.image ? publicImageUrl(meta.image) : null;
     return { kind: "sowfun", loanId: meta.loanId, borrower: meta.borrower, image };
   }
   return confirmedMissing ? { kind: "foreign" } : { kind: "unknown" };
@@ -175,21 +173,22 @@ export function resolveBorrowerClaims(launches: LaunchSummary[], nowSec = Date.n
 }
 
 // Migration threshold (lamports) from the config account, cached per process
-let thresholdCache: { key: string; lamports: number | null } | null = null;
-export async function getMigrationThresholdLamports(client: DynamicBondingCurveClient): Promise<number | null> {
-  if (thresholdCache?.key === DBC_CONFIG_KEY) return thresholdCache.lamports;
+const thresholdCache = new Map<string, number>();
+export async function getMigrationThresholdLamports(client: DynamicBondingCurveClient, configKey: string = DBC_CONFIG_KEY): Promise<number | null> {
+  const hit = thresholdCache.get(configKey);
+  if (hit !== undefined) return hit;
   let lamports: number | null = null;
   try {
     const state = client.state as unknown as { getPoolConfig?: (a: PublicKey) => Promise<unknown> };
     if (state.getPoolConfig) {
-      const cfg = (await state.getPoolConfig(new PublicKey(DBC_CONFIG_KEY))) as {
+      const cfg = (await state.getPoolConfig(new PublicKey(configKey))) as {
         migrationQuoteThreshold?: { toNumber: () => number };
       } | null;
       lamports = cfg?.migrationQuoteThreshold?.toNumber() ?? null;
     }
   } catch { /* optional - graduation bar hides without it */ }
   // Never cache a failed lookup (e.g. an RPC outage) - retry next time
-  if (lamports !== null) thresholdCache = { key: DBC_CONFIG_KEY, lamports };
+  if (lamports !== null) thresholdCache.set(configKey, lamports);
   return lamports;
 }
 
@@ -223,14 +222,14 @@ export async function getLaunches(): Promise<LaunchSummary[]> {
 }
 
 /** Uncached launch index - for the pre-mint "is this borrower taken" check. */
-export async function getLaunchesFresh(): Promise<LaunchSummary[]> {
-  return loadLaunches();
+export async function getLaunchesFresh(configKey: string = DBC_CONFIG_KEY): Promise<LaunchSummary[]> {
+  return loadLaunches(configKey);
 }
 
-async function loadLaunches(): Promise<LaunchSummary[]> {
-  if (!DBC_CONFIG_KEY || DBC_CONFIG_KEY.length < 30) return [];
+async function loadLaunches(configKey: string = DBC_CONFIG_KEY): Promise<LaunchSummary[]> {
+  if (!configKey || configKey.length < 30) return [];
   const { connection, client } = getDbcClient();
-  const config = new PublicKey(DBC_CONFIG_KEY);
+  const config = new PublicKey(configKey);
 
   const [pools, fees] = await Promise.all([
     client.state.getPoolsByConfig(config),
@@ -238,7 +237,7 @@ async function loadLaunches(): Promise<LaunchSummary[]> {
   ]);
   const feeByPool = new Map(fees.map((f) => [f.poolAddress.toBase58(), f]));
 
-  const thresholdLamports = await getMigrationThresholdLamports(client);
+  const thresholdLamports = await getMigrationThresholdLamports(client, configKey);
   const entries = pools.map((p) => {
     const pa = p as unknown as {
       address?: PublicKey; publicKey?: PublicKey;

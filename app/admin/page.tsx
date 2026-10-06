@@ -130,10 +130,11 @@ interface Overview {
   harvestRecords?: HarvestRecord[];
   buckets?: Bucket[];
   sow?: { mint: string; lockUrl: string | null; row: PoolRow | null } | null;
+  config?: string;
+  configs?: { key: string; label: string }[];
   history?: { claims: ClaimHistory[]; harvests: LedgerHarvest[]; burns: unknown[] };
 }
 
-const CONFIG = process.env.NEXT_PUBLIC_DBC_CONFIG_KEY ?? "<config>";
 const SOW_MINT = process.env.NEXT_PUBLIC_SOW_MINT ?? "<$SOW mint>";
 const KEY_DIR_DEFAULT = "C:/Users/kenx0/vanity-grinder/gpu-grinder";
 
@@ -257,6 +258,7 @@ function MoneyFlow({ t, wallets, solPrice }: { t: Totals; wallets: Wallet[]; sol
 function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
   const t = data.totals!;
   const wallets = data.wallets ?? [];
+  const CONFIG = data.config ?? "<config>";
   const keyFor = (role: string) => {
     const addr = wallets.find((w) => w.role.startsWith(role))?.address ?? "<address>";
     return `${keyDir.replace(/[\\/]+$/, "")}/${addr}.json`;
@@ -669,13 +671,15 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [sync, setSync] = useState<string | null>(null);
   const [keyDir, setKeyDir] = useState(KEY_DIR_DEFAULT);
+  const [cfg, setCfg] = useState<string>("");
 
   useEffect(() => {
     setSavedKey(localStorage.getItem("uplift_admin_key"));
     setKeyDir(localStorage.getItem("sow_key_dir") ?? KEY_DIR_DEFAULT);
+    setCfg(localStorage.getItem("sow_admin_config") ?? "");
   }, []);
 
-  const load = useCallback(async (k: string, withSync = false) => {
+  const load = useCallback(async (k: string, withSync = false, configKey = "") => {
     setLoading(true);
     setError(null);
     try {
@@ -684,7 +688,7 @@ export default function AdminPage() {
         const s = await fetch("/api/cron/harvest-sync", { headers: { "x-admin-key": k } }).then((r) => r.json()).catch(() => null);
         setSync(s?.error ? `Kiva sync failed: ${s.error}` : s ? `Kiva synced: ${s.checked} loans checked, ${s.recorded.length} new recorded` : "Kiva sync unavailable");
       }
-      const res = await fetch("/api/admin/claims", { headers: { "x-admin-key": k } });
+      const res = await fetch(`/api/admin/claims${configKey ? `?config=${configKey}` : ""}`, { headers: { "x-admin-key": k } });
       if (res.status === 401) {
         localStorage.removeItem("uplift_admin_key");
         setSavedKey(null);
@@ -707,8 +711,13 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (savedKey) load(savedKey, true);
+    if (savedKey) load(savedKey, true, localStorage.getItem("sow_admin_config") ?? "");
   }, [savedKey, load]);
+  const switchConfig = (key: string) => {
+    setCfg(key);
+    localStorage.setItem("sow_admin_config", key);
+    if (savedKey) load(savedKey, false, key);
+  };
 
   const sowCoins = useMemo(() => (data?.pools ?? []).filter((p) => p.origin === "sowfun" && p.mint), [data]);
   const foreign = useMemo(() => (data?.pools ?? []).filter((p) => p.origin !== "sowfun"), [data]);
@@ -739,7 +748,7 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
           <h1 className="font-serif text-3xl font-semibold">Command Center</h1>
-          <button onClick={() => savedKey && load(savedKey, true)} disabled={loading}
+          <button onClick={() => savedKey && load(savedKey, true, cfg)} disabled={loading}
             className="flex items-center gap-2 text-sm font-bold text-[#276A43] hover:text-[#223829] transition-colors">
             <Icon name="refresh" className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             Refresh + sync Kiva
@@ -747,6 +756,18 @@ export default function AdminPage() {
         </div>
         <p className="text-sm text-gray-500">Every dollar from the pools to Kiva, reconciled. Read-only: it builds the commands, your local scripts sign.</p>
         {sync && <p className="text-xs text-gray-400 mt-1">{sync}</p>}
+        {data?.configs && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px]">
+            <span className="text-gray-400 font-semibold">Config:</span>
+            {data.configs.map((c) => (
+              <button key={c.key} onClick={() => switchConfig(c.key)} disabled={loading}
+                className={`rounded-full px-3 py-1 font-bold border transition-colors ${data.config === c.key ? "bg-[#223829] text-white border-[#223829]" : "border-[#D9E6DF] text-[#223829] hover:border-[#276A43]"}`}>
+                {c.label} <span className="font-mono font-normal opacity-70">{short(c.key)}</span>
+              </button>
+            ))}
+            {data.configs.length === 1 && <span className="text-gray-400">Live config not created yet - showing the pilot.</span>}
+          </div>
+        )}
 
         {error && <div className="mt-6 bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">{error}</div>}
         {data?.notice && <div className="mt-6 bg-[#F8F2E6] border border-[#F8CD69]/50 text-[#996210] rounded-xl p-4 text-sm">{data.notice}</div>}
@@ -788,7 +809,7 @@ export default function AdminPage() {
             </Section>
 
             <Section id="review" title="Kiva loans recorded by the sync" hint="Loans funded from the sowfun account. Matched ones were recorded with the plan's amount; 'review' ones are hidden publicly until you assign or ignore them. Fix any amount here - every save keeps a history.">
-              <Review records={data.harvestRecords ?? []} coins={sowCoins} adminKey={savedKey} onSaved={() => load(savedKey)} />
+              <Review records={data.harvestRecords ?? []} coins={sowCoins} adminKey={savedKey} onSaved={() => load(savedKey, false, cfg)} />
             </Section>
 
             <Section title="Coins" hint="'Yours pending' = the treasury's 55% (45 Kiva / 10 Ops). 'Owed' = claimed money not yet lent or skimmed - it must sit in the treasury.">

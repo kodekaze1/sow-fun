@@ -8,6 +8,7 @@ import { kivaGQL } from "@/lib/kiva-graphql";
 import { DBC_CONFIG_KEY } from "@/lib/launchpad";
 import {
   classifyLaunch,
+  getLaunchesFresh,
   getMigrationThresholdLamports,
   marketCapFromAccount,
   metadataPda,
@@ -15,7 +16,7 @@ import {
   poolField,
 } from "@/lib/launchpad-onchain";
 import { serverRpcUrl } from "@/lib/rpc-server";
-import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET, TREASURY_WALLET } from "@/lib/constants";
+import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET, PILOT_CONFIG, TREASURY_WALLET } from "@/lib/constants";
 import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { getCoinPlans } from "@/lib/coin-plans";
 import { isAdmin } from "@/lib/admin-auth";
@@ -120,14 +121,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "ADMIN_KEY not configured on the server" }, { status: 503 });
   }
   if (!isAdmin(request)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  if (!DBC_CONFIG_KEY || DBC_CONFIG_KEY.length < 30) {
-    return NextResponse.json({ pools: [], solPrice: 0, notice: "DBC config not created yet - no pools to watch." });
-  }
+  // The live config (once created) and the mainnet pilot - the operator can
+  // watch either; the public site only ever uses the live one
+  const configs = [
+    ...(DBC_CONFIG_KEY && DBC_CONFIG_KEY.length >= 30 ? [{ key: DBC_CONFIG_KEY, label: "Live" }] : []),
+    { key: PILOT_CONFIG, label: "Pilot" },
+  ];
+  const requested = new URL(request.url).searchParams.get("config");
+  const configKey = configs.find((c) => c.key === requested)?.key ?? configs[0].key;
 
   try {
     const connection = new Connection(serverRpcUrl(), "confirmed");
     const client = new DynamicBondingCurveClient(connection, "confirmed");
-    const config = new PublicKey(DBC_CONFIG_KEY);
+    const config = new PublicKey(configKey);
     // The Impact Treasury is whoever the config pays - the real treasury on the
     // live config, the test wallet on the pilot - so reconciliation always
     // checks the wallet the claims actually land in
@@ -141,7 +147,7 @@ export async function GET(request: Request) {
       fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd", {
         next: { revalidate: 300 },
       }).then((r) => r.json()).catch(() => null),
-      getMigrationThresholdLamports(client),
+      getMigrationThresholdLamports(client, configKey),
       Promise.all([
         walletBalance(connection, feeClaimer).then((b) => ({ ...b, role: feeClaimer === TREASURY_WALLET ? "Impact Treasury" : "Impact Treasury (pilot)" })),
         walletBalance(connection, GENESIS_WALLET).then((b) => ({ ...b, role: "Genesis" })),
@@ -272,7 +278,7 @@ export async function GET(request: Request) {
 
     // Harvest plan per coin from CLAIMED funds (claim snapshots minus what
     // harvest records already deployed) - see lib/coin-ledger.ts
-    const plans = await getCoinPlans({ solPrice }).catch(() => new Map());
+    const plans = await getCoinPlans({ solPrice, launches: await getLaunchesFresh(configKey) }).catch(() => new Map());
     const withPlans = enriched.map((r) => {
       const plan = r.mint ? plans.get(r.mint) : undefined;
       return {
@@ -359,6 +365,8 @@ export async function GET(request: Request) {
     return NextResponse.json({
       pools: withMarkets,
       solPrice,
+      config: configKey,
+      configs,
       wallets,
       sow: SOW_MINT ? { mint: SOW_MINT, lockUrl: process.env.NEXT_PUBLIC_SOW_LOCK_URL ?? null, row: withMarkets.find((r) => r.mint === SOW_MINT) ?? null } : null,
       buckets,
