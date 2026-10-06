@@ -42,9 +42,11 @@ if (PILOT) {
 }
 
 let migrationQuoteSol = ECONOMICS.migrationQuoteSol;
+// TEST_CONFIG=1 allows a different graduation target on a mainnet TEST config
+// (never the real launch config - that always uses scripts/lib/sow-config.mjs)
 if (process.env.MIGRATION_SOL) {
-  if (NETWORK !== "devnet") {
-    console.error("MIGRATION_SOL overrides are devnet-only - mainnet always uses scripts/lib/sow-config.mjs");
+  if (NETWORK !== "devnet" && !process.env.TEST_CONFIG) {
+    console.error("MIGRATION_SOL overrides are devnet-only (or mainnet with TEST_CONFIG=1) - the real config always uses scripts/lib/sow-config.mjs");
     process.exit(1);
   }
   migrationQuoteSol = Number(process.env.MIGRATION_SOL);
