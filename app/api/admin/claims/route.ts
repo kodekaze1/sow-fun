@@ -393,6 +393,9 @@ export async function GET(request: Request) {
         // Reconciliation: what the Impact Treasury should be holding for Kiva
         // (claimed, not yet lent or skimmed) vs what it actually holds
         owedCents: sum(sow.map((r) => r.plan?.availableCents ?? 0)),
+        // Card top-ups not yet lent on Kiva: still owed money, just held as
+        // card balance (KAST sweeps the deposit address, so read the receipts)
+        inTransitCents: Math.max(0, Math.round(sum(topups.map((x) => x.usd)) * 100) - sum(sow.map((r) => r.plan?.lentCents ?? 0))),
         treasuryUsd: ((wallets[0].sol ?? 0) * solPrice) + (wallets[0].usdc ?? 0),
         earnedCents: sum(sow.map((r) => r.plan?.earnedCents ?? 0)),
         lentCents: sum(sow.map((r) => r.plan?.lentCents ?? 0)),

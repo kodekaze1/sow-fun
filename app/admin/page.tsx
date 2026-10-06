@@ -104,6 +104,7 @@ interface Totals {
   toLendCents: number;
   skimCents: number;
   owedCents: number;
+  inTransitCents: number;
   treasuryUsd: number;
   earnedCents: number;
   lentCents: number;
@@ -217,8 +218,8 @@ function MoneyFlow({ t, wallets, solPrice }: { t: Totals; wallets: Wallet[]; sol
     },
     {
       title: "4 · In transit",
-      main: card?.usdc != null ? `$${card.usdc.toFixed(2)}` : "-",
-      lines: ["USDC at the KAST deposit address", "not yet lent - keep near zero"],
+      main: usd(t.inTransitCents),
+      lines: ["card top-ups not yet lent on Kiva", `deposit address now: ${card?.usdc != null ? `$${card.usdc.toFixed(2)}` : "-"}`, "keep near zero between harvests"],
     },
     {
       title: "5 · Lent on Kiva",
@@ -228,7 +229,7 @@ function MoneyFlow({ t, wallets, solPrice }: { t: Totals; wallets: Wallet[]; sol
   ];
 
   // Reconciliation: the treasury must hold at least what the ledger says it owes
-  const gapCents = Math.round(t.treasuryUsd * 100) - t.owedCents;
+  const gapCents = Math.round(t.treasuryUsd * 100) + t.inTransitCents - t.owedCents;
   const short_ = gapCents < -500; // tolerate $5 of price drift / fees
   return (
     <div>
@@ -246,7 +247,7 @@ function MoneyFlow({ t, wallets, solPrice }: { t: Totals; wallets: Wallet[]; sol
       </div>
       <div className={`mt-3 rounded-xl px-4 py-3 text-sm ${short_ ? "bg-red-50 border border-red-200 text-red-700" : "bg-[#EDF4F1] text-[#223829]"}`}>
         <b>{short_ ? "Reconciliation: SHORT" : "Reconciliation: OK"}</b>
-        {" - "}the Impact Treasury holds {usdN(t.treasuryUsd)}; the ledger says {usd(t.owedCents)} of claimed money is owed to Kiva and skims.{" "}
+        {" - "}the Impact Treasury holds {usdN(t.treasuryUsd)}{t.inTransitCents ? ` + ${usd(t.inTransitCents)} on the card` : ""}; the ledger says {usd(t.owedCents)} of claimed money is owed to Kiva and skims.{" "}
         {short_
           ? `It is ${usd(-gapCents)} short - something left the treasury without a harvest record. Check the history below before the next harvest.`
           : `${usd(Math.max(0, gapCents))} above that is unearmarked (rent reserve, rounding leftovers, or money waiting for the next claim's split).`}
