@@ -21,3 +21,4 @@ programs/furnace/.anchor/
 # devnet rehearsal wallets and logs
 .devnet/
 *.tsbuildinfo
+.launch-config
