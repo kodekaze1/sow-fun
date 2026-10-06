@@ -26,6 +26,8 @@ export const PILOT_CONFIG = "AJyDjMdvnxysFetFXvfKsYCX1P2z6KRtCGhimUruefgv";
 // Test 2 pays the REAL Impact Treasury (it was first created as the live config).
 // The first entry is what /admin opens on.
 export const TEST_CONFIGS = [
+  // Test 3: paid by the dev test wallet sowtLuq..., graduates at 100 SOL
+  { key: "HdHFLBYCEBqWtZDrr3TSxDNRHHncJWbjGLF6CgTakabA", label: "Test 3" },
   { key: "5znCMHGyxiDn595365q9ntzPJ6KKCR9GpPE4aFMuVMFo", label: "Test 2" },
   { key: PILOT_CONFIG, label: "Pilot" },
 ];
