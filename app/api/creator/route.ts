@@ -4,7 +4,8 @@ import BN from "bn.js";
 import { getLaunchesByCreator, getSolPrice, getDbcClient, isClaimLapsed } from "@/lib/launchpad-onchain";
 import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
 import { getLoansById } from "@/lib/kiva-graphql";
-import { getActiveSuccession, getRewardsForCreator } from "@/lib/impact-ledger";
+import { getRewardsForCreator } from "@/lib/impact-ledger";
+import { getSuccessionChainLive } from "@/lib/succession-store";
 import { getCoinPlans } from "@/lib/coin-plans";
 
 export async function GET(request: Request) {
@@ -36,10 +37,13 @@ export async function GET(request: Request) {
 
     // Resolve each coin's ACTIVE loan (after any adoptions) and its live
     // Kiva status, so the dashboard can prompt adoption when a loan closes.
-    const withSuccession = launches.map((l) => {
-      const succession = l.mint ? getActiveSuccession(l.mint) : null;
-      return { ...l, activeLoanId: succession?.to_loan_id ?? l.loanId, succession };
-    });
+    const withSuccession = await Promise.all(
+      launches.map(async (l) => {
+        const chain = l.mint ? await getSuccessionChainLive(l.mint).catch(() => []) : [];
+        const succession = chain.length ? chain[chain.length - 1] : null;
+        return { ...l, activeLoanId: succession?.to_loan_id ?? l.loanId, succession };
+      })
+    );
     const loanIds = [...new Set(withSuccession.map((l) => l.activeLoanId).filter(Boolean))] as number[];
     const loans = loanIds.length ? await getLoansById(loanIds).catch(() => new Map()) : new Map();
 

@@ -6,7 +6,7 @@ import { getCreatorQueues, type CoinQueue } from "@/lib/borrower-queue";
 import { computeCoinLedger, type CoinLedger } from "@/lib/coin-ledger";
 import { readAllClaimSnapshots } from "@/lib/claim-store";
 import { getLoansById, type KivaLoanLive } from "@/lib/kiva-graphql";
-import { getSuccessionChain } from "@/lib/impact-ledger";
+import { getAllSuccessions } from "@/lib/succession-store";
 import { getAllWaves } from "@/lib/waves";
 
 export interface CoinPlan {
@@ -48,10 +48,15 @@ export async function getCoinPlans(opts: {
   const queueByMint = new Map<string, CoinQueue>();
   queueMaps.forEach((m) => m.forEach((q, mint) => queueByMint.set(mint, q)));
 
+  // Operator picks: committed file + live picks from /admin
+  const successions = await getAllSuccessions().catch(() => []);
   const queueFor = (l: LaunchSummary) => {
     const creatorQueue = queueByMint.get(l.mint!)?.loans ?? [];
     // Operator fallback picks (data/successions.json) run after the creator's own
-    const operator = getSuccessionChain(l.mint!).map((s) => s.to_loan_id);
+    const operator = successions
+      .filter((s) => s.mint === l.mint)
+      .sort((a, b) => a.adopted_at.localeCompare(b.adopted_at))
+      .map((s) => s.to_loan_id);
     return [...new Set([...creatorQueue, ...operator])].filter((id) => id !== l.loanId);
   };
 

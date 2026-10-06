@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Icon from "@/components/icons";
 import WalletAction from "./WalletAction";
+import QueuePanel from "./QueuePanel";
 import type { CoinLedger } from "@/lib/coin-ledger";
 import type { HarvestRecord } from "@/lib/harvest-auto";
 import type { LedgerHarvest } from "@/lib/waves";
@@ -54,6 +55,7 @@ interface PoolRow {
   plan: Plan | null;
   market: Market | null;
   lifetimeVolumeSol: number;
+  operatorPicks?: number[];
 }
 
 interface Market {
@@ -310,7 +312,26 @@ function DoNext({ data, keyDir, adminKey, onDone }: { data: Overview; keyDir: st
       body: <LendSteps key={lendLines.map((l) => `${l.loanId}_${l.cents}`).join(",")} lines={lendLines} dollars={dollars} totalCents={t.toLendCents} treasuryKey={treasuryKey} config={CONFIG} adminKey={adminKey} treasuryAddr={treasuryAddr} onDone={onDone} />,
     });
   }
-  if (skimRows.length) {
+  const waiting = sowRows.filter((r) => (r.plan?.waitingCents ?? 0) > 0);
+  if (waiting.length) {
+    const total = waiting.reduce((a, r) => a + (r.plan?.waitingCents ?? 0), 0);
+    steps.push({
+      title: `${usd(total)} is waiting for a borrower`,
+      body: (
+        <p className="text-[13px] text-gray-600">
+          {waiting.map((r) => `$${r.symbol} ${usd(r.plan!.waitingCents)}`).join(", ")} - their borrowers are funded and nothing is queued.{" "}
+          <a href="#queues" className="font-bold text-[#276A43] hover:underline">Add a borrower ↓</a>
+        </p>
+      ),
+    });
+  }
+  if (skimRows.length && !data.sow) {
+    steps.push({
+      title: `${usd(t.skimCents)} of $SOW skims are held until $SOW launches`,
+      body: <p className="text-[13px] text-gray-600">20% of excess buys $SOW (half burned, half creator rewards). There is no $SOW to buy yet, so it stays reserved in the treasury and shows here as owed.</p>,
+    });
+  }
+  if (skimRows.length && data.sow) {
     steps.push({
       title: `Buy + burn ${usd(t.skimCents)} of $SOW (20% of excess)`,
       body: (
@@ -837,6 +858,14 @@ export default function AdminPage() {
 
             <Section title="Coins" hint="'Yours pending' = the treasury's 55% (45 Kiva / 10 Ops). 'Owed' = claimed money not yet lent or skimmed - it must sit in the treasury.">
               <CoinsTable rows={data.pools.filter((p) => p.origin === "sowfun")} solPrice={data.solPrice} />
+            </Section>
+
+            <Section id="queues" title="Borrower queues" hint="Where each coin's money goes after its launch borrower: the creator's queue (on-chain, from /my), then your picks. Picks are live at once and the harvest plan uses them on the next refresh.">
+              <div className="flex flex-col gap-3">
+                {data.pools.filter((p) => p.origin === "sowfun" && p.mint).map((p) => (
+                  <QueuePanel key={p.pool} row={p} adminKey={savedKey} onChanged={() => load(savedKey, false, cfg)} />
+                ))}
+              </div>
             </Section>
 
             <Section title="Wallets">

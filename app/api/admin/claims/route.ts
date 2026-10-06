@@ -23,6 +23,7 @@ import { isAdmin } from "@/lib/admin-auth";
 import { getHarvestRecords } from "@/lib/harvest-auto";
 import { getAllWaves, summarizeLedger } from "@/lib/waves";
 import { readAllClaimSnapshots, readCardTopups } from "@/lib/claim-store";
+import { getAllSuccessions } from "@/lib/succession-store";
 
 // Operator command center data (/admin). Everything returned is public
 // on-chain / Kiva data - the key just keeps the ops view private.
@@ -118,7 +119,7 @@ export async function GET(request: Request) {
   // watch either; the public site only ever uses the live one
   const configs = [
     ...(DBC_CONFIG_KEY && DBC_CONFIG_KEY.length >= 30 ? [{ key: DBC_CONFIG_KEY, label: "Live" }] : []),
-    { key: PILOT_CONFIG, label: "Pilot" },
+    ...(DBC_CONFIG_KEY === PILOT_CONFIG ? [] : [{ key: PILOT_CONFIG, label: "Pilot" }]),
   ];
   const requested = new URL(request.url).searchParams.get("config");
   const configKey = configs.find((c) => c.key === requested)?.key ?? configs[0].key;
@@ -273,6 +274,7 @@ export async function GET(request: Request) {
     // Harvest plan per coin from CLAIMED funds (claim snapshots minus what
     // harvest records already deployed) - see lib/coin-ledger.ts
     const plans = await getCoinPlans({ solPrice, launches: await getLaunchesFresh(configKey) }).catch(() => new Map());
+    const picks = await getAllSuccessions().catch(() => []);
     const withPlans = enriched.map((r) => {
       const plan = r.mint ? plans.get(r.mint) : undefined;
       return {
@@ -289,6 +291,7 @@ export async function GET(request: Request) {
               currentLoanId: plan.ledger.currentLoanId,
             }
           : null,
+        operatorPicks: picks.filter((s) => s.mint === r.mint).map((s) => s.to_loan_id),
       };
     });
 
