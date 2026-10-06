@@ -113,6 +113,17 @@ they're ours. thousands of one-of-ones are still open. who's yours? 🌱
 
 ---
 
+## Pre-launch: tested on mainnet (build in public)
+Media: tw-testing.png
+
+we've been testing sow.fun on mainnet
+
+real coins launched, traded and graduated. fees split on-chain, 45% kiva loans / 45% creator / 10% ops. and trading fees from a test coin already funded a real kiva loan, with a receipt for every hop
+
+almost ready to plant the first seed 🌱
+
+---
+
 ## 10. The CA tease (~48h before launch)
 Media: ../video/sow-seed-tease.mp4
 
