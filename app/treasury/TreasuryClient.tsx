@@ -5,6 +5,7 @@ import { SHOW_LIVE_TREASURY } from "@/lib/types";
 import type { LedgerSummary } from "@/lib/waves";
 import Icon from "@/components/icons";
 import TeamRank from "@/components/TeamRank";
+import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET, TREASURY_WALLET } from "@/lib/constants";
 
 interface TreasuryData {
   balance: number;
@@ -17,11 +18,9 @@ const money = (cents: number) => `$${(cents / 100).toLocaleString(undefined, { m
 export default function TreasuryClient({
   ledger,
   team,
-  wallets,
 }: {
   ledger: LedgerSummary;
   team: { memberCount: number; loanCount: number; loanedAmount: number };
-  wallets: { treasury: string; genesis: string; ops: string; card: string } | null;
 }) {
   const [treasury, setTreasury] = useState<TreasuryData | null>(null);
   const [card, setCard] = useState<{ address: string; sol: number; usdc: number; recent: { signature: string; blockTime: number | null }[] } | null>(null);
@@ -123,16 +122,16 @@ export default function TreasuryClient({
         )}
 
         {/* WALLETS - one job each, so every receipt is easy to read */}
-        {SHOW_LIVE_TREASURY && wallets && (
+        {SHOW_LIVE_TREASURY && (
         <div className="bg-white rounded-2xl border border-[#E4EBE7] shadow-[0_4px_15px_rgba(0,0,0,0.05)] p-8">
           <h2 className="text-2xl font-extrabold text-[#223829] mb-1">Our wallets</h2>
           <p className="text-sm text-gray-500 mb-6 max-w-xl [text-wrap:balance]">Four public addresses, one job each. Anyone can follow every SOL between them on Solana.</p>
           <div className="flex flex-col divide-y divide-gray-100">
             {[
-              { name: "Impact Treasury", addr: wallets.treasury, body: "Collects the 55% vault share of every coin's fees and the launch fees. Pays out only to the Impact Card (Kiva loans), $SOW buybacks, and the ops share." },
-              { name: "Genesis Vault", addr: wallets.genesis, body: "Launched $SOW and holds the team buy (locked on Streamflow). Receives $SOW's 45% creator share - spent only on bonus loans, buyback-and-burns or community rewards, always with receipts." },
-              { name: "Operations", addr: wallets.ops, body: "Receives the 10% operations share. Pays the costs of running sow.fun." },
-              { name: "Impact Card", addr: wallets.card, body: "The KAST card that pays Kiva at checkout. Topped up per harvest only - money here is in transit, not yet lent." },
+              { name: "Impact Treasury", addr: TREASURY_WALLET, body: "Collects the 55% vault share of every coin's fees and the launch fees. Pays out only to the Impact Card (Kiva loans), $SOW buybacks, and the ops share." },
+              { name: "Genesis Vault", addr: GENESIS_WALLET, body: "Launched $SOW and holds the team buy (locked on Streamflow). Receives $SOW's 45% creator share - spent only on bonus loans, buyback-and-burns or community rewards, always with receipts." },
+              { name: "Operations", addr: OPS_WALLET, body: "Receives the 10% operations share. Pays the costs of running sow.fun." },
+              { name: "Impact Card", addr: IMPACT_CARD_ADDRESS, body: "The KAST card that pays Kiva at checkout. Topped up per harvest only - money here is in transit, not yet lent." },
             ].map((w) => (
               <div key={w.name} className="py-4 first:pt-0 last:pb-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">

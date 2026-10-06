@@ -1,7 +1,4 @@
 // The three live wallets - each with one job, so every receipt is easy to read.
-// NEVER import these into a "use client" component: anything a client
-// component imports ships in the public JavaScript, even if the UI hides it.
-// Pass them as props from a server component, and only once SHOW_LIVE_TREASURY.
 // Shown on the site only once SHOW_LIVE_TREASURY (lib/types.ts) is on. The
 // sowSZPr... wallet is TEST-ONLY and must never appear on the site or in the
 // mainnet config.

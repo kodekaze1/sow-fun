@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import TreasuryClient from "./TreasuryClient";
 import { getAllWaves, summarizeLedger } from "@/lib/waves";
 import { getKivaImpactStats } from "@/lib/kiva-stats";
-import { SHOW_LIVE_TREASURY } from "@/lib/types";
-import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET, TREASURY_WALLET } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Impact Treasury | sow.fun",
@@ -20,8 +18,6 @@ export default async function TreasuryPage() {
   return (
     <TreasuryClient
       ledger={summarizeLedger(waves)}
-      // Wallet addresses only reach the browser once we are live
-      wallets={SHOW_LIVE_TREASURY ? { treasury: TREASURY_WALLET, genesis: GENESIS_WALLET, ops: OPS_WALLET, card: IMPACT_CARD_ADDRESS } : null}
       team={{
         memberCount: kiva?.team?.memberCount ?? 1,
         loanCount: kiva?.team?.loanCount ?? 0,
