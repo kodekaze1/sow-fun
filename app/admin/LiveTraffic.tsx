@@ -11,6 +11,7 @@ interface Live {
   last60?: { views: number; visits: number };
   pages?: { path: string; views: number }[];
   countries?: { country: string; views: number }[];
+  who?: { browser: string; os: string; views: number }[];
   minutes?: { t: string; views: number; visits: number }[];
 }
 
@@ -76,7 +77,7 @@ export default function LiveTraffic({ adminKey }: { adminKey: string }) {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-[12px]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-[12px]">
         <div>
           <div className="font-black text-[#223829] mb-1">Pages right now</div>
           {(live.pages ?? []).length ? (
@@ -96,6 +97,15 @@ export default function LiveTraffic({ adminKey }: { adminKey: string }) {
               ))}
             </ul>
           ) : <div className="text-gray-400">-</div>}
+        </div>
+        <div>
+          <div className="font-black text-[#223829] mb-1">Browsers · last hour</div>
+          <ul className="flex flex-col gap-0.5">
+            {(live.who ?? []).map((w) => (
+              <li key={`${w.browser}-${w.os}`} className="flex justify-between gap-3"><span className="text-gray-600">{w.browser} · {w.os}</span><b>{w.views}</b></li>
+            ))}
+          </ul>
+          <div className="text-[11px] text-gray-400 mt-1">One browser/OS doing thousands of loads an hour is a bot polling the site, not people.</div>
         </div>
       </div>
     </div>

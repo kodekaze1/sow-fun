@@ -27,6 +27,11 @@ const QUERY = `query Live($zone: String!, $since5: Time!, $since60: Time!, $excl
         filter: { datetime_geq: $since60, requestSource: "eyeball", edgeResponseContentTypeName: "html", clientIP_notin: $exclude }
         orderBy: [count_DESC]
       ) { count dimensions { clientCountryName } }
+      who: httpRequestsAdaptiveGroups(
+        limit: 12
+        filter: { datetime_geq: $since60, requestSource: "eyeball", edgeResponseContentTypeName: "html", clientIP_notin: $exclude }
+        orderBy: [count_DESC]
+      ) { count dimensions { userAgentBrowser userAgentOS } }
     }
   }
 }`;
@@ -48,7 +53,7 @@ export async function GET(request: Request) {
   const token = process.env.CLOUDFLARE_API_TOKEN;
   if (!token) return NextResponse.json({ configured: false });
   const zone = await zoneId(token).catch(() => null);
-  if (!zone) return NextResponse.json({ configured: true, error: "couldn't find the sow.fun zone - give the token Zone > Zone > Read, or set CLOUDFLARE_ZONE_ID" }, { status: 502 });
+  if (!zone) return NextResponse.json({ configured: true, error: "couldn't find the sow.fun zone - give the token Zone > Zone > Read, or set CLOUDFLARE_ZONE_ID" });
 
   const now = Date.now();
   const iso = (ms: number) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -60,10 +65,10 @@ export async function GET(request: Request) {
       body: JSON.stringify({ query: QUERY, variables: { zone, since5: iso(now - 5 * 60_000), since60: iso(now - 60 * 60_000), exclude } }),
       cache: "no-store",
     });
-    const json = (await res.json()) as { data?: { viewer: { zones: { now: Group[]; hour: Group[]; countries: Group[] }[] } }; errors?: { message: string }[] };
-    if (json.errors?.length) return NextResponse.json({ configured: true, error: json.errors[0].message }, { status: 502 });
+    const json = (await res.json()) as { data?: { viewer: { zones: { now: Group[]; hour: Group[]; countries: Group[]; who: Group[] }[] } }; errors?: { message: string }[] };
+    if (json.errors?.length) return NextResponse.json({ configured: true, error: json.errors[0].message });
     const z = json.data?.viewer.zones[0];
-    if (!z) return NextResponse.json({ configured: true, error: "zone not found - check CLOUDFLARE_ZONE_ID" }, { status: 502 });
+    if (!z) return NextResponse.json({ configured: true, error: "zone not found - check CLOUDFLARE_ZONE_ID" });
 
     // Per-minute buckets for the hour (fill gaps with zero)
     const byMin = new Map(z.hour.map((g) => [g.dimensions.datetimeMinute.slice(0, 16), g]));
@@ -79,9 +84,10 @@ export async function GET(request: Request) {
       last60: { views: minutes.reduce((s, m) => s + m.views, 0), visits: minutes.reduce((s, m) => s + m.visits, 0) },
       pages: z.now.map((g) => ({ path: g.dimensions.clientRequestPath, views: g.count })).slice(0, 10),
       countries: z.countries.map((g) => ({ country: g.dimensions.clientCountryName, views: g.count })),
+      who: z.who.map((g) => ({ browser: g.dimensions.userAgentBrowser, os: g.dimensions.userAgentOS, views: g.count })),
       minutes,
     });
   } catch (e) {
-    return NextResponse.json({ configured: true, error: e instanceof Error ? e.message : "Cloudflare unreachable" }, { status: 502 });
+    return NextResponse.json({ configured: true, error: e instanceof Error ? e.message : "Cloudflare unreachable" });
   }
 }
