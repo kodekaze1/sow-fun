@@ -18,6 +18,16 @@ Order matters. The DBC config is IMMUTABLE once created, so everything before
 step 4 is a rehearsal and everything after it is permanent. Keep a terminal
 log of every command and signature.
 
+## LIVE CONFIG - created 2026-10-07
+  5znCMHGyxiDn595365q9ntzPJ6KKCR9GpPE4aFMuVMFo
+  tx 2Ny1y7f9XwLye6qkuMb9UnFLA5k2EjooXNX3keaJjfVYwHEioKmLnVR7bCBPEdmuJTnRrdFvyxuMPCWhFdcx4J4h
+  Paid by Genesis sowMw8eT...; fee claimer + leftover receiver = Impact
+  Treasury sowSaeM... (permanent). Verified on-chain: every other field is
+  identical to the pilot config. Set as NEXT_PUBLIC_DBC_CONFIG_KEY on Vercel
+  and in .env.local. Public launching stays closed until NEXT_PUBLIC_SOW_MINT
+  is set (step 6). Steps 1-4 below are DONE - next is the Furnace (T-24h)
+  and step 5 ($SOW) with CONFIG=5znCMHGyxiDn595365q9ntzPJ6KKCR9GpPE4aFMuVMFo.
+
 ## Mainnet pilot (test treasury)
 
 Pilot config (created 2026-10-05, fees to the TEST treasury sowSZPr...):
