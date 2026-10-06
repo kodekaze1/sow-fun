@@ -46,6 +46,8 @@ interface RawSnapshot {
   splits?: { to: string; wallet: string; sol: number; tx: string }[];
 }
 
+const sum = (xs: number[]) => xs.reduce((s, x) => s + x, 0);
+
 function readJsonDir<T>(dir: string): T[] {
   if (!fs.existsSync(dir)) return [];
   return fs
@@ -64,6 +66,53 @@ async function walletBalance(connection: Connection, address: string) {
       .catch(() => null),
   ]);
   return { address, sol: lamports === null ? null : lamports / 1e9, usdc };
+}
+
+// Live market data (price, 24h volume/change, liquidity, mcap) from
+// DexScreener's free public API - it indexes Meteora DBC and DAMM pools.
+interface Market {
+  priceUsd: number | null;
+  volume24hUsd: number;
+  change24hPct: number | null;
+  liquidityUsd: number | null;
+  marketCapUsd: number | null;
+  url: string | null;
+}
+async function getMarkets(mints: string[]): Promise<Map<string, Market>> {
+  const out = new Map<string, Market>();
+  for (let i = 0; i < mints.length; i += 30) {
+    const chunk = mints.slice(i, i + 30);
+    try {
+      const res = await fetch(`https://api.dexscreener.com/tokens/v1/solana/${chunk.join(",")}`, { next: { revalidate: 60 } });
+      if (!res.ok) continue;
+      const pairs = (await res.json()) as {
+        baseToken?: { address?: string };
+        priceUsd?: string;
+        volume?: { h24?: number };
+        priceChange?: { h24?: number };
+        liquidity?: { usd?: number } | null;
+        marketCap?: number;
+        url?: string;
+      }[];
+      for (const p of pairs) {
+        const mint = p.baseToken?.address;
+        if (!mint) continue;
+        const prev = out.get(mint);
+        // A coin can trade in more than one pool (curve, then DAMM v2) - sum volume, keep the deepest
+        const m: Market = {
+          priceUsd: p.priceUsd ? Number(p.priceUsd) : null,
+          volume24hUsd: (prev?.volume24hUsd ?? 0) + (p.volume?.h24 ?? 0),
+          change24hPct: p.priceChange?.h24 ?? null,
+          liquidityUsd: p.liquidity?.usd ?? null,
+          marketCapUsd: p.marketCap ?? null,
+          url: p.url ?? null,
+        };
+        if (!prev || (m.liquidityUsd ?? 0) >= (prev.liquidityUsd ?? 0)) out.set(mint, m);
+        else out.set(mint, { ...prev, volume24hUsd: m.volume24hUsd });
+      }
+    } catch { /* market data is optional */ }
+  }
+  return out;
 }
 
 export async function GET(request: Request) {
@@ -243,24 +292,83 @@ export async function GET(request: Request) {
       };
     });
 
+    const SOW_MINT = process.env.NEXT_PUBLIC_SOW_MINT ?? "";
+    const markets = await getMarkets(withPlans.filter((r) => r.mint && (r.origin === "sowfun" || r.mint === SOW_MINT)).map((r) => r.mint!));
+    const withMarkets = withPlans.map((r) => ({
+      ...r,
+      market: r.mint ? markets.get(r.mint) ?? null : null,
+      // Fees are 2% on the curve, 1% after graduation - volume is fees / rate
+      lifetimeVolumeSol: r.lifetimeFeesSol / (r.migrated ? 0.01 : 0.02),
+    }));
+
     const [waves, records] = await Promise.all([getAllWaves(), getHarvestRecords().catch(() => [])]);
     const ledger = summarizeLedger(waves);
     const burnsFile = path.join(process.cwd(), "data", "burns.json");
     const burns = fs.existsSync(burnsFile) ? (JSON.parse(fs.readFileSync(burnsFile, "utf8")) as unknown[]) : [];
 
-    const sow = withPlans.filter((r) => r.origin === "sowfun");
+    const sow = withMarkets.filter((r) => r.origin === "sowfun");
+
+    // Where every SOL goes, by bucket: still in the pools vs already collected
+    // (claim snapshots) - Kiva gets 45/55 of sow.fun coins' partner share, Ops
+    // 10/55 plus launch fees, Genesis the foreign pools plus $SOW's creator share
+    const KIVA = 45 / 55;
+    const OPS = 10 / 55;
+    const sowPartnerPending = sum(sow.map((r) => r.pendingSol));
+    const sowCreatorPending = withMarkets.find((r) => r.mint === SOW_MINT)?.creatorPendingSol ?? 0;
+    const launchFeesPending = withMarkets.filter((r) => !r.launchFeeClaimed).length * LAUNCH_FEE_PARTNER_SOL;
+    const sowfunMints = new Set(sow.map((r) => r.mint));
+    let collectedKiva = 0;
+    let collectedOpsFromPartner = 0;
+    let collectedGenesis = 0;
+    let collectedOps = 0;
+    for (const snap of snapshots) {
+      for (const p of snap.pools) {
+        if (p.source === "genesis_vault") collectedGenesis += p.claimed_sol;
+        else if (p.source === "foreign_pool" || p.source === "foreign_pool_lp") continue; // counted via the Genesis split
+        else if (p.mint && sowfunMints.has(p.mint)) {
+          collectedKiva += p.claimed_sol * KIVA;
+          collectedOpsFromPartner += p.claimed_sol * OPS;
+        }
+      }
+      for (const sp of snap.splits ?? []) {
+        if (sp.to === "ops") collectedOps += sp.sol;
+        if (sp.to === "genesis") collectedGenesis += sp.sol;
+      }
+    }
+    if (!collectedOps) collectedOps = collectedOpsFromPartner; // snapshots from before automatic splits
+    const buckets = [
+      { key: "kiva", label: "Kiva loans", rule: "45/55 of sow.fun coins' partner share", uncollectedSol: sowPartnerPending * KIVA, collectedSol: collectedKiva },
+      { key: "ops", label: "Ops", rule: "10/55 of sow.fun coins' partner share + launch fees", uncollectedSol: sowPartnerPending * OPS + launchFeesPending, collectedSol: collectedOps },
+      {
+        key: "genesis",
+        label: "Genesis",
+        rule: "foreign pools' partner share + $SOW's creator share",
+        uncollectedSol: sum(withMarkets.filter((r) => r.origin !== "sowfun").map((r) => r.pendingSol)) + sowCreatorPending,
+        collectedSol: collectedGenesis,
+      },
+      {
+        key: "creators",
+        label: "Creators (theirs)",
+        rule: "45% of every coin - claimed by each creator on /my",
+        uncollectedSol: sum(withMarkets.filter((r) => r.mint !== SOW_MINT).map((r) => r.creatorPendingSol)),
+        collectedSol: null as number | null,
+      },
+    ];
     const borrowerRows = sow.filter((r) => r.borrower);
-    const sum = (xs: number[]) => xs.reduce((s, x) => s + x, 0);
 
     return NextResponse.json({
-      pools: withPlans,
+      pools: withMarkets,
       solPrice,
       wallets,
+      sow: SOW_MINT ? { mint: SOW_MINT, lockUrl: process.env.NEXT_PUBLIC_SOW_LOCK_URL ?? null, row: withMarkets.find((r) => r.mint === SOW_MINT) ?? null } : null,
+      buckets,
       totals: {
         pendingSol: sum(withPlans.map((r) => r.pendingSol)),
         pendingUsd: sum(withPlans.map((r) => r.pendingUsd)),
         readyCount: enriched.filter((r) => r.state !== "accruing").length,
         lifetimeFeesSol: sum(withPlans.map((r) => r.lifetimeFeesSol)),
+        lifetimeVolumeSol: sum(sow.map((r) => r.lifetimeVolumeSol)),
+        volume24hUsd: sum(sow.map((r) => r.market?.volume24hUsd ?? 0)),
         creatorPendingSol: sum(withPlans.map((r) => r.creatorPendingSol)),
         sowfunPartnerPendingSol: sum(sow.map((r) => r.pendingSol)),
         foreignPartnerPendingSol: sum(withPlans.filter((r) => r.origin !== "sowfun").map((r) => r.pendingSol)),

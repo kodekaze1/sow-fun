@@ -51,6 +51,25 @@ interface PoolRow {
   state: "fund-now" | "harvest-soon" | "roll-over" | "accruing";
   borrower: Borrower | null;
   plan: Plan | null;
+  market: Market | null;
+  lifetimeVolumeSol: number;
+}
+
+interface Market {
+  priceUsd: number | null;
+  volume24hUsd: number;
+  change24hPct: number | null;
+  liquidityUsd: number | null;
+  marketCapUsd: number | null;
+  url: string | null;
+}
+
+interface Bucket {
+  key: string;
+  label: string;
+  rule: string;
+  uncollectedSol: number;
+  collectedSol: number | null;
 }
 
 interface Wallet {
@@ -88,6 +107,8 @@ interface Totals {
   skimDoneCents: number;
   accruingCents: number;
   reviewCount: number;
+  lifetimeVolumeSol: number;
+  volume24hUsd: number;
 }
 
 interface ClaimHistory {
@@ -107,6 +128,8 @@ interface Overview {
   wallets?: Wallet[];
   totals?: Totals;
   harvestRecords?: HarvestRecord[];
+  buckets?: Bucket[];
+  sow?: { mint: string; lockUrl: string | null; row: PoolRow | null } | null;
   history?: { claims: ClaimHistory[]; harvests: LedgerHarvest[]; burns: unknown[] };
 }
 
@@ -264,30 +287,16 @@ function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
       body: (
         <div className="flex flex-col gap-2">
           <CopyCmd label="1. Preview (sends nothing)" cmd={`KEYPAIR="${treasuryKey}" CONFIG=${CONFIG} DRY=1 node scripts/claim-fees.mjs`} />
-          <CopyCmd label="2. Claim + route, then commit the snapshot it writes" cmd={`KEYPAIR="${treasuryKey}" CONFIG=${CONFIG} node scripts/claim-fees.mjs\ngit add data/claims && git commit -m "Claim snapshot" && git push`} />
+          <CopyCmd label="2. One paste: claim + route Ops/Genesis + publish the snapshot (commit, push, deploy) - then Refresh this page" cmd={`KEYPAIR="${treasuryKey}" CONFIG=${CONFIG} node scripts/claim-fees.mjs && git add data/claims && git commit -m "Claim snapshot" && git push sowfun master && npx vercel deploy --prod --yes`} />
         </div>
       ),
     });
   }
   if (lendLines.length) {
+    const dollars = (t.toLendCents / 100).toFixed(2);
     steps.push({
       title: `Lend ${usd(t.toLendCents)} on Kiva`,
-      body: (
-        <div className="text-[13px] text-gray-700 flex flex-col gap-2">
-          <p>
-            Swap <b>exactly {usd(t.toLendCents)}</b> of USDC on Jupiter (exact-out) from the Impact Treasury, send it to the KAST deposit address,
-            then lend these amounts as lender <b>sowfun</b> - credit team <b>sow.fun</b> at checkout. The sync records them for you.
-          </p>
-          <ul className="flex flex-col gap-1">
-            {lendLines.map((l) => (
-              <li key={`${l.coin}-${l.loanId}`}>
-                <b>{usd(l.cents)}</b> to {l.name ?? `#${l.loanId}`} ({l.coin}, {l.role}) ·{" "}
-                <a href={`https://www.kiva.org/lend/${l.loanId}`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#276A43] hover:underline">open on Kiva ↗</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ),
+      body: <LendSteps key={lendLines.map((l) => `${l.loanId}_${l.cents}`).join(",")} lines={lendLines} dollars={dollars} totalCents={t.toLendCents} treasuryKey={treasuryKey} />,
     });
   }
   if (skimRows.length) {
@@ -324,6 +333,82 @@ function DoNext({ data, keyDir }: { data: Overview; keyDir: string }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+// ------------------------------------------------------------- lend
+
+const KAST_DEPOSIT = "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q";
+
+function LendSteps({ lines, dollars, totalCents, treasuryKey }: {
+  lines: { coin: string; loanId: number; name: string | null; cents: number; role: string }[];
+  dollars: string;
+  totalCents: number;
+  treasuryKey: string;
+}) {
+  // Ticks survive a refresh; keyed by loan + amount so a new plan starts clean
+  const tickKey = (l: { loanId: number; cents: number }) => `sow_lent_${l.loanId}_${l.cents}`;
+  // Rendered only after the client fetch, so localStorage is available; the
+  // parent keys this component by the plan, so a new plan re-reads the ticks
+  const [ticked, setTicked] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(lines.map((l) => [tickKey(l), typeof window !== "undefined" && localStorage.getItem(tickKey(l)) === "1"]))
+  );
+  const toggle = (k: string) => {
+    setTicked((m) => {
+      const v = !m[k];
+      if (v) localStorage.setItem(k, "1");
+      else localStorage.removeItem(k);
+      return { ...m, [k]: v };
+    });
+  };
+  const fundCmd = `KEYPAIR="${treasuryKey}" USD=${dollars} node scripts/fund-card.mjs`;
+  return (
+    <div className="flex flex-col gap-4 text-[13px] text-gray-700">
+      <div>
+        <div className="font-bold text-[#223829] mb-1.5">A. Fund the card with exactly {usd(totalCents)}</div>
+        <div className="flex flex-col gap-2">
+          <CopyCmd label="Preview the swap (sends nothing)" cmd={fundCmd.replace(" node", " DRY=1 node")} />
+          <CopyCmd label="One paste: swap exactly this much SOL -> USDC + send to KAST + publish the receipt"
+            cmd={`${fundCmd} && git add data/card-topups.json && git commit -m "Card top-up $${dollars}" && git push sowfun master`} />
+          <p className="text-[12px] text-gray-500">
+            By hand instead: <a href="https://jup.ag/swap/SOL-USDC" target="_blank" rel="noopener noreferrer" className="font-bold text-[#276A43] hover:underline">Jupiter SOL→USDC ↗</a>{" "}
+            (switch to exact-out, receive {usd(totalCents)}), then send it to the KAST deposit{" "}
+            <button onClick={() => navigator.clipboard.writeText(KAST_DEPOSIT)} className="font-mono font-bold text-[#276A43] hover:underline">{KAST_DEPOSIT.slice(0, 6)}...{KAST_DEPOSIT.slice(-4)} (copy)</button>.
+          </p>
+        </div>
+      </div>
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+          <span className="font-bold text-[#223829]">B. Lend on Kiva as sowfun - credit team sow.fun at checkout</span>
+          <div className="flex items-center gap-3 text-[12px] font-bold">
+            <button onClick={() => lines.forEach((l) => window.open(`https://www.kiva.org/lend/${l.loanId}`, "_blank", "noopener"))} className="text-[#276A43] hover:underline">
+              Open all {lines.length} ↗
+            </button>
+            <a href="https://www.kiva.org/basket" target="_blank" rel="noopener noreferrer" className="text-[#276A43] hover:underline">Checkout ↗</a>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          {lines.map((l) => {
+            const k = tickKey(l);
+            return (
+              <div key={k} className={`flex flex-wrap items-center gap-3 rounded-xl border px-3 py-2 ${ticked[k] ? "border-[#2AA967] bg-[#EDF4F1]" : "border-[#E4EBE7] bg-white"}`}>
+                <input type="checkbox" checked={!!ticked[k]} onChange={() => toggle(k)} className="w-4 h-4 accent-[#276A43]" aria-label="Lent" />
+                <a href={`https://www.kiva.org/lend/${l.loanId}`} target="_blank" rel="noopener noreferrer"
+                  className="rounded-full bg-[#276A43] hover:bg-[#223829] text-white font-bold px-4 py-1.5 text-[12px] transition-colors">
+                  Lend {usd(l.cents)} → {l.name ?? `#${l.loanId}`} ↗
+                </a>
+                <span className="text-[12px] text-gray-500">${l.coin} · {l.role} · loan #{l.loanId}</span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-gray-400 mt-1.5">Pick exactly these amounts in Kiva&apos;s lend box (they are already $25 steps). Kiva links can&apos;t pre-fill the amount.</p>
+      </div>
+      <div>
+        <div className="font-bold text-[#223829] mb-0.5">C. Refresh this page</div>
+        <p className="text-[12px] text-gray-500">The sync finds the new loans in the sowfun profile and records them on the public Harvest Ledger.</p>
+      </div>
+    </div>
   );
 }
 
@@ -424,6 +509,68 @@ function Review({ records, coins, adminKey, onSaved }: {
   );
 }
 
+// ------------------------------------------------------------- buckets
+
+function Buckets({ buckets, solPrice }: { buckets: Bucket[]; solPrice: number }) {
+  const cell = (n: number | null) =>
+    n == null ? <span className="text-gray-400">-</span> : (<>{sol(n, 3)}<div className="text-gray-400 font-normal">{usdN(n * solPrice)}</div></>);
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-[#E4EBE7] bg-white">
+      <table className="w-full text-[12px]">
+        <thead className="bg-[#FBFCFA] text-gray-400 uppercase tracking-wider text-[10px]">
+          <tr>{["Bucket", "Gets", "Uncollected (in pools)", "Collected (lifetime)"].map((h) => <th key={h} className="text-left font-black px-3 py-2">{h}</th>)}</tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {buckets.map((b) => (
+            <tr key={b.key} className="align-top">
+              <td className="px-3 py-2.5 font-black text-[#223829] whitespace-nowrap">{b.label}</td>
+              <td className="px-3 py-2.5 text-gray-500">{b.rule}</td>
+              <td className="px-3 py-2.5 font-bold whitespace-nowrap">{cell(b.uncollectedSol)}</td>
+              <td className="px-3 py-2.5 font-bold whitespace-nowrap">{cell(b.collectedSol)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------- $SOW
+
+function SowPanel({ sow, solPrice }: { sow: Overview["sow"]; solPrice: number }) {
+  if (!sow) {
+    return (
+      <div className="rounded-2xl bg-[#FBF6EA] border border-[#F8CD69]/40 p-5 text-sm text-[#223829]">
+        <b>Pre-launch.</b> This panel lights up once NEXT_PUBLIC_SOW_MINT is set on Vercel (launch day, step 6): price, market cap,
+        volume, graduation progress, its Kiva pledge and the Genesis Vault fees it earns.
+      </div>
+    );
+  }
+  const r = sow.row;
+  const m = r?.market;
+  const items = [
+    { label: "Price", value: m?.priceUsd != null ? `$${m.priceUsd.toPrecision(4)}` : "-", sub: m?.change24hPct != null ? `${m.change24hPct >= 0 ? "+" : ""}${m.change24hPct.toFixed(1)}% 24h` : "" },
+    { label: "Market cap", value: m?.marketCapUsd != null ? usdN(m.marketCapUsd) : r?.marketCapSol != null ? `${r.marketCapSol.toFixed(0)} SOL` : "-", sub: "" },
+    { label: "24h volume", value: m ? usdN(m.volume24hUsd) : "-", sub: r ? `≈ ${sol(r.lifetimeVolumeSol, 1)} lifetime` : "" },
+    { label: "Curve", value: r?.migrated ? "Graduated" : r?.curvePct != null ? `${r.curvePct}%` : "-", sub: r ? `${sol(r.quoteReserveSol, 2)} raised` : "" },
+    { label: "Genesis Vault pending", value: r ? sol(r.creatorPendingSol, 3) : "-", sub: r ? usdN(r.creatorPendingSol * solPrice) : "" },
+    { label: "Kiva share pending", value: r ? sol(r.pendingSol * (45 / 55), 3) : "-", sub: r?.borrower ? `for ${r.borrower.name}` : "" },
+  ];
+  return (
+    <div>
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+        {items.map((i) => <Stat key={i.label} label={i.label} value={i.value} sub={i.sub} />)}
+      </div>
+      <div className="flex flex-wrap gap-4 text-xs font-bold mt-3">
+        <a href={`/t/${sow.mint}`} target="_blank" className="text-[#276A43] hover:underline">Token page ↗</a>
+        {m?.url && <a href={m.url} target="_blank" rel="noopener noreferrer" className="text-[#276A43] hover:underline">DexScreener ↗</a>}
+        <a href={solscan("token", sow.mint)} target="_blank" rel="noopener noreferrer" className="text-[#276A43] hover:underline">Solscan ↗</a>
+        {sow.lockUrl && <a href={sow.lockUrl} target="_blank" rel="noopener noreferrer" className="text-[#276A43] hover:underline">Team lock (Streamflow) ↗</a>}
+      </div>
+    </div>
+  );
+}
+
 // ------------------------------------------------------------- coins
 
 function CoinsTable({ rows, solPrice }: { rows: PoolRow[]; solPrice: number }) {
@@ -433,7 +580,7 @@ function CoinsTable({ rows, solPrice }: { rows: PoolRow[]; solPrice: number }) {
       <table className="w-full text-[12px]">
         <thead className="bg-[#FBFCFA] text-gray-400 uppercase tracking-wider text-[10px]">
           <tr>
-            {["Coin", "Borrower", "Lifetime fees", "Yours pending", "Creator pending", "Earned → lent", "Owed", "Curve", "Mcap"].map((h) => (
+            {["Coin", "Borrower", "Volume", "Lifetime fees", "Yours pending", "Creator pending", "Earned → lent", "Owed", "Curve", "Mcap"].map((h) => (
               <th key={h} className="text-left font-black px-3 py-2 whitespace-nowrap">{h}</th>
             ))}
           </tr>
@@ -458,6 +605,7 @@ function CoinsTable({ rows, solPrice }: { rows: PoolRow[]; solPrice: number }) {
                     </>
                   ) : <span className="text-gray-400">-</span>}
                 </td>
+                <td className="px-3 py-2.5 whitespace-nowrap">≈ {sol(r.lifetimeVolumeSol, 1)}<div className="text-gray-400">{r.market ? `${usdN(r.market.volume24hUsd)} 24h${r.market.change24hPct != null ? ` · ${r.market.change24hPct >= 0 ? "+" : ""}${r.market.change24hPct.toFixed(0)}%` : ""}` : ""}</div></td>
                 <td className="px-3 py-2.5 whitespace-nowrap">{sol(r.lifetimeFeesSol, 3)}</td>
                 <td className="px-3 py-2.5 whitespace-nowrap font-bold">{sol(r.pendingSol, 3)}<div className="text-gray-400 font-normal">{usdN(r.pendingSol * solPrice)}</div></td>
                 <td className="px-3 py-2.5 whitespace-nowrap">{sol(r.creatorPendingSol, 3)}</td>
@@ -606,7 +754,8 @@ export default function AdminPage() {
 
         {data && t && data.wallets && (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mt-8">
+            <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mt-8">
+              <Stat label="Volume" value={`≈ ${sol(t.lifetimeVolumeSol, 0)}`} sub={`${usdN(t.volume24hUsd)} in 24h`} />
               <Stat label="Lifetime trading fees" value={sol(t.lifetimeFeesSol, 2)} sub={usdN(t.lifetimeFeesSol * data.solPrice)} />
               <Stat label="Lent on Kiva" value={usd(t.deployedCents)} sub={`${t.livesFunded} lives funded`} />
               <Stat label="sow.fun coins" value={String(t.launches)} sub={`${t.nearGraduation} near graduation · ${t.graduated} graduated`} />
@@ -617,6 +766,16 @@ export default function AdminPage() {
 
             <Section title="Money flow" hint="Where every dollar is right now. The reconciliation line checks the treasury against the per-coin ledger - if it ever says SHORT, money moved without a record.">
               <MoneyFlow t={t} wallets={data.wallets} solPrice={data.solPrice} />
+            </Section>
+
+            {data.buckets && (
+              <Section title="Fee buckets" hint="Every SOL of partner and creator fees by where it goes. Uncollected = still in the pools; collected = claimed (from the claim receipts). The claim script routes each bucket automatically.">
+                <Buckets buckets={data.buckets} solPrice={data.solPrice} />
+              </Section>
+            )}
+
+            <Section title="$SOW" hint="Our own coin - same config, same split as every coin. Its 45% creator share is the Genesis Vault.">
+              <SowPanel sow={data.sow ?? null} solPrice={data.solPrice} />
             </Section>
 
             <Section title="Do next" hint="Built from the live numbers. Commands use your key folder below - copy, run locally, done.">
