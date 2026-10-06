@@ -27,7 +27,21 @@ export async function POST(request: Request) {
       const wallet = String(body.wallet ?? "");
       if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) return NextResponse.json({ error: "connect a wallet" }, { status: 400 });
       if (body.kind === "claim" || body.kind === "creator") return NextResponse.json(await buildClaim(config, wallet, body.kind));
-      if (body.kind === "fund") return NextResponse.json(await buildFund(config, wallet, Number(body.usd)));
+      if (body.kind === "fund") {
+        const raw = Array.isArray(body.lends) ? body.lends.slice(0, 20) : [];
+        const lends = raw
+          .map((l: Record<string, unknown>) => ({
+            loanId: Number(l.loanId),
+            mint: String(l.mint ?? ""),
+            symbol: String(l.symbol ?? "").slice(0, 10),
+            role: l.role === "excess" ? ("excess" as const) : ("pledge" as const),
+            cents: Number(l.cents),
+            name: typeof l.name === "string" ? l.name.slice(0, 80) : null,
+            at: new Date().toISOString(),
+          }))
+          .filter((l: { loanId: number; cents: number; mint: string }) => Number.isInteger(l.loanId) && l.loanId > 0 && Number.isInteger(l.cents) && l.cents > 0 && l.mint.length >= 32);
+        return NextResponse.json(await buildFund(config, wallet, Number(body.usd), lends));
+      }
       return NextResponse.json({ error: "unknown kind" }, { status: 400 });
     }
     if (body.action === "execute") {

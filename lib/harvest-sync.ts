@@ -16,7 +16,7 @@ import { KIVA_FETCH_HEADERS, KIVA_LENDER_ID, TEST_CONFIGS } from "@/lib/constant
 import { DBC_CONFIG_KEY } from "@/lib/launchpad";
 import { getCoinPlans } from "@/lib/coin-plans";
 import { getLaunchesFresh, getSolPrice } from "@/lib/launchpad-onchain";
-import { getHarvestRecordsFresh, saveHarvestRecord, type HarvestRecord } from "@/lib/harvest-auto";
+import { getExpectedLends, getHarvestRecordsFresh, saveHarvestRecord, type HarvestRecord } from "@/lib/harvest-auto";
 import type { UpliftWave } from "@/lib/waves";
 
 interface KivaLenderLoan {
@@ -82,8 +82,12 @@ export async function runHarvestSync(): Promise<SyncResult> {
   }
 
   const now = new Date().toISOString();
+  // Lends the operator funded the card for win over the live plan: a lend
+  // that completes a loan removes it from the live plan before we look
+  const expected = new Map<number, { mint: string; symbol: string; role: "pledge" | "excess"; cents: number }>();
+  for (const e of (await getExpectedLends().catch(() => [])).sort((a, b) => a.at.localeCompare(b.at))) expected.set(e.loanId, e);
   for (const loan of fresh) {
-    const line = lines.get(loan.id);
+    const line = expected.get(loan.id) ?? lines.get(loan.id);
     const record: HarvestRecord = {
       kiva_id: String(loan.id),
       status: line ? "auto" : "review",

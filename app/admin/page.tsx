@@ -274,9 +274,9 @@ function DoNext({ data, keyDir, adminKey, onDone }: { data: Overview; keyDir: st
   const sowRows = data.pools.filter((p) => p.origin === "sowfun");
   const sowCreatorPending = data.pools.find((p) => p.mint === SOW_MINT)?.creatorPendingSol ?? 0;
   const lendLines = sowRows.flatMap((r) => {
-    const out: { coin: string; loanId: number; name: string | null; cents: number; role: string }[] = [];
-    if (r.plan?.pledge && r.plan.pledge.cents > 0) out.push({ coin: r.symbol, loanId: r.plan.pledge.loanId, name: r.plan.pledge.name, cents: r.plan.pledge.cents, role: "pledge" });
-    for (const q of r.plan?.queue ?? []) if (q.cents > 0) out.push({ coin: r.symbol, loanId: q.loanId, name: q.name, cents: q.cents, role: "queue" });
+    const out: { coin: string; mint: string; loanId: number; name: string | null; cents: number; role: string }[] = [];
+    if (r.plan?.pledge && r.plan.pledge.cents > 0) out.push({ coin: r.symbol, mint: r.mint!, loanId: r.plan.pledge.loanId, name: r.plan.pledge.name, cents: r.plan.pledge.cents, role: "pledge" });
+    for (const q of r.plan?.queue ?? []) if (q.cents > 0) out.push({ coin: r.symbol, mint: r.mint!, loanId: q.loanId, name: q.name, cents: q.cents, role: "excess" });
     return out;
   });
   const skimRows = sowRows.filter((r) => (r.plan?.skimCents ?? 0) > 0);
@@ -379,7 +379,7 @@ function DoNext({ data, keyDir, adminKey, onDone }: { data: Overview; keyDir: st
 const KAST_DEPOSIT = "BisPNULEXmouTNaqNPwDadHCp9puAuLvp3EUT4tAih5Q";
 
 function LendSteps({ lines, dollars, totalCents, treasuryKey, config, adminKey, treasuryAddr, onDone }: {
-  lines: { coin: string; loanId: number; name: string | null; cents: number; role: string }[];
+  lines: { coin: string; mint: string; loanId: number; name: string | null; cents: number; role: string }[];
   dollars: string;
   totalCents: number;
   treasuryKey: string;
@@ -409,7 +409,7 @@ function LendSteps({ lines, dollars, totalCents, treasuryKey, config, adminKey, 
       <div>
         <div className="font-bold text-[#223829] mb-1.5">A. Fund the card with exactly {usd(totalCents)}</div>
         <div className="flex flex-col gap-2">
-          <WalletAction kind="fund" label={`Fund card ${usd(totalCents)}`} usd={Number(dollars)} config={config} adminKey={adminKey} expectWallet={treasuryAddr} onDone={onDone} />
+          <WalletAction kind="fund" label={`Fund card ${usd(totalCents)}`} usd={Number(dollars)} lends={lines.map((l) => ({ loanId: l.loanId, mint: l.mint, symbol: l.coin, role: l.role, cents: l.cents, name: l.name }))} config={config} adminKey={adminKey} expectWallet={treasuryAddr} onDone={onDone} />
           <details className="text-[12px] text-gray-500">
             <summary className="cursor-pointer font-bold">Or run it from the terminal</summary>
             <div className="flex flex-col gap-2 mt-2">
@@ -854,6 +854,14 @@ export default function AdminPage() {
             </Section>
 
             <Section id="review" title="Kiva loans recorded by the sync" hint="Loans funded from the sowfun account. Matched ones were recorded with the plan's amount; 'review' ones are hidden publicly until you assign or ignore them. Fix any amount here - every save keeps a history.">
+              <div className="flex items-center gap-3 mb-3">
+                <button onClick={() => load(savedKey, true, cfg)} disabled={loading}
+                  className="flex items-center gap-2 rounded-full border border-[#276A43] text-[#276A43] hover:bg-[#276A43] hover:text-white font-bold px-4 py-1.5 text-[13px] transition-colors disabled:opacity-50">
+                  <Icon name="refresh" className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  {loading ? "Syncing..." : "Sync Kiva now"}
+                </button>
+                {sync && <span className="text-[12px] text-gray-500">{sync}</span>}
+              </div>
               <Review records={data.harvestRecords ?? []} coins={sowCoins} adminKey={savedKey} onSaved={() => load(savedKey, false, cfg)} />
             </Section>
 

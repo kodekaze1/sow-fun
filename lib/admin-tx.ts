@@ -34,6 +34,7 @@ import { getOwnerPositions, buildClaimPositionFeeTx, unclaimedSolLamports } from
 import { serverRpcUrl } from "@/lib/rpc-server";
 import { GENESIS_WALLET, IMPACT_CARD_ADDRESS, OPS_WALLET } from "@/lib/constants";
 import { saveCardTopup, saveClaimSnapshot, type ClaimSnapshot } from "@/lib/claim-store";
+import { saveExpectedLends, type ExpectedLend } from "@/lib/harvest-auto";
 
 const OPS_SHARE = 10 / 55;
 const LAUNCH_FEE_PARTNER_LAMPORTS = 31_500_000; // 90% of the 0.035 SOL launch fee
@@ -68,6 +69,7 @@ export interface Plan {
   sequential: number[]; // tx indexes that only go out after every earlier tx confirmed
   items: PlanItem[];
   usd?: number; // fund: dollars to the card
+  lends?: ExpectedLend[]; // fund: the plan lines this top-up pays for
 }
 
 export interface Built {
@@ -135,7 +137,7 @@ function pack(groups: { ixs: TransactionInstruction[]; itemIdx: number[] }[], pa
   return txs;
 }
 
-function finish(kind: Kind, configKey: string, wallet: PublicKey, price: number | null, bh: { blockhash: string; lastValidBlockHeight: number }, txs: (Transaction | VersionedTransaction)[], items: PlanItem[], sequential: number[], summary: string[], usd?: number): Built {
+function finish(kind: Kind, configKey: string, wallet: PublicKey, price: number | null, bh: { blockhash: string; lastValidBlockHeight: number }, txs: (Transaction | VersionedTransaction)[], items: PlanItem[], sequential: number[], summary: string[], usd?: number, lends?: ExpectedLend[]): Built {
   const msgBytes = (t: Transaction | VersionedTransaction) => (t instanceof VersionedTransaction ? t.message.serialize() : t.serializeMessage());
   const plan: Plan = {
     kind,
@@ -150,6 +152,7 @@ function finish(kind: Kind, configKey: string, wallet: PublicKey, price: number 
     sequential,
     items,
     ...(usd ? { usd } : {}),
+    ...(lends?.length ? { lends } : {}),
   };
   return {
     plan,
@@ -359,7 +362,7 @@ export async function buildClaim(configKey: string, walletStr: string, kind: "cl
 // ------------------------------------------------------------------ fund card
 
 /** Swap exactly the needed USDC (Jupiter exact-out, treasury USDC used first) and send `usd` to the KAST deposit. */
-export async function buildFund(configKey: string, walletStr: string, usd: number): Promise<Built> {
+export async function buildFund(configKey: string, walletStr: string, usd: number, lends: ExpectedLend[] = []): Promise<Built> {
   if (!(usd > 0) || usd > 100_000) throw new Error("invalid amount");
   const connection = conn();
   const client = new DynamicBondingCurveClient(connection, "confirmed");
@@ -410,7 +413,7 @@ export async function buildFund(configKey: string, walletStr: string, usd: numbe
   txs.push(send);
   summary.push(`Send exactly $${usd.toFixed(2)} USDC to the KAST card ${IMPACT_CARD_ADDRESS.slice(0, 6)}...${IMPACT_CARD_ADDRESS.slice(-4)}`);
   summary.push(`${txs.length} transaction${txs.length > 1 ? "s" : ""} - one approval in your wallet`);
-  return finish("fund", configKey, wallet, price, bh, txs, items, sequential, summary, usd);
+  return finish("fund", configKey, wallet, price, bh, txs, items, sequential, summary, usd, lends);
 }
 
 // ------------------------------------------------------------------ execute
@@ -476,6 +479,7 @@ export async function executePlan(plan: Plan, givenMac: string, signed: string[]
     const sendSig = sigOf(sendItem.tx);
     if (sendSig) {
       const swap = plan.items.find((i) => i.source === "swap");
+      await saveExpectedLends(plan.lends ?? []).catch(() => {});
       await saveCardTopup({
         at: now,
         usd: plan.usd ?? Number(sendItem.lamports) / 10 ** USDC_DECIMALS,

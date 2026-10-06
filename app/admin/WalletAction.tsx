@@ -31,13 +31,14 @@ interface Built {
   summary: string[];
 }
 
-export default function WalletAction({ kind, label, config, adminKey, expectWallet, usd, onDone }: {
+export default function WalletAction({ kind, label, config, adminKey, expectWallet, usd, lends, onDone }: {
   kind: "claim" | "creator" | "fund";
   label: string;
   config: string;
   adminKey: string;
   expectWallet: string | null;
   usd?: number;
+  lends?: { loanId: number; mint: string; symbol: string; role: string; cents: number; name: string | null }[];
   onDone: () => void;
 }) {
   const { publicKey, signAllTransactions } = useWallet();
@@ -64,7 +65,7 @@ export default function WalletAction({ kind, label, config, adminKey, expectWall
     setResult(null);
     setPhase("building");
     try {
-      setBuilt(await post({ action: "build", kind, config, wallet: connected, usd }));
+      setBuilt(await post({ action: "build", kind, config, wallet: connected, usd, lends }));
       setPhase("review");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "build failed");

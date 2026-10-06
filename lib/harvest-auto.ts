@@ -35,6 +35,41 @@ export interface HarvestRecord {
 }
 
 const PREFIX = "harvest/loans/";
+
+/** A lend the operator funded the card for (saved by one-click Fund card). */
+export interface ExpectedLend {
+  loanId: number;
+  mint: string;
+  symbol: string;
+  role: "pledge" | "excess";
+  cents: number;
+  name: string | null;
+  at: string;
+}
+
+/** Remember which loans a card top-up is for, so the sync can match them even after the lend completes a loan. */
+export async function saveExpectedLends(lends: ExpectedLend[]): Promise<void> {
+  if (!lends.length) return;
+  await put(`harvest/expected/expected-${Date.now()}.json`, JSON.stringify(lends), {
+    access: "public",
+    contentType: "application/json",
+    addRandomSuffix: false,
+    allowOverwrite: false,
+  });
+}
+
+export async function getExpectedLends(): Promise<ExpectedLend[]> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return [];
+  const urls: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await list({ prefix: "harvest/expected/", cursor, limit: 1000 });
+    urls.push(...page.blobs.map((b) => b.url));
+    cursor = page.hasMore ? page.cursor : undefined;
+  } while (cursor);
+  const docs = await Promise.all(urls.map((u) => fetch(u, { cache: "no-store" }).then((r) => (r.ok ? (r.json() as Promise<ExpectedLend[]>) : [])).catch(() => [])));
+  return docs.flat();
+}
 export const HARVEST_TAG = "harvest-records";
 
 async function loadRecords(): Promise<HarvestRecord[]> {
