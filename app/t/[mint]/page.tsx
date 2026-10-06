@@ -104,7 +104,7 @@ export default async function TokenPage({ params }: { params: Promise<{ mint: st
             <div className="flex items-center gap-3 mt-1">
               <span className="font-mono text-sm font-bold text-[#276A43]">${launch.symbol}</span>
               <span className="text-xs font-bold bg-[#EDF4F1] text-[#276A43] px-2.5 py-0.5 rounded-full">
-                Meteora DBC · {POOL_FEE_BPS / 100}% fee
+                {launch.migrated ? "Meteora DAMM v2 · 1% fee" : `Meteora DBC · ${POOL_FEE_BPS / 100}% fee`}
               </span>
             </div>
           </div>

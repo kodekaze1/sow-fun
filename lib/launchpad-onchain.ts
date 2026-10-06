@@ -4,10 +4,12 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { unstable_cache } from "next/cache";
 import { DynamicBondingCurveClient, getPriceFromSqrtPrice, TokenDecimal } from "@meteora-ag/dynamic-bonding-curve-sdk";
-import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
+import { DBC_CONFIG_KEY, IMPACT_FEE_PCT, CREATOR_FEE_PCT, CLAIM_WINDOW_HOURS, CLAIM_MIN_FEES_SOL } from "@/lib/launchpad";
 import { serverRpcUrl } from "@/lib/rpc-server";
 import { publicImageUrl, readCoinMeta, readCoinMetaChecked } from "@/lib/coin-meta";
 import { getMultipleAccountsChunked } from "@/lib/rpc-chunk.mjs";
+import { getOwnerPositions, unclaimedSolLamports } from "@/lib/damm-v2.mjs";
+import { readAllClaimSnapshots } from "@/lib/claim-store";
 
 export const METADATA_PROGRAM = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
@@ -313,6 +315,39 @@ async function loadLaunches(configKey: string = DBC_CONFIG_KEY): Promise<LaunchS
       creator: entry.creator,
       marketCapSol: entry.marketCapSol,
     });
+  }
+
+  // Graduated coins trade on DAMM v2: their fees accrue to the permanently
+  // locked LP positions, not the curve. Count the fee claimer's position
+  // (55%) as vault fees - unclaimed goes to pendingVaultSol, and lifetime
+  // fees grow by every LP SOL ever earned (unclaimed + already claimed).
+  const migrated = launches.filter((l) => l.migrated && l.mint);
+  if (migrated.length) {
+    try {
+      const cfg = (await client.state.getPoolConfig(config)) as { feeClaimer?: PublicKey } | null;
+      if (cfg?.feeClaimer) {
+        const mints = new Set(migrated.map((l) => l.mint!));
+        const lpPending = new Map<string, number>();
+        for (const pos of await getOwnerPositions(connection, cfg.feeClaimer)) {
+          const m = [pos.pool.tokenAMint.toBase58(), pos.pool.tokenBMint.toBase58()].find((x: string) => mints.has(x));
+          if (m) lpPending.set(m, (lpPending.get(m) ?? 0) + unclaimedSolLamports(pos).toNumber() / 1e9);
+        }
+        const lpClaimed = new Map<string, number>();
+        for (const snap of await readAllClaimSnapshots().catch(() => [])) {
+          for (const row of snap.pools) {
+            if (row.source === "damm_v2_locked_lp" && row.mint && mints.has(row.mint)) lpClaimed.set(row.mint, (lpClaimed.get(row.mint) ?? 0) + row.claimed_sol);
+          }
+        }
+        const VAULT_SHARE = (100 - CREATOR_FEE_PCT) / 100; // the fee claimer's 55%
+        for (const l of migrated) {
+          const pending = lpPending.get(l.mint!) ?? 0;
+          const earnedVault = pending + (lpClaimed.get(l.mint!) ?? 0);
+          l.pendingVaultSol += pending;
+          l.lifetimeFeesSol += earnedVault / VAULT_SHARE;
+          l.impactShareSol = l.lifetimeFeesSol * LOAN_SHARE;
+        }
+      }
+    } catch { /* LP lookup is best-effort - curve fees still show */ }
   }
 
   launches.sort((a, b) => b.lifetimeFeesSol - a.lifetimeFeesSol);
