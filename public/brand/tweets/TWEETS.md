@@ -118,7 +118,7 @@ Media: tw-testing.png
 
 we've been testing sow.fun on mainnet
 
-real coins launched, traded and graduated. fees split on-chain, 45% kiva loans / 45% creator / 10% ops. and trading fees from a test coin already funded a real kiva loan, with a receipt for every hop
+trading fees from a test coin just funded a real kiva loan
 
 almost ready to plant the first seed 🌱
 
